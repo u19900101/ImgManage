@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+	<!-- targetRuntime="MyBatis3Simple":生成简单版的CRUD "MyBatis3":豪华版-->
+	 
+  <properties resource="dbconfig.properties"/>
+
+    <context id="DB2Tables" targetRuntime="MyBatis3">
+
+    <!-- 配置不生成注释 -->
+    <commentGenerator>
+        <property name="suppressAllComments" value="true" />
+    </commentGenerator>
+        <!-- jdbcConnection：指定如何连接到目标数据库 -->
+    <jdbcConnection driverClass="${jdbc.driverClassName}"
+        connectionURL="${jdbc.url}"
+        userId="${jdbc.username}"
+        password="${jdbc.password}">
+    </jdbcConnection>
+
+    <javaTypeResolver >
+      <property name="forceBigDecimals" value="false" />
+    </javaTypeResolver>
+
+
+    <javaModelGenerator targetPackage="ppppp.g_bean"
+    		targetProject="D:/MyJava/mylifeImg/src/main/java">
+      <property name="enableSubPackages" value="true" />
+      <property name="trimStrings" value="true" />
+    </javaModelGenerator>
+
+	<!-- sqlMapGenerator：sql映射生成策略： -->
+    <sqlMapGenerator targetPackage="mybatis.mapper"
+    	targetProject="D:/MyJava/mylifeImg/src/main/resource">
+      <property name="enableSubPackages" value="true" />
+    </sqlMapGenerator>
+
+	<!-- javaClientGenerator:指定mapper接口所在的位置 -->
+    <javaClientGenerator type="XMLMAPPER" targetPackage="ppppp.g_dao"
+    	targetProject="D:/MyJava/mylifeImg/src/main/java">
+      <property name="enableSubPackages" value="true" />
+    </javaClientGenerator>
+
+	<!-- 指定要逆向分析哪些表：根据表要创建javaBean -->
+      <table tableName="t_pic" domainObjectName="Picture"></table>
+  </context>
+
+</generatorConfiguration>
