@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%--
   Created by IntelliJ IDEA.
   User: liupannnnnnnnnn
@@ -7,17 +8,18 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%-- 静态包含 base标签、css样式、jQuery文件 --%>
-<%@ include file="/WEB-INF/pages/head.jsp"%>
+<%@ include file="/pages/head.jsp"%>
 <html>
 <head>
     <title>Title</title>
     <style>
         .left{
             float:left;
+            margin-left:50px;
             width:800px;
         }
         .right{
-            margin-left:700px;
+            margin-left:auto;
             text-align: center;
 
         }
@@ -132,25 +134,28 @@ pdesc='还未设置'
 }
 --%>
 <div>
-    <div class="left">
-        <img src="static/${picture.pname}" width="800"><br/><br/>
-    </div>
+    <c:forEach items="${info.list}" var="picture">
+        <div class="left">
+            <img src="static/${picture.pname}" height="600"><br/><br/>
+        </div>
 
-    <div class="right" >
-        <br/><br/><br/><br/><br/><br/>
-        <form action="picture/update" method="post" >
-            文件名：<input name="pname" id="pname" picpath = ${picture.path}
-                value="${picture.pname}">
-            <span class="errorMsg" style="color: red">${ requestScope.msg }</span><br/><br/>
-            拍摄时间：<input name="pcreatime" value="${picture.pcreatime}"> <br/><br/>
-            地理位置： <input name="plocal" value="${picture.plocal}"> <%--<br/>--%>
-            <input name="pid" type="hidden" value="${picture.pid}"> <br/><br/>
-            <input name="path" type="hidden" value="${picture.path}">
+        <div class="right" >
+            <br/><br/><br/><br/><br/><br/>
+            <form action="picture/update" method="post" >
+                文件名：<input name="pname" id="pname" picpath = ${picture.path}
+                    value="${picture.pname}">
+                <span class="errorMsg" style="color: red">${ requestScope.msg }</span><br/><br/>
+                拍摄时间：<input name="pcreatime" value="${picture.pcreatime}"> <br/><br/>
+                地理位置： <input name="plocal" value="${picture.plocal}"> <%--<br/>--%>
+                <input name="pid" type="hidden" value="${picture.pid}"> <br/><br/>
+                <input name="path" type="hidden" value="${picture.path}">
 
-            描述<textarea name="pdesc"> </textarea><br/>
-            <input type="submit" value="提交"/>
-        </form>
-    </div>
+                描述<textarea name="pdesc"> </textarea><br/>
+                <input type="submit" value="提交"/>
+            </form>
+        </div>
+    </c:forEach>
+    <%@include file="/pages/page_nav.jsp"%>
 
 </div>
 

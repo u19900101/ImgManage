@@ -1,6 +1,8 @@
 package ppppp.controller;
 
 import com.drew.imaging.ImageProcessingException;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.google.gson.Gson;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,12 +10,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ppppp.bean.Picture;
 import ppppp.bean.PictureExample;
 import ppppp.dao.PictureMapper;
 import ppppp.service.PictureService;
 
+import java.awt.print.Book;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -33,11 +37,24 @@ public class PictureController {
 
     // 查询数据库中的图片信息  在页面中显示
     @RequestMapping("/page")
-    public String page(Model model){
+    public String page(Model model,
+                       @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum){
 
-        List<Picture> pictures = mapper.selectByExample(new PictureExample());
-        model.addAttribute("picture", pictures.get(0));
+        PageHelper.startPage(pageNum, 1);
+        //紧跟着的第一条查询语句才有用  后面的无分页功能
 
+        // 查询时间不为空的图片
+        PictureExample pictureExample = new PictureExample();
+        PictureExample.Criteria criteria = pictureExample.createCriteria();
+        criteria.andPcreatimeIsNotNull();
+
+        List<Picture> pictures = mapper.selectByExample(pictureExample);
+        PageInfo<Picture> info = new PageInfo<>(pictures, 5);
+        model.addAttribute("info", info);
+
+        // // 带上当前的权限 路径  以便分页 区分跳转前缀
+        model.addAttribute("url", "picture/page?");
+        System.out.println(info);
         return "picture";
     }
 

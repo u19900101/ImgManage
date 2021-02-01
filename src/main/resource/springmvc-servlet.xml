@@ -15,7 +15,7 @@
 
     <!--配置视图解析器 简化返回页面-->
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix" value="/WEB-INF/pages/"></property>
+        <property name="prefix" value="/pages/"></property>
         <property name="suffix" value=".jsp"></property>
     </bean>
 
