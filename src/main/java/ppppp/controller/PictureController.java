@@ -34,7 +34,7 @@ public class PictureController {
     // 查询数据库中的图片信息  在页面中显示
     @RequestMapping("/page")
     public String page(Model model){
-        //
+
         List<Picture> pictures = mapper.selectByExample(new PictureExample());
         model.addAttribute("picture", pictures.get(0));
 
@@ -73,16 +73,6 @@ public class PictureController {
         return new Gson().toJson(map);
     }
 
-
-
-    @Test
-    public void T(){
-        File file = new File("2.jpg");
-        String parent = file.getParent();
-        System.out.println(parent);
-        boolean b = file.renameTo(new File("3.jpg"));
-        System.out.println(b);
-    }
 
     @RequestMapping("/init")
     public String insertInfo(){

@@ -11,7 +11,20 @@
 <html>
 <head>
     <title>Title</title>
+    <style>
+        .left{
+            float:left;
+            width:800px;
+        }
+        .right{
+            margin-left:700px;
+            text-align: center;
+
+        }
+    </style>
+
     <script type="text/javascript">
+
         // 页面加载完成之后
         $(function () {
             // 给注册绑定单击事件
@@ -89,8 +102,6 @@
             $("#pname").bind("input propertychange",function(event){
                 var pname = this.value;
                 var picpath = $(this).attr('picpath');
-               /* alert(pname);
-                alert(picpath);*/
                 $.post(
                     "${basePath}picture/ajaxexistPname",
                     "pname="+pname+"&picpath="+picpath,
@@ -120,18 +131,34 @@ plocal='null', plabel='null',
 pdesc='还未设置'
 }
 --%>
+<div>
+    <div class="left">
+        <img src="static/${picture.pname}" width="800"><br/><br/>
+    </div>
 
-<form action="picture/update" method="post">
-    文件名：<input name="pname" id="pname" picpath = ${picture.path}
-        value="${picture.pname}">
-    <span class="errorMsg" style="color: red">${ requestScope.msg }</span><br/>
-    拍摄时间：<input name="pcreatime" value="${picture.pcreatime}"> <br/>
-    地理位置： <input name="plocal" value="${picture.plocal}"> <br/>
-    <input name="pid" type="hidden" value="${picture.pid}"> <br/>
-    <input name="path" type="hidden" value="${picture.path}"> <br/>
-    <img src="static/${picture.pname}" width="600"><br/>
-    描述<textarea name="pdesc"> </textarea><br/>
-    <input type="submit" value="提交"/>
-</form>
+    <div class="right" >
+        <br/><br/><br/><br/><br/><br/>
+        <form action="picture/update" method="post" >
+            文件名：<input name="pname" id="pname" picpath = ${picture.path}
+                value="${picture.pname}">
+            <span class="errorMsg" style="color: red">${ requestScope.msg }</span><br/><br/>
+            拍摄时间：<input name="pcreatime" value="${picture.pcreatime}"> <br/><br/>
+            地理位置： <input name="plocal" value="${picture.plocal}"> <%--<br/>--%>
+            <input name="pid" type="hidden" value="${picture.pid}"> <br/><br/>
+            <input name="path" type="hidden" value="${picture.path}">
+
+            描述<textarea name="pdesc"> </textarea><br/>
+            <input type="submit" value="提交"/>
+        </form>
+    </div>
+
+</div>
+
+
+
+
+
+</div>
+
 </body>
 </html>
