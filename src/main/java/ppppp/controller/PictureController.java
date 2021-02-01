@@ -1,17 +1,21 @@
 package ppppp.controller;
 
 import com.drew.imaging.ImageProcessingException;
+import com.google.gson.Gson;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import ppppp.bean.Picture;
 import ppppp.bean.PictureExample;
 import ppppp.dao.PictureMapper;
 import ppppp.service.PictureService;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -50,6 +54,26 @@ public class PictureController {
         System.out.println(i);
         return "redirect:/picture/page";
     }
+
+    // 实时验证是否重名
+    @ResponseBody
+    @RequestMapping(value = "/ajaxexistPname",method = RequestMethod.POST)
+    public String ajaxexistPname(String pname,String picpath){
+        // 修改本地文件名  要解决重名问题
+        File file = new File(picpath);
+        String newpath = file.getParentFile() + "\\" + pname;
+
+        PictureExample pictureExample = new PictureExample();
+        PictureExample.Criteria criteria = pictureExample.createCriteria();
+        criteria.andPathEqualTo(newpath);
+        List<Picture> pictures = mapper.selectByExample(pictureExample);
+
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("existpname", pictures.size()>0?true:false);
+        return new Gson().toJson(map);
+    }
+
+
 
     @Test
     public void T(){
