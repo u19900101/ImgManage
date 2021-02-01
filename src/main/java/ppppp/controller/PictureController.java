@@ -19,6 +19,13 @@ public class PictureController {
     @Autowired
     PictureService pictureService;
 
+    //
+    @RequestMapping("/page")
+    public String page(){
+        // 遍历文件夹下所有文件路径
+
+        return "success";
+    }
     @RequestMapping("/init")
     public String insertInfo(){
         // 遍历文件夹下所有文件路径
