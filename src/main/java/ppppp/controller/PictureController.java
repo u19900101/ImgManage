@@ -45,6 +45,7 @@ public class PictureController {
 
         // 查询时间不为空的图片
         PictureExample pictureExample = new PictureExample();
+        pictureExample.setOrderByClause("pcreatime DESC");
         PictureExample.Criteria criteria = pictureExample.createCriteria();
         criteria.andPcreatimeIsNotNull();
 

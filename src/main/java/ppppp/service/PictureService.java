@@ -81,16 +81,21 @@ public class PictureService {
 
         if(readExif(file).get("GPS_Longitude")!=null && readExif(file).get("GPS_Latitude")!=null){
             System.out.println();
-            System.out.println(readExif(file).get("GPS_Longitude"));
-            System.out.println(readExif(file).get("GPS_Latitude"));
-            System.out.println();
-            pic.setPlocal(readExif(file).get("GPS_Longitude")+","+readExif(file).get("GPS_Latitude"));
+            String lon = readExif(file).get("GPS_Longitude").replace(" ","").replace("\"","")
+                    .replace("°","_").replace("'","_");
+            String lat = readExif(file).get("GPS_Latitude").replace(" ","").replace("\"","")
+                    .replace("°","_").replace("'","_");
+            pic.setPlocal(lon+","+lat);
         }
         System.out.println(pic);
         int insert = mapper.insert(pic);
         System.out.println("成功写入图片: "+file.getName()+" 信息到数据库");
     }
 
+    @Test
+    public void T1() throws ParseException, ImageProcessingException, IOException {
+        insertInfo("D:\\MyJava\\mylifeImg\\src\\main\\webapp\\static\\gofree.jpg");
+    }
     @Test
     public void T(){
         // 遍历文件夹下所有文件路径
