@@ -19,6 +19,7 @@ import ppppp.service.PictureService;
 
 import java.awt.print.Book;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -62,14 +63,14 @@ public class PictureController {
     //修改图片信息
     @RequestMapping("/update")
     public String updateInfo(Picture picture){
-        // 修改本地文件名  要解决重名问题
-        File file = new File(picture.getPath());
-        String newFilepath = file.getParentFile() + "\\" + picture.getPname();
-        boolean b = file.renameTo(new File(newFilepath));
-        System.out.println(b);
-        picture.setPath(newFilepath);
-        int i = mapper.updateByPrimaryKeySelective(picture);
-        System.out.println(i);
+        // 修改文件名  要解决重名问题
+
+        // String newFilepath = file.getParentFile() + "\\" + picture.getPname();
+        // boolean b = file.renameTo(new File(newFilepath));
+        // System.out.println(b);
+        // picture.setPath(newFilepath);
+        // int i = mapper.updateByPrimaryKeySelective(picture);
+        // System.out.println(i);
         return "redirect:/picture/page";
     }
 
@@ -78,34 +79,75 @@ public class PictureController {
     @RequestMapping(value = "/ajaxexistPname",method = RequestMethod.POST)
     public String ajaxexistPname(String pname,String picpath){
         // 修改本地文件名  要解决重名问题
-        File file = new File(picpath);
-        String newpath = file.getParentFile() + "\\" + pname;
 
+        //1.查看是否 存在同名的pname，不存在则可用，存在 则查看path的上一层文件是否同名
         PictureExample pictureExample = new PictureExample();
         PictureExample.Criteria criteria = pictureExample.createCriteria();
-        criteria.andPathEqualTo(newpath);
+        criteria.andPnameEqualTo(pname);
         List<Picture> pictures = mapper.selectByExample(pictureExample);
-
         HashMap<String,Object> map = new HashMap<>();
-        map.put("existpname", pictures.size()>0?true:false);
+
+
+        if(pictures.size()>0){
+            // 存在同名的pname  查看path的父路径是否同名
+            //获取修改图片的父路径
+            int index = picpath.lastIndexOf("\\");
+            String o_parent = picpath.substring(0, index);
+            for (Picture picture : pictures) {
+                //获取父路径
+                String parentpath = picture.getPath().substring(0, picture.getPath().lastIndexOf("\\"));
+                if(o_parent.equalsIgnoreCase(parentpath)){
+                    map.put("existpname",true);
+                    break;
+                }
+            }
+        }else {
+            map.put("existpname",false);
+        }
+
         return new Gson().toJson(map);
     }
-
 
     @RequestMapping("/init")
     public String insertInfo(){
         // 遍历文件夹下所有文件路径
-        String dir = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\static\\";
-        File dirfile = new File(dir);
-        String[] list = dirfile.list();
-        for (String s : list) {
-            String filepath = dir+s;
+        String dir = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\";
+        List<String> stringList = new ArrayList<>();
+        getallpath(dir,stringList);
+        for (String s : stringList) {
             try {
-                pictureService.insertInfo(filepath);
+                pictureService.insertInfo(s);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         return "success";
+    }
+
+    @Test
+    public void T(){
+        String dir = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\";
+        List<String> stringList = new ArrayList<>();
+        getallpath(dir, stringList);
+        for (String s : stringList) {
+            if(s.contains(" ")){
+                File file = new File(s);
+                file.renameTo(new File(s.replace(" ", "_")));
+            }
+        }
+
+    }
+
+    public static void getallpath(String dir,List<String> stringList){
+        File dirfile = new File(dir);
+        if(dirfile.isDirectory()){
+            String[] list = dirfile.list();
+            for (String s : list) {
+                getallpath(dirfile.getAbsolutePath() + "\\" + s,stringList);
+            }
+        }else {
+            // System.out.println(dir);
+            stringList.add(dir);
+        }
     }
 }

@@ -40,6 +40,16 @@
   </build>
 
   <dependencies>
+    <!--获取视频文件-->
+    <!-- https://mvnrepository.com/artifact/it.sauronsoftware/jave -->
+    <dependency>
+      <groupId>it.sauronsoftware</groupId>
+      <artifactId>jave</artifactId>
+      <version>1.0.2</version>
+    </dependency>
+
+
+
     <!--获取照片的exif-->
      <dependency>
       <groupId>com.drewnoakes</groupId>
@@ -126,12 +136,7 @@
       <version>1.2</version>
     </dependency>
 
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>3.1.0</version>
-      <scope>provided</scope>
-    </dependency>
+
 
     <dependency>
       <groupId>javax.servlet.jsp</groupId>
@@ -152,12 +157,20 @@
 
     <!--因为provided表明该包只在编译和测试的时候用，
     所以，当启动tomcat的时候，就不会冲突了-->
-    <dependency>
+  <!--  <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
       <version>3.1</version>
       <scope>provided</scope>
+    </dependency>-->
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>3.1.0</version>
+      <scope>provided</scope>
     </dependency>
+
     <!--文件上传-->
     <dependency>
       <groupId>commons-io</groupId>
