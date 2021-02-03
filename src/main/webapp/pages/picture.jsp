@@ -65,9 +65,8 @@ pdesc='还未设置'
 <div>
     <c:forEach items="${info.list}" var="picture">
         <div class="left">
-            <img src="img/f1/${picture.pname}" height="600"><br/><br/>
+            <img src="${picture.path}" height="600"><br/><br/>
         </div>
-
         <div class="right" >
             <br/><br/><br/><br/><br/><br/>
             <form action="picture/update" method="post" >

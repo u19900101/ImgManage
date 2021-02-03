@@ -154,8 +154,9 @@ public class PictureService {
         }else if(filetype.equals("mp4") || filetype.equals("avi")|| filetype.equals("mov")|| filetype.equals("rmvb")){
             map = getVideoInfo(filepath);
         }
-
-        pic.setPath(file.getAbsolutePath());
+        //将图片的相对路径存入数据库中 以便页面显示
+        String path = file.getAbsolutePath();
+        pic.setPath(path.substring(path.indexOf("img")));
         pic.setPname(file.getName());
         pic.setPcreatime(map.get("create_time"));
         pic.setPlocal(map.get("location"));

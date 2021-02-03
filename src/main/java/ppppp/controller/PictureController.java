@@ -125,6 +125,21 @@ public class PictureController {
     }
 
     @Test
+    public void T_(){
+        String dir = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img";
+        List<String> stringList = new ArrayList<>();
+        getallpath(dir,stringList);
+        for (String s : stringList) {
+            try {
+                String img = s.substring(s.indexOf("img"));
+
+                System.out.println(img);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    @Test
     public void T(){
         String dir = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\";
         List<String> stringList = new ArrayList<>();
