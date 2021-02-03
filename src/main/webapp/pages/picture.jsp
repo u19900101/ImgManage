@@ -21,6 +21,16 @@
         .right{
             margin-left:auto;
             text-align: center;
+        }
+        /*设置div属性*/
+        .c1{
+            float: left;
+            border: 1px solid red;
+        }
+
+        .c2{
+            float: left;
+            border: 1px solid green;
 
         }
 
@@ -63,30 +73,21 @@ plocal='null', plabel='null',
 pdesc='还未设置'
 }
 --%>
-<div style="height:800px;overflow-y:auto">
-    <c:forEach items="${info.list}" var="picture">
+<div style="height:1920px;overflow-y:auto">
+        <c:forEach var="item" items="${info}">
+            <div class="c2">
+                <h2 style="color: chocolate">${item.key}</h2>
+                <c:forEach items="${item.value}" var="picture" >
+                    <div class="c1">
+                        <h1 style="color: seagreen">${picture.pcreatime}</h1>　
+                        <img src="${picture.path}" height="300px">
+                    </div>
+                </c:forEach>
+            </div>
 
-        <img src="${picture.path}" height="300">
+            <br/>
 
-       <%-- <div class="left">
-            <img src="${picture.path}" height="300"><br/><br/>
-        </div>
-        <div class="right" >
-            <br/><br/><br/><br/><br/><br/>
-            <form action="picture/update" method="post" >
-                文件名：<input name="pname" id="pname" picpath = ${picture.path}
-                    value="${picture.pname}">
-                <span class="errorMsg" style="color: red">${ requestScope.msg }</span><br/><br/>
-                拍摄时间：<input name="pcreatime" value="${picture.pcreatime}"> <br/><br/>
-                地理位置： <input name="plocal" value="${picture.plocal}"> &lt;%&ndash;<br/>&ndash;%&gt;
-                <input name="pid" type="hidden" value="${picture.pid}"> <br/><br/>
-                <input name="path" type="hidden" value="${picture.path}">
-
-                描述<textarea name="pdesc"> </textarea><br/>
-                <input type="submit" value="提交"/>
-            </form>
-        </div>--%>
-    </c:forEach>
+        </c:forEach>
     <%--<%@include file="/pages/page_nav.jsp"%>--%>
 
 </div>

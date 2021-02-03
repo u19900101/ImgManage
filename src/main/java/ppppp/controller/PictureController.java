@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import ppppp.bean.MonthPicture;
 import ppppp.bean.Picture;
 import ppppp.bean.PictureExample;
 import ppppp.dao.PictureMapper;
@@ -19,9 +20,7 @@ import ppppp.service.PictureService;
 
 import java.awt.print.Book;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author lppppp
@@ -46,17 +45,37 @@ public class PictureController {
 
         // 查询时间不为空的图片
         PictureExample pictureExample = new PictureExample();
-        pictureExample.setOrderByClause("pcreatime DESC");
+        pictureExample.setOrderByClause("pcreatime");// 单月中照片升序显示  按月  照片逆序显示
         PictureExample.Criteria criteria = pictureExample.createCriteria();
         criteria.andPcreatimeIsNotNull();
 
         List<Picture> pictures = mapper.selectByExample(pictureExample);
-        PageInfo<Picture> info = new PageInfo<>(pictures, 5);
-        model.addAttribute("info", info);
 
+        //将带时间的照片按月进行分组
+        TreeMap<String,ArrayList<Picture>> map = new TreeMap<>(new Comparator<String>() {
+            // 月份按照降序排列
+            @Override
+            public int compare(String o1, String o2) {
+                return -o1.compareTo(o2);
+            }
+        });
+        for (Picture picture : pictures) {
+            String month = picture.getPcreatime().substring(0, 7);
+            if(!map.containsKey(month)){
+                ArrayList<Picture> pictureArrayList = new ArrayList<>();
+                pictureArrayList.add(picture);
+                map.put(month,pictureArrayList);
+            }else {
+                ArrayList<Picture> pictureArrayList = map.get(month);
+                pictureArrayList.add(picture);
+            }
+        }
+
+        //将map 写进 MonthPic
+        model.addAttribute("info", map);
+        // PageInfo<Picture> info = new PageInfo<>(pictures, 5);
         // // 带上当前的权限 路径  以便分页 区分跳转前缀
-        model.addAttribute("url", "picture/page?");
-        System.out.println(info);
+        // model.addAttribute("url", "picture/page?");
         return "picture";
     }
 
