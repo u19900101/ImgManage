@@ -41,7 +41,7 @@ public class PictureController {
     public String page(Model model,
                        @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum){
 
-        PageHelper.startPage(pageNum, 1);
+        // PageHelper.startPage(pageNum, 10);
         //紧跟着的第一条查询语句才有用  后面的无分页功能
 
         // 查询时间不为空的图片

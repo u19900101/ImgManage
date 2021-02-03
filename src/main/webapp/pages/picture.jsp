@@ -23,6 +23,7 @@
             text-align: center;
 
         }
+
     </style>
 
     <script type="text/javascript">
@@ -62,10 +63,13 @@ plocal='null', plabel='null',
 pdesc='还未设置'
 }
 --%>
-<div>
+<div style="height:800px;overflow-y:auto">
     <c:forEach items="${info.list}" var="picture">
-        <div class="left">
-            <img src="${picture.path}" height="600"><br/><br/>
+
+        <img src="${picture.path}" height="300">
+
+       <%-- <div class="left">
+            <img src="${picture.path}" height="300"><br/><br/>
         </div>
         <div class="right" >
             <br/><br/><br/><br/><br/><br/>
@@ -74,16 +78,16 @@ pdesc='还未设置'
                     value="${picture.pname}">
                 <span class="errorMsg" style="color: red">${ requestScope.msg }</span><br/><br/>
                 拍摄时间：<input name="pcreatime" value="${picture.pcreatime}"> <br/><br/>
-                地理位置： <input name="plocal" value="${picture.plocal}"> <%--<br/>--%>
+                地理位置： <input name="plocal" value="${picture.plocal}"> &lt;%&ndash;<br/>&ndash;%&gt;
                 <input name="pid" type="hidden" value="${picture.pid}"> <br/><br/>
                 <input name="path" type="hidden" value="${picture.path}">
 
                 描述<textarea name="pdesc"> </textarea><br/>
                 <input type="submit" value="提交"/>
             </form>
-        </div>
+        </div>--%>
     </c:forEach>
-    <%@include file="/pages/page_nav.jsp"%>
+    <%--<%@include file="/pages/page_nav.jsp"%>--%>
 
 </div>
 
