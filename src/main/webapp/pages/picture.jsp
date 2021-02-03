@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%--
   Created by IntelliJ IDEA.
   User: liupannnnnnnnnn
@@ -6,7 +7,6 @@
   Time: 16:42
   To change this template use File | Settings | File Templates.
 --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%-- 静态包含 base标签、css样式、jQuery文件 --%>
 <%@ include file="/pages/head.jsp"%>
 <html>
@@ -65,7 +65,7 @@ pdesc='还未设置'
 <div>
     <c:forEach items="${info.list}" var="picture">
         <div class="left">
-            <img src="static/${picture.pname}" height="600"><br/><br/>
+            <img src="img/f1/${picture.pname}" height="600"><br/><br/>
         </div>
 
         <div class="right" >
