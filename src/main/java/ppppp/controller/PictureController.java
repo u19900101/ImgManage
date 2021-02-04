@@ -79,6 +79,19 @@ public class PictureController {
         return "picture";
     }
 
+    @RequestMapping("/before_edit_picture")
+    public String before_edit_picture(Integer pid,Model model){
+        Picture picture = mapper.selectByPrimaryKey(pid);
+
+        //不带后缀名显示
+        String[] split = picture.getPname().split("\\.");
+        picture.setPname(split[0]);
+        model.addAttribute("picture",picture);
+        model.addAttribute("type","."+split[1]);
+        return "forward:/pages/edit_picture.jsp";
+    }
+
+
     //修改图片信息
     @RequestMapping("/update")
     public String updateInfo(Picture picture){
@@ -96,13 +109,13 @@ public class PictureController {
     // 实时验证是否重名
     @ResponseBody
     @RequestMapping(value = "/ajaxexistPname",method = RequestMethod.POST)
-    public String ajaxexistPname(String pname,String picpath){
+    public String ajaxexistPname(String pname,String picpath,String pictype){
         // 修改本地文件名  要解决重名问题
 
         //1.查看是否 存在同名的pname，不存在则可用，存在 则查看path的上一层文件是否同名
         PictureExample pictureExample = new PictureExample();
         PictureExample.Criteria criteria = pictureExample.createCriteria();
-        criteria.andPnameEqualTo(pname);
+        criteria.andPnameEqualTo(pname+pictype);
         List<Picture> pictures = mapper.selectByExample(pictureExample);
         HashMap<String,Object> map = new HashMap<>();
 
