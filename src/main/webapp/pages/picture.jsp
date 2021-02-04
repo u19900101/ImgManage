@@ -13,15 +13,6 @@
 <head>
     <title>Title</title>
     <style>
-        .left{
-            float:left;
-            margin-left:50px;
-            width:800px;
-        }
-        .right{
-            margin-left:auto;
-            text-align: center;
-        }
         /*设置div属性*/
         .c1{
             float: left;
@@ -29,9 +20,8 @@
         }
 
         .c2{
-            float: left;
-            border: 1px solid green;
-
+            /*float: left;*/
+            border: 2px solid green;
         }
 
     </style>
@@ -73,7 +63,8 @@ plocal='null', plabel='null',
 pdesc='还未设置'
 }
 --%>
-<div style="height:1920px;overflow-y:auto">
+<%--完美解决 图片的页面显示问题--%>
+<div style="width:100%;height:100%;overflow: scroll;">
         <c:forEach var="item" items="${info}">
             <div class="c2">
                 <h2 style="color: chocolate">${item.key}</h2>
@@ -83,6 +74,8 @@ pdesc='还未设置'
                         <img src="${picture.path}" height="300px">
                     </div>
                 </c:forEach>
+                <%--清除div的格式 以便于每月的图片另起一行显示--%>
+                <div style="clear: both"></div>
             </div>
 
             <br/>
