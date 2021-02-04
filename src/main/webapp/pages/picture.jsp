@@ -12,6 +12,11 @@
 <html>
 <head>
     <title>Title</title>
+    <meta charset="utf-8">
+    <title>Bootsatrap 实例 - 折叠面板</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <style>
         /*设置div属性*/
         .c1{
@@ -65,22 +70,38 @@ pdesc='还未设置'
 --%>
 <%--完美解决 图片的页面显示问题--%>
 <div style="width:100%;height:100%;overflow: scroll;">
-        <c:forEach var="item" items="${info}">
-            <div class="c2">
-                <h2 style="color: chocolate">${item.key}</h2>
-                <c:forEach items="${item.value}" var="picture" >
-                    <div class="c1">
-                        <h1 style="color: seagreen">${picture.pcreatime}</h1>　
-                        <img src="${picture.path}" height="300px">
+
+    <div class="panel-group" id="accordion">
+    <c:forEach var="item" items="${info}">
+        <div class="c2">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion"
+                           href="#${item.key}">
+                            <h2 style="color: chocolate">${item.key}</h2>
+                        </a>
+                    </h4>
+                </div>
+                <div id="${item.key}" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <c:forEach items="${item.value}" var="picture" >
+                            <div class="c1">
+                                <h1 style="color: seagreen">${picture.pcreatime}</h1>　
+                                <img src="${picture.path}" height="300px">
+                            </div>
+                        </c:forEach>
                     </div>
-                </c:forEach>
-                <%--清除div的格式 以便于每月的图片另起一行显示--%>
-                <div style="clear: both"></div>
+                </div>
             </div>
 
-            <br/>
 
-        </c:forEach>
+                <%--清除div的格式 以便于每月的图片另起一行显示--%>
+        <div style="clear: both"></div>
+
+    </div>
+    </c:forEach>
+        </div>
     <%--<%@include file="/pages/page_nav.jsp"%>--%>
 
 </div>
