@@ -91,8 +91,9 @@ pdesc='还未设置'
                         <div class="panel-body">
                             <c:forEach items="${item.value}" var="picture" >
                                 <div class="c1">
-                                    <h1 style="color: seagreen">${picture.pcreatime}</h1>　
-                                    <img src="${picture.path}" height="300px">
+                                    <%--现实照片拍摄的时间--%>
+                                    <h2 align="center" style="color: seagreen">${picture.pcreatime}</h2>　
+                                    <img src="${picture.path}" height="300px" >
                                 </div>
                             </c:forEach>
                         </div>

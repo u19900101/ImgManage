@@ -2,9 +2,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <style type="text/css">
-        li{list-style:none;float:left;margin-left:10px;}
-    </style>
     <script type="text/javascript" src="static/script/jquery-1.7.2.js"></script>
     <script type="text/javascript">
         var data = {
@@ -39,23 +36,21 @@
                 $("#show").click(function(){
                     $("div").last().fadeOut("fast");
                 });
-               /* smallPath.mouseleave(function(){
-                    $("div").last().fadeOut("fast");
-                });*/
+                /* smallPath.mouseleave(function(){
+                     $("div").last().fadeOut("fast");
+                 });*/
             });
         });
     </script>
 </head>
 <body>
-<h2>Hello World!</h2>
-<%--<h1><a href="picture/init">add pic info</a> </h1>--%>
-<h1><a href="picture/page">add pic info</a> </h1>
-<%--<%@include file="/pages/page_nav.jsp"%>--%>
+
 <%--显示小图--%>
 <div style="position: absolute;"></div>
 
 <%--显示大图--%>
-<div style="background:gray;position: relative;margin: auto;top: 0;
+<div style="position: relative;margin: auto;border: 2px solid red;
+    top: 0;
 	left: 0;
 	right: 0;
 	bottom: 0;
