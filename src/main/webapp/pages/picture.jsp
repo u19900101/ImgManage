@@ -55,6 +55,7 @@
         });
 
     </script>
+
 </head>
 <body>
 
@@ -70,38 +71,44 @@ pdesc='还未设置'
 --%>
 <%--完美解决 图片的页面显示问题--%>
 <div style="width:100%;height:100%;overflow: scroll;">
-
     <div class="panel-group" id="accordion">
-    <c:forEach var="item" items="${info}">
-        <div class="c2">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion"
-                           href="#${item.key}">
-                            <h2 style="color: chocolate">${item.key}</h2>
-                        </a>
-                    </h4>
-                </div>
-                <div id="${item.key}" class="panel-collapse collapse in">
-                    <div class="panel-body">
-                        <c:forEach items="${item.value}" var="picture" >
-                            <div class="c1">
-                                <h1 style="color: seagreen">${picture.pcreatime}</h1>　
-                                <img src="${picture.path}" height="300px">
-                            </div>
-                        </c:forEach>
+        <c:forEach var="item" items="${info}">
+            <%--月份的div框--%>
+            <div class="c2">
+                <div class="panel panel-default">
+                    <%--折叠月份的标题--%>
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion"
+                               href="#${item.key}">
+                                <%--拍摄时间--%>
+                                <h2 style="color: chocolate">${item.key}</h2>
+                            </a>
+                        </h4>
+                    </div>
+                    <%--折叠月度照片--%>
+                    <div id="${item.key}" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            <c:forEach items="${item.value}" var="picture" >
+                                <div class="c1">
+                                    <h1 style="color: seagreen">${picture.pcreatime}</h1>　
+                                    <img src="${picture.path}" height="300px">
+                                </div>
+                            </c:forEach>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-
                 <%--清除div的格式 以便于每月的图片另起一行显示--%>
-        <div style="clear: both"></div>
-
+                <div style="clear: both"></div>
+            </div>
+        </c:forEach>
     </div>
-    </c:forEach>
-        </div>
+    <%-- 此方法 默认第一个显示 其余的折叠  不知其所以然--%>
+    <script type="text/javascript">
+        $(function () {
+            $('.collapse').collapse('hidden');
+        });
+    </script>
     <%--<%@include file="/pages/page_nav.jsp"%>--%>
 
 </div>
