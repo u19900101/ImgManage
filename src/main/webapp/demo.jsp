@@ -1,45 +1,18 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!DOCTYPE html>
 <html>
-
-
-
-<style>
-    body{
-        width: 100%;
-        height: 100%;
-        padding: 0;
-        margin: 0;
-        position: absolute;
-    }
-    #main{
-        width: 800px;
-        height: 300px;
-        border: solid black 1px;
-        position: absolute;
-    }
-    #one{
-        float: left;
-        /*display: inline-block;*/
-        width: 50%;
-        height: 40%;
-        word-wrap: break-word;
-        border-bottom: 3px solid red;
-    }
-    #two{
-        /*display: inline-block;*/
-        float: right;
-        position: relative;
-        width: 50%;
-        height: 40%;
-        border-bottom: 3px solid green;
-    }
-</style>
-
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ include file="/pages/head.jsp"%>
+<head> 
+    <title>菜鸟教程(runoob.com)</title> 
+</head>
 <body>
-<div id ="main">
-    <div id="one"> dgfdgdgfdgdgfdgdgfdgdgfdgdgfdgdgfdgdgfdgdgfdgdgfdgdgfdgdgfdg </div>
-    <div id="two"> 哈哈哈哈哈哈啊哈哈哈哈哈哈啊哈哈哈哈哈哈哈哈哈哈哈啊哈哈哈哈 </div>
-</div>
-</body>
+<img src="老照片_vip_(3).jpg" width="800">
+您是谁？
+<textarea rows="4" cols="50" placeholder="描述信息...">
+</textarea>
 
+<p><strong>注意：</strong>Internet Explorer 9 及更早 IE 版本不支持 textarea 标签的  placeholder 属性。</p>
+
+</body>
 </html>
