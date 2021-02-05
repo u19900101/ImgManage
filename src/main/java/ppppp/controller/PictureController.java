@@ -88,6 +88,22 @@ public class PictureController {
         return "redirect:/picture/page";
     }
 
+    @RequestMapping("/setDesc")
+    public String setDesc(){
+        // 修改文件名  要解决重名问题
+        PictureExample example = new PictureExample();
+        List<Picture> pictures = mapper.selectByExample(example);
+        for (Picture picture : pictures) {
+            picture.setPdesc("");
+            // 这种修改不了.....
+            // mapper.updateByPrimaryKey(picture);
+            int i = mapper.updateByPrimaryKeySelective(picture);
+        }
+
+        return "redirect:/picture/page";
+    }
+
+
     @RequestMapping("/before_edit_picture")
     public String before_edit_picture(Integer pid,Model model){
         Picture picture = mapper.selectByPrimaryKey(pid);

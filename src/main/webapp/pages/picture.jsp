@@ -58,7 +58,7 @@ pdesc='还未设置'
             <div class="c2">
                 <c:set var="index" value="${index+1}" />
                 <button type="button" class="btn btn-primary" data-toggle="collapse"
-                        data-target="#${item.key}">
+                        data-target="#${item.key}" style="background: #e3e3e3">
                     <h2 style="color: chocolate">${item.key}</h2>
                 </button>
 
