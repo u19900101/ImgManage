@@ -3,53 +3,48 @@
 <%@ include file="/pages/head.jsp"%>
 <html>
 <head>
-    <script type="text/javascript" src="static/script/jquery-1.7.2.js"></script>
     <style>
-        .BigImg{
-            width: 80%;
-            height:80%;
-            /*设置div居中*/
-            top: 10px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            margin: auto;
-            /* 设置div中的图片居中*/
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            /*为了效果明显，可以将如下边框打开，看一下效果*/
-            border:1px solid red;
-            /* 层叠显示在其上 */
-            position: relative;
+        .app{
+            width:100%;
+            height:100%;
+            overflow: scroll;
         }
-        .BigInput{
-            width: 80%;
-            height:5%;
-            /*设置div居中*/
-            top: 10px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            margin: auto;
-            /* 设置div中的图片居中*/
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            /*为了效果明显，可以将如下边框打开，看一下效果*/
-            border:1px solid red;
-            /* 层叠显示在其上 */
-            position: relative;
+        .c1{
+            border: 1px solid red;
         }
 
-        /*控制div 里面 img 的大小*/
-        .BigImg img{
+        .c2{
+            float: left;
+            border: 2px solid green;
+            height:100%;
+            width: 60%;;
+            display: inline-block;
+
+            top: 10px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            /* 设置div中的图片居中*/
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            /*为了效果明显，可以将如下边框打开，看一下效果*/
+            border:1px solid red;
+        }
+        .c2 img{
             width:auto;
             height:100%;
+          /*  width:100%;
+            height:auto;*/
         }
-        .BigInput input{
-            width:60%;
-            height:auto;
+
+        .c3{
+            float: right;
+            border: 1px solid gold;
+            display: inline-block;
+            width:39%;
+            height: 100%;
         }
     </style>
     <script type="text/javascript">
@@ -80,17 +75,37 @@
 <body>
 
 <%--显示大图--%>
-<h1></h1>
-<div id="big_img_div">
-    <div class="BigInput" >
-        <input id="pname" value="${picture.pname}" picpath = ${picture.path} pictype=${type}>
+<div class="app">
+    <div class="c1">
+        照片名称：<input id="pname" value="${picture.pname}" picpath = ${picture.path} pictype=${type}>
         <%--提示是否有重名的信息  错误信息  跟上面对应起来要写class--%>
-        <span class="errorMsg" style="color: red"></span>
+        <span class="errorMsg" style="color: red;"></span>
+        拍摄时间：
+        <c:if test="${empty picture.pcreatime}">
+            <span tyle="color: darksalmon">神秘时间</span>
+        </c:if>
+        <c:if test="${not empty picture.pcreatime}">
+            <span style="color: darksalmon">${picture.pcreatime}</span>
+        </c:if>
+
+        坐标：
+        <c:if test="${empty picture.plocal}">
+        <span style="color: green">神秘未知</span>
+        </c:if>
+        <c:if test="${not empty picture.plocal}">
+            <span style="color: green">${picture.plocal}</span>
+        </c:if>
+
     </div>
-    <div class="BigImg" >
-        <img id="show" src="${picture.path}"/>
+    <div class="c2">
+        <img src="${picture.path}" >
+
+    </div>
+    <div class="c3" >
+        <%--现实照片拍摄的时间--%>
+        <h2 align="center" style="color: seagreen" >添加描述</h2>　
+
     </div>
 </div>
-
 
 </html>
