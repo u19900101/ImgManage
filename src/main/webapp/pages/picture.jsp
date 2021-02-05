@@ -50,6 +50,7 @@ pdesc='还未设置'
 }
 --%>
 <%--完美解决 图片的页面显示问题--%>
+
 <div style="width:100%;height:100%;overflow: scroll;">
     <div class="panel-group" id="accordion">
         <c:set var="index" value="0" />

@@ -1,8 +1,6 @@
 package ppppp.controller;
 
 import com.drew.imaging.ImageProcessingException;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.google.gson.Gson;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,15 +10,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import ppppp.bean.MonthPicture;
+import org.springframework.web.multipart.MultipartFile;
 import ppppp.bean.Picture;
 import ppppp.bean.PictureExample;
 import ppppp.dao.PictureMapper;
 import ppppp.service.PictureService;
 
-import java.awt.print.Book;
 import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.*;
+
+import static ppppp.service.PictureService.getImgInfo;
 
 /**
  * @author lppppp
@@ -87,7 +89,57 @@ public class PictureController {
         System.out.println(i);
         return "redirect:/picture/page";
     }
+    String basepath = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\";
+    @RequestMapping(value = "/upload",method = RequestMethod.POST)
+    public String up(@RequestParam(value = "img",required = false) MultipartFile multipartFile,
+                     Model model) throws ParseException, IOException, ImageProcessingException {
+        System.out.println(multipartFile.getOriginalFilename());
 
+        File temp = new File("D:\\Temp\\"+multipartFile.getOriginalFilename());
+        multipartFile.transferTo(temp);
+
+        HashMap<String, String> imgInfo = getImgInfo(temp);
+
+        String create_time = imgInfo.get("create_time");
+        String destDir;
+        if(create_time!=null){
+            // 创建文件夹
+            File file = new File(basepath+create_time.split(" ")[0].replace("-","\\"));
+            if(!file.exists() || !file.isDirectory()) {
+                file.mkdirs();
+            }
+            destDir = basepath+create_time.split(" ")[0].replace("-","\\");
+        //    将照片移入日期类文件夹
+        }else {
+            destDir = basepath+LocalDateTime.now().toString().split("T")[0].replace("-","\\");
+        }
+        move_file(temp.getAbsolutePath(),destDir);
+        System.out.println(multipartFile.getSize());
+        /*try {
+            // 按上传的日期做文件夹名称
+
+            multipartFile.transferTo(new File("D:\\fileupload\\"+multipartFile.getOriginalFilename()));
+            model.addAttribute("msg", "文件上传成功鸟！！！");
+        } catch (IOException e) {
+            model.addAttribute("msg", "文件上传失败鸟！！！"+e.toString());
+        }*/
+        return "forward:/upload.jsp";
+    }
+
+
+    public boolean move_file(String scrpath,String destDir){
+        File file = new File(scrpath);
+        boolean b = file.renameTo(new File(destDir+"\\" + file.getName()));
+        return b;
+    }
+    @Test
+    public void T_creat_dir(){
+        String dirName = LocalDateTime.now().toString().split("T")[0].replace("-","\\");
+        File file = new File("D:\\MyJava\\mylifeImg\\src\\main\\webapp\\"+dirName);
+        if(!file.exists() || !file.isDirectory()) {
+            file.mkdirs();
+        }
+    }
     @RequestMapping("/setDesc")
     public String setDesc(){
         // 修改文件名  要解决重名问题
@@ -149,6 +201,8 @@ public class PictureController {
 
         return new Gson().toJson(map);
     }
+
+
 
     @RequestMapping("/init")
     public String insertInfo(){
