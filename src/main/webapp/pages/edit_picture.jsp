@@ -62,6 +62,12 @@
             font-family: Verdana, Arial, Helvetica, sans-serif;
             border: 1px solid black;"
         }
+
+        span,input{
+            font-size: 2em;
+            font-weight: bold;
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+        }
     </style>
     <script type="text/javascript">
         // 页面加载完成之后
@@ -92,13 +98,16 @@
 
 <%--显示大图--%>
 <div class="app">
-    <%--显示 照片名称  拍摄时间 地点--%>
-    <div class="c1">
-        照片名称：<input id="pname" value="${picture.pname}" picpath = ${picture.path} pictype=${type}>
-        <%--提示是否有重名的信息  错误信息  跟上面对应起来要写class--%>
-        <span class="errorMsg" style="color: red;"></span>
+    <form action="picture/update">
+        <%--显示 照片名称  拍摄时间 地点--%>
+        <div class="c1">
+            <span>照片名称：</span><input id="pname" name = "pname" value="${picture.pname}" picpath = ${picture.path} pictype=${type}>
+            <input id="pid" name = "pid" value="${picture.pid}" type="hidden">
+            <input id="pictype" name = "pictype" value="${type}" type="hidden">
+            <%--提示是否有重名的信息  错误信息  跟上面对应起来要写class--%>
+            <span class="errorMsg" style="color: red;"></span>
 
-            拍摄时间：
+            <span>拍摄时间：</span>
             <c:if test="${empty picture.pcreatime}">
                 <span tyle="color: darksalmon">神秘时间</span>
             </c:if>
@@ -106,8 +115,7 @@
                 <span style="color: darksalmon">${picture.pcreatime}</span>
             </c:if>
 
-
-            坐标：
+            <span>坐标：</span>
             <c:if test="${empty picture.plocal}">
                 <span style="color: green">神秘未知</span>
             </c:if>
@@ -116,19 +124,33 @@
             </c:if>
 
 
+            <input type="submit" value="提交">
+
+        </div>
+        <%--显示照片--%>
+        <div class="c2">
+            <img src="${picture.path}" width="800">
+        </div>
+        <%--添加描述--%>
+        <div class="c3" >
+            <c:if test="${empty picture.pdesc}">
+                  <textarea class="comments" rows="4" cols="50"
+                            placeholder="从我这里可以添加描述鸟..."
+                            id = "pdesc"
+                            name = "pdesc"
+                  ></textarea>
+            </c:if>
+            <c:if test="${not empty picture.pdesc}">
+                  <textarea class="comments" rows="4" cols="50"
+                            id = "pdesc"
+                            name = "pdesc"
+                  >${picture.pdesc}</textarea>
+            </c:if>
 
 
-    </div>
-    <%--显示照片--%>
-    <div class="c2">
-        <img src="${picture.path}" width="800">
-    </div>
-    <%--添加描述--%>
-    <div class="c3" >
-        <textarea class="comments" rows="4" cols="50"
-                  placeholder="从我这里可以添加描述鸟..."
-        ></textarea>
-    </div>
+        </div>
+
+    </form>
 </div>
 
 </html>

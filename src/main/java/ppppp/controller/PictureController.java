@@ -78,6 +78,15 @@ public class PictureController {
         // model.addAttribute("url", "picture/page?");
         return "picture";
     }
+    //修改图片信息
+    @RequestMapping("/update")
+    public String updateInfo(Picture picture,String pictype){
+        // 修改文件名  要解决重名问题
+        picture.setPname(picture.getPname()+pictype);
+        int i = mapper.updateByPrimaryKeySelective(picture);
+        System.out.println(i);
+        return "redirect:/picture/page";
+    }
 
     @RequestMapping("/before_edit_picture")
     public String before_edit_picture(Integer pid,Model model){
@@ -89,21 +98,6 @@ public class PictureController {
         model.addAttribute("picture",picture);
         model.addAttribute("type","."+split[1]);
         return "forward:/pages/edit_picture.jsp";
-    }
-
-
-    //修改图片信息
-    @RequestMapping("/update")
-    public String updateInfo(Picture picture){
-        // 修改文件名  要解决重名问题
-
-        // String newFilepath = file.getParentFile() + "\\" + picture.getPname();
-        // boolean b = file.renameTo(new File(newFilepath));
-        // System.out.println(b);
-        // picture.setPath(newFilepath);
-        // int i = mapper.updateByPrimaryKeySelective(picture);
-        // System.out.println(i);
-        return "redirect:/picture/page";
     }
 
     // 实时验证是否重名

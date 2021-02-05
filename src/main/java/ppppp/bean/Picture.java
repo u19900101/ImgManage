@@ -7,7 +7,7 @@ public class Picture {
     private String pcreatime;
     private String plocal;
     private String plabel;
-    private String pdesc = "还未设置";
+    private String pdesc;
 
     public Picture(String path, String pname, String pcreatime, String plocal, String plabel, String pdesc) {
         this.path = path;
