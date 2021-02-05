@@ -52,27 +52,67 @@ pdesc='还未设置'
 <%--完美解决 图片的页面显示问题--%>
 <div style="width:100%;height:100%;overflow: scroll;">
     <div class="panel-group" id="accordion">
+        <c:set var="index" value="0" />
         <c:forEach var="item" items="${info}">
             <%--月份的div框--%>
             <div class="c2">
-                <div class="panel panel-default">
-                    <%--折叠月份的标题--%>
+                <c:set var="index" value="${index+1}" />
+                <button type="button" class="btn btn-primary" data-toggle="collapse"
+                        data-target="#${item.key}">
+                    <h2 style="color: chocolate">${item.key}</h2>
+                </button>
+
+                <%--最近一个月份的照片不折叠--%>
+                <c:if test="${index.equals(1)}">
+                    <div id="${item.key}" class="collapse in">
+                        <c:forEach items="${item.value}" var="picture" >
+                            <div class="c1">
+                                    <%--现实照片拍摄的时间--%>
+                                <h2 align="center" style="color: seagreen">${picture.pcreatime}</h2>　
+
+                                <a href="picture/before_edit_picture?pid=${picture.pid}">
+                                    <img src="${picture.path}" height="300px" >
+                                </a>
+
+                            </div>
+                        </c:forEach>
+                    </div>
+                </c:if>
+
+                <c:if test="${not index.equals(1)}">
+                    <div id="${item.key}" class="collapse">
+                        <c:forEach items="${item.value}" var="picture" >
+                            <div class="c1">
+                                    <%--现实照片拍摄的时间--%>
+                                <h2 align="center" style="color: seagreen">${picture.pcreatime}</h2>　
+
+                                <a href="picture/before_edit_picture?pid=${picture.pid}">
+                                    <img src="${picture.path}" height="300px" >
+                                </a>
+
+                            </div>
+                        </c:forEach>
+                    </div>
+                </c:if>
+
+                <%--<div class="panel panel-default">
+                    &lt;%&ndash;折叠月份的标题&ndash;%&gt;
                     <div class="panel-heading">
                         <h4 class="panel-title">
                             <a data-toggle="collapse" data-parent="#accordion"
                                href="#${item.key}">
-                                <%--拍摄时间--%>
+                                &lt;%&ndash;拍摄时间&ndash;%&gt;
                                 <h2 style="color: chocolate">${item.key}</h2>
                             </a>
                         </h4>
                     </div>
-                    <%--折叠月度照片--%>
+                    &lt;%&ndash;折叠月度照片&ndash;%&gt;
                     <div id="${item.key}" class="panel-collapse collapse">
                         <div class="panel-body">
 
                             <c:forEach items="${item.value}" var="picture" >
                                 <div class="c1">
-                                    <%--现实照片拍摄的时间--%>
+                                    &lt;%&ndash;现实照片拍摄的时间&ndash;%&gt;
                                     <h2 align="center" style="color: seagreen">${picture.pcreatime}</h2>　
 
                                         <a href="picture/before_edit_picture?pid=${picture.pid}">
@@ -83,18 +123,18 @@ pdesc='还未设置'
                             </c:forEach>
                         </div>
                     </div>
-                </div>
+                </div>--%>
                 <%--清除div的格式 以便于每月的图片另起一行显示--%>
                 <div style="clear: both"></div>
             </div>
         </c:forEach>
     </div>
     <%-- 此方法 默认第一个显示 其余的折叠  不知其所以然--%>
-    <script type="text/javascript">
+   <%-- <script type="text/javascript">
         $(function () {
             $('.collapse').collapse('hidden');
         });
-    </script>
+    </script>--%>
 </div>
 
 </div>
