@@ -3,6 +3,9 @@ package ppppp.service;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import org.junit.Test;
+import org.opencv.core.*;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ppppp.bean.Picture;
@@ -12,6 +15,8 @@ import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static ppppp.controller.PictureController.getallpath;
 
@@ -52,6 +57,16 @@ public class PictureService {
 
                                 map.put("create_time",replace+" "+ s[1]);
                             }
+                            break;
+                        //    获取照片的尺寸 便于照片去重判断
+                        case "Image Height":
+                            // System.out.println(t.getDescription());
+                            map.put("height",t.getDescription().split(" ")[0]);
+                            break;
+                        case "Image Width":
+                            // System.out.println(t.getDescription());
+                            map.put("width",t.getDescription().split(" ")[0]);
+                            break;
                         //    这个时间没有太多参考意义
                       /*  case "Date/Time":
                             if(map.get("date_time")==null){
@@ -141,7 +156,61 @@ public class PictureService {
         return map;
     }
 
+    public static double getImageSimilar(String imgpathA,String imgpathB){
+        //加载库
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        // System.out.println("opencv = " + Core.VERSION);
+        Mat H1 = getHistImage(imgpathA);
+        Mat H2 = getHistImage(imgpathB);
+        return Imgproc.compareHist(H1, H2, 0);
+    }
+    public static boolean isContainChinese(String str) {
+        Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
+        Matcher m = p.matcher(str);
+        if (m.find()) {
+            return true;
+        }
+        return false;
+    }
+    public static Mat getHistImage(String pathName){
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        File srcPic = new File(pathName);
+        Mat  srcMat = new Mat();
+        if(isContainChinese(pathName)){
+            FileInputStream inputStream = null;
+            try {
+                inputStream = new FileInputStream(srcPic);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            byte[] byt = new byte[(int) srcPic.length()];
+            try {
+                int read = inputStream.read(byt);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            srcMat =  Imgcodecs.imdecode(new MatOfByte(byt), Imgcodecs.IMREAD_COLOR);
+        }else{
+            srcMat = Imgcodecs.imread(srcPic.getAbsolutePath(), Imgcodecs.IMREAD_ANYCOLOR);
+        }
 
+        Mat gray = new Mat();
+        //1 图片灰度化
+        Imgproc.cvtColor(srcMat, gray, Imgproc.COLOR_BGR2GRAY);
+        List<Mat> matList = new LinkedList<Mat>();
+        matList.add(gray);
+        Mat histogram = new Mat();
+        MatOfFloat ranges=new MatOfFloat(0,256);
+        MatOfInt histSize = new MatOfInt(255);
+        //2 计算直方图
+        Imgproc.calcHist(matList,new MatOfInt(0),new Mat(),histogram,histSize ,ranges);
+        //3 创建直方图面板
+        Mat histImage = Mat.zeros( 100, (int)histSize.get(0, 0)[0], CvType.CV_8UC1);
+        //4 归一化直方图
+        Core.normalize(histogram, histogram, 1, histImage.rows() , Core.NORM_MINMAX, -1);
+        return histogram;
+    }
     // 2.将照片或视频信息写入数据库中
     public void insertInfo(String filepath) throws ParseException, IOException, ImageProcessingException {
         String filetype = filepath.split("\\.")[1].toLowerCase();
@@ -149,9 +218,9 @@ public class PictureService {
         Picture pic = new Picture();
         File file = new File(filepath);
         // 以后缀名来判断文件是图片还是视频
-        if(filetype.equals("jpg") || filetype.equals("png")|| filetype.equals("jpeg")|| filetype.equals("gif")|| filetype.equals("bmp")){
+        if(isImgType(filetype)){
             map = getImgInfo(file);
-        }else if(filetype.equals("mp4") || filetype.equals("avi")|| filetype.equals("mov")|| filetype.equals("rmvb")){
+        }else if(isVideoType(filetype)){
             map = getVideoInfo(filepath);
         }
         //将图片的相对路径存入数据库中 以便页面显示
@@ -166,7 +235,12 @@ public class PictureService {
         int insert = mapper.insert(pic);
 
     }
-
+    public static boolean isImgType(String filetype){
+        return filetype.equals("jpg") || filetype.equals("png")|| filetype.equals("jpeg")|| filetype.equals("gif")|| filetype.equals("bmp");
+    }
+    public static boolean isVideoType(String filetype){
+        return filetype.equals("mp4") || filetype.equals("avi")|| filetype.equals("mov")|| filetype.equals("rmvb");
+    }
     @Test
     public void T_img() throws ParseException, ImageProcessingException, IOException {
         insertInfo("D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\f2\\gofree.jpg");

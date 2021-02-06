@@ -1,5 +1,6 @@
 package ppppp.controller;
 
+import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.google.gson.Gson;
 import org.junit.Test;
@@ -16,13 +17,17 @@ import ppppp.bean.PictureExample;
 import ppppp.dao.PictureMapper;
 import ppppp.service.PictureService;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static ppppp.service.PictureService.getImgInfo;
+import static ppppp.service.PictureService.*;
 
 /**
  * @author lppppp
@@ -31,6 +36,7 @@ import static ppppp.service.PictureService.getImgInfo;
 @Controller
 @RequestMapping("/picture")
 public class PictureController {
+    final double IMAGE_SIMILARITY = 0.95;
     @Autowired
     PictureService pictureService;
 
@@ -89,7 +95,7 @@ public class PictureController {
         System.out.println(i);
         return "redirect:/picture/page";
     }
-    String basepath = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\";
+    String imgpath = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\";
     @RequestMapping(value = "/upload",method = RequestMethod.POST)
     public String up(@RequestParam(value = "img",required = false) MultipartFile multipartFile,
                      Model model) throws ParseException, IOException, ImageProcessingException {
@@ -102,19 +108,30 @@ public class PictureController {
 
         String create_time = imgInfo.get("create_time");
         String destDir;
+        // 将照片移入日期类文件夹
+        //照片包含时间信息的 移入照片创建的日期文件夹
         if(create_time!=null){
             // 创建文件夹
-            File file = new File(basepath+create_time.split(" ")[0].replace("-","\\"));
+            File file = new File(imgpath+create_time.split(" ")[0].replace("-","\\"));
             if(!file.exists() || !file.isDirectory()) {
                 file.mkdirs();
             }
-            destDir = basepath+create_time.split(" ")[0].replace("-","\\");
-        //    将照片移入日期类文件夹
-        }else {
-            destDir = basepath+LocalDateTime.now().toString().split("T")[0].replace("-","\\");
+            destDir = imgpath+create_time.split(" ")[0].replace("-","\\");
         }
+        //照片不包含时间信息的 移入导入时间的文件夹
+        else {
+            destDir = imgpath+LocalDateTime.now().toString().split("T")[0].replace("-","\\");
+        }
+
+        // 将上传的文件保存
+        // 保存之前先进行去重检查
+            //1.检查是否存在同名的文件
+            // 2.若同名，在检查两个文件大小和时间信息是否一致
+
         move_file(temp.getAbsolutePath(),destDir);
         System.out.println(multipartFile.getSize());
+
+        // 完成上传后 将照片信息写入数据库中
         /*try {
             // 按上传的日期做文件夹名称
 
@@ -123,8 +140,112 @@ public class PictureController {
         } catch (IOException e) {
             model.addAttribute("msg", "文件上传失败鸟！！！"+e.toString());
         }*/
-        return "forward:/upload.jsp";
+        return "redirect:/demo.jsp";
     }
+
+    // 照片去重
+    @Test
+    public void T_get_dir_file() throws ParseException, IOException, ImageProcessingException {
+        String destDir = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\";
+        File file = new File(destDir);
+        // File srcFile = new File("D:\\MyJava\\mylifeImg\\src\\main\\webapp\\2020\\10\\06\\0E4A2352.jpg");
+        File srcFile = new File("C:\\Users\\Administrator\\Desktop\\m2.jpg");
+        String srcFileName = srcFile.getName();
+
+        //在整个数据库中进行 照片去重检查
+        ArrayList<String> stringList = new ArrayList<>();
+        getallpath(destDir,stringList);
+        boolean exist = false;
+        //判断图片在数据库中是否存在相似的照片
+        long l = System.currentTimeMillis();
+        int count = 0;
+        for (String s : stringList) {
+            //1. 比较两个文件的大小
+            File fileExist = new File(s);
+            // long fileExist_length = fileExist.length();
+            // long srcFile_length = srcFile.length();
+           /* 此种判断可靠性不强.*/
+            // if(fileExist_length==srcFile_length){
+            //     System.out.println("大小相等");
+            //     HashMap<String, String> srcFile_imgInfo = getImgInfo(srcFile);
+            //     HashMap<String, String> fileExist_imgInfo = getImgInfo(fileExist);
+            //     // 2.尺寸
+            //     if(srcFile_imgInfo.get("width").equalsIgnoreCase(fileExist_imgInfo.get("width"))&&
+            //             srcFile_imgInfo.get("height").equalsIgnoreCase(fileExist_imgInfo.get("height"))){
+            //         System.out.println("尺寸相等");
+            //         if(srcFile_imgInfo.get("create_time")!=null&&fileExist_imgInfo.get("create_time")!=null){
+            //
+            //             if(srcFile_imgInfo.get("create_time").equalsIgnoreCase(fileExist_imgInfo.get("create_time"))){
+            //                 System.out.println("创建日期相等，照片相同鸟....");
+            //                 exist = true;
+            //                 break;
+            //             }
+            //         }else {
+            //             System.out.println("无创建日期，判定为图片相同");
+            //             exist = true;
+            //             break;
+            //         }
+            //     }else {
+            //         continue;
+            //     }
+            //
+            // }else {
+            //     continue;
+            // }
+            // 照片的 大小、尺寸、创建日期 都不相同，则判断  是否重名
+            // 只对图片文件进行判断
+            String fileType = s.substring(s.indexOf(".")+1);
+            if(isImgType(fileType)){
+                double imageSimilar = getImageSimilar(fileExist.getAbsolutePath(), srcFile.getAbsolutePath());
+                System.out.println("图片 ："+s+"与原图的相似度为： "+imageSimilar);
+                count++;
+                if(imageSimilar>IMAGE_SIMILARITY){
+                    exist = true;
+                    break;
+                }
+            }
+        }
+        //存在
+        if(exist){
+            System.out.println("存在相同照片.....");
+        }
+        // 不存在，按照片信息建立文件夹上传
+        else {
+            createImgFile(srcFile);
+        }
+
+        System.out.println(("耗时："+(System.currentTimeMillis()-l)/1000)+" s 共检测照片 "+count+" 张");
+    }
+
+    public void createImgFile(File img) throws ParseException, IOException, ImageProcessingException {
+        HashMap<String, String> imgInfo = getImgInfo(img);
+
+        String create_time = imgInfo.get("create_time");
+        String destDir;
+        // 将照片移入日期类文件夹
+        //照片包含时间信息的 移入照片创建的日期文件夹
+        if(create_time!=null){
+            // 创建文件夹
+            File file = new File(imgpath+create_time.split(" ")[0].replace("-","\\"));
+            if(!file.exists() || !file.isDirectory()) {
+                file.mkdirs();
+            }
+            destDir = imgpath+create_time.split(" ")[0].replace("-","\\");
+        }
+        //照片不包含时间信息的 移入导入时间的文件夹
+        else {
+            destDir = imgpath+LocalDateTime.now().toString().split("T")[0].replace("-","\\");
+        }
+        move_file(img.getAbsolutePath(),destDir);
+    }
+    @Test
+    public void T_get_img_len_hig() throws IOException, ImageProcessingException, ParseException {
+
+        String picture = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\2020\\10\\06\\0E4A2352.jpg";
+        HashMap<String, String> imgInfo = getImgInfo(new File(picture));
+        System.out.println(imgInfo);
+    }
+
 
 
     public boolean move_file(String scrpath,String destDir){

@@ -40,6 +40,15 @@
   </build>
 
   <dependencies>
+
+    <!-- 引入opencv-->
+    <dependency>
+      <groupId>com.acts</groupId>
+      <artifactId>opencv</artifactId>
+      <version>4.51</version>
+    </dependency>
+
+
     <!--获取视频文件-->
     <!-- https://mvnrepository.com/artifact/it.sauronsoftware/jave -->
     <dependency>
