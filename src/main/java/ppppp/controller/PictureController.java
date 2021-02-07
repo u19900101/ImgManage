@@ -1,6 +1,5 @@
 package ppppp.controller;
 
-import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.google.gson.Gson;
 import org.junit.Test;
@@ -17,11 +16,8 @@ import ppppp.bean.PictureExample;
 import ppppp.dao.PictureMapper;
 import ppppp.service.PictureService;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -36,7 +32,7 @@ import static ppppp.service.PictureService.*;
 @Controller
 @RequestMapping("/picture")
 public class PictureController {
-    final double IMAGE_SIMILARITY = 0.95;
+    static public final double IMAGE_SIMILARITY = 0.95;
     @Autowired
     PictureService pictureService;
 
@@ -95,7 +91,7 @@ public class PictureController {
         System.out.println(i);
         return "redirect:/picture/page";
     }
-    String imgpath = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\";
+    static String imgpath = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\";
     @RequestMapping(value = "/upload",method = RequestMethod.POST)
     public String up(@RequestParam(value = "img",required = false) MultipartFile multipartFile,
                      Model model) throws ParseException, IOException, ImageProcessingException {
@@ -149,7 +145,7 @@ public class PictureController {
         String destDir = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\";
         File file = new File(destDir);
         // File srcFile = new File("D:\\MyJava\\mylifeImg\\src\\main\\webapp\\2020\\10\\06\\0E4A2352.jpg");
-        File srcFile = new File("C:\\Users\\Administrator\\Desktop\\m2.jpg");
+        File srcFile = new File("C:\\Users\\Administrator\\Desktop\\中文.jpg");
         String srcFileName = srcFile.getName();
 
         //在整个数据库中进行 照片去重检查
@@ -196,7 +192,7 @@ public class PictureController {
             // 只对图片文件进行判断
             String fileType = s.substring(s.indexOf(".")+1);
             if(isImgType(fileType)){
-                double imageSimilar = getImageSimilar(fileExist.getAbsolutePath(), srcFile.getAbsolutePath());
+                double imageSimilar = pictureService.getImageSimilar(fileExist.getAbsolutePath(), srcFile.getAbsolutePath());
                 System.out.println("图片 ："+s+"与原图的相似度为： "+imageSimilar);
                 count++;
                 if(imageSimilar>IMAGE_SIMILARITY){
@@ -217,7 +213,7 @@ public class PictureController {
         System.out.println(("耗时："+(System.currentTimeMillis()-l)/1000)+" s 共检测照片 "+count+" 张");
     }
 
-    public void createImgFile(File img) throws ParseException, IOException, ImageProcessingException {
+    public static void createImgFile(File img) throws ParseException, IOException, ImageProcessingException {
         HashMap<String, String> imgInfo = getImgInfo(img);
 
         String create_time = imgInfo.get("create_time");
@@ -248,19 +244,28 @@ public class PictureController {
 
 
 
-    public boolean move_file(String scrpath,String destDir){
+    public static boolean move_file(String scrpath,String destDir){
+        //判断当前文件夹下是否有重名的文件
+        String[] list = new File(destDir).list();
         File file = new File(scrpath);
-        boolean b = file.renameTo(new File(destDir+"\\" + file.getName()));
+        String newFileName = file.getName();
+        for (String s : list) {
+            if(file.getName().equalsIgnoreCase(s)){
+                newFileName = file.getName().split("\\.")[0]+"_."+file.getName().split("\\.")[1];
+            }
+        }
+        boolean b = file.renameTo(new File(destDir+"\\" + newFileName));
+        if(b){
+            System.out.println("移动照片： "+scrpath+ "到文件夹 ："
+            +destDir +" 下");
+        }else {
+            System.out.println("移动图片失败.....");
+        }
         return b;
     }
-    @Test
-    public void T_creat_dir(){
-        String dirName = LocalDateTime.now().toString().split("T")[0].replace("-","\\");
-        File file = new File("D:\\MyJava\\mylifeImg\\src\\main\\webapp\\"+dirName);
-        if(!file.exists() || !file.isDirectory()) {
-            file.mkdirs();
-        }
-    }
+
+
+
     @RequestMapping("/setDesc")
     public String setDesc(){
         // 修改文件名  要解决重名问题

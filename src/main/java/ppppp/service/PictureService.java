@@ -156,14 +156,14 @@ public class PictureService {
         return map;
     }
 
-    public static double getImageSimilar(String imgpathA,String imgpathB){
+    // 对图像的旋转 很好解决
+    public  double getImageSimilar(String imgpathA,String imgpathB) throws IOException {
         //加载库
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         // System.out.println("opencv = " + Core.VERSION);
-        Mat H1 = getHistImage(imgpathA);
-        Mat H2 = getHistImage(imgpathB);
-        return Imgproc.compareHist(H1, H2, 0);
+        return diff(aHash(imgpathA), aHash(imgpathB));
     }
+    // 解决图片路径中包含中文
     public static boolean isContainChinese(String str) {
         Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
         Matcher m = p.matcher(str);
@@ -172,45 +172,116 @@ public class PictureService {
         }
         return false;
     }
-    public static Mat getHistImage(String pathName){
+
+    /** 均值哈希算法*/
+    public static int[] aHash(String src){
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        File srcPic = new File(pathName);
-        Mat  srcMat = new Mat();
-        if(isContainChinese(pathName)){
-            FileInputStream inputStream = null;
-            try {
-                inputStream = new FileInputStream(srcPic);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            byte[] byt = new byte[(int) srcPic.length()];
-            try {
+        int[] res = new int[64];
+        try {
+            int width = 8;
+            int height = 8;
+            File srcPic = new File(src);
+            Mat  srcMat = new Mat();
+            if(isContainChinese(src)){
+                FileInputStream inputStream = new FileInputStream(srcPic);
+                byte[] byt = new byte[(int) srcPic.length()];
                 int read = inputStream.read(byt);
-            } catch (IOException e) {
-                e.printStackTrace();
+                srcMat =  Imgcodecs.imdecode(new MatOfByte(byt), Imgcodecs.IMREAD_COLOR);
+            }else{
+                srcMat = Imgcodecs.imread(srcPic.getAbsolutePath(), Imgcodecs.IMREAD_ANYCOLOR);
             }
-            srcMat =  Imgcodecs.imdecode(new MatOfByte(byt), Imgcodecs.IMREAD_COLOR);
-        }else{
-            srcMat = Imgcodecs.imread(srcPic.getAbsolutePath(), Imgcodecs.IMREAD_ANYCOLOR);
+
+            Mat resizeMat = new Mat();
+            Imgproc.resize(srcMat,resizeMat, new Size(width, height),0,0);
+            // 将缩小后的图片转换为64级灰度（简化色彩）
+            int total = 0;
+            int[] ints = new int[64];
+
+            int index = 0;
+            for (int i = 0;i < height;i++){
+                for (int j = 0;j < width;j++){
+                    int gray = gray(resizeMat.get(i, j));
+                    ints[index++] = gray;
+                    total = total + gray;
+                }
+            }
+            // 计算灰度平均值
+            int grayAvg = total / (width * height);
+            // 比较像素的灰度
+            for (int i =0;i<ints.length;i++) {
+                if (ints[i] >= grayAvg) {
+                    res[i] = 1;
+                } else {
+                    res[i] = 0;
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return res;
+    }
+    private static int gray(double[] bgr) {
+        int rgb = (int) (bgr[2] * 77 + bgr[1] * 151 + bgr[0] * 28) >> 8;
+        int gray = (rgb << 16) | (rgb << 8) | rgb;
+        return gray;
+    }
+
+    // 判断两者之间的4个方向转换是否都不同，若有一个完全相同则说明两张图相似
+    public  double diff(int[] ints1,int[] ints2){
+        int []diffCount = new int[4];
+        diffCount[0] = caluDiff(ints1,ints2);
+        if(diffCount[0]==64){
+            return 1.0;
+        }
+        //第1次旋转90度后比较
+        int[] turn90 = clockwise90Deg(ints2, 8);
+        diffCount[1] = caluDiff(ints1,turn90);
+        if(diffCount[1]==64){
+            return 1.0;
+        }
+        //第2次旋转90度后比较
+        int[] turn180 = clockwise90Deg(turn90, 8);
+        diffCount[2] = caluDiff(ints1,clockwise90Deg(turn180, 8));
+        if(diffCount[1]==64){
+            return 1.0;
+        }
+        //第3次旋转90度后比较
+        int[] turn270 = clockwise90Deg(turn180, 8);
+        diffCount[3] = caluDiff(ints1,clockwise90Deg(turn270, 8));
+        if(diffCount[3]==64){
+            return 1.0;
         }
 
-        Mat gray = new Mat();
-        //1 图片灰度化
-        Imgproc.cvtColor(srcMat, gray, Imgproc.COLOR_BGR2GRAY);
-        List<Mat> matList = new LinkedList<Mat>();
-        matList.add(gray);
-        Mat histogram = new Mat();
-        MatOfFloat ranges=new MatOfFloat(0,256);
-        MatOfInt histSize = new MatOfInt(255);
-        //2 计算直方图
-        Imgproc.calcHist(matList,new MatOfInt(0),new Mat(),histogram,histSize ,ranges);
-        //3 创建直方图面板
-        Mat histImage = Mat.zeros( 100, (int)histSize.get(0, 0)[0], CvType.CV_8UC1);
-        //4 归一化直方图
-        Core.normalize(histogram, histogram, 1, histImage.rows() , Core.NORM_MINMAX, -1);
-        return histogram;
+        return (diffCount[0]+diffCount[1]+diffCount[2]+diffCount[3])/64.0/4.0;
     }
+
+    private int caluDiff(int[] ints1, int[] ints2) {
+        int diffCount = 0;
+        for (int i = 0; i < ints1.length; i++) {
+            if (ints1[i] == ints2[i]) {
+                diffCount++;
+            }
+        }
+        return diffCount;
+    }
+
+    public int[] clockwise90Deg(int []origin, int row){
+        int col = origin.length/row;
+        int [][]list = new int[row][col];
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                list[i][j] = origin[i*col+j];
+            }
+        }
+        int []newlist = new int[col*row];
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                newlist[j*col+row-1-i] = list[i][j];
+            }
+        }
+        return newlist;
+    }
+
     // 2.将照片或视频信息写入数据库中
     public void insertInfo(String filepath) throws ParseException, IOException, ImageProcessingException {
         String filetype = filepath.split("\\.")[1].toLowerCase();
