@@ -14,11 +14,12 @@ import ppppp.dao.PictureMapper;
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static ppppp.controller.PictureController.getallpath;
+import static ppppp.controller.PictureController.*;
 
 /**
  * @author lppppp
@@ -156,6 +157,65 @@ public class PictureService {
         return map;
     }
 
+    public void checkAndCreateImg(String destDir,File srcFile) throws ParseException, IOException, ImageProcessingException {
+        //在整个数据库中进行 照片去重检查
+        ArrayList<String> stringList = new ArrayList<>();
+        getallpath(destDir,stringList);
+        boolean exist = false;
+        //判断图片在数据库中是否存在相似的照片
+        long l = System.currentTimeMillis();
+        int count = 0;
+        for (String s : stringList) {
+            File fileExist = new File(s);
+            String fileType = s.substring(s.indexOf(".")+1);
+            if(isImgType(fileType)){
+                double imageSimilar = getImageSimilar(fileExist.getAbsolutePath(), srcFile.getAbsolutePath());
+                System.out.println("图片 ："+s+"与原图的相似度为： "+imageSimilar);
+                count++;
+                if(imageSimilar>IMAGE_SIMILARITY){
+                    exist = true;
+                    break;
+                }
+            }
+        }
+
+        //存在
+        if(exist){
+            System.out.println("存在相同照片.....");
+            srcFile.delete();
+        }
+        // 不存在，按照片信息建立文件夹上传
+        else {
+            boolean isCreated =  createImgFile(srcFile);
+            // 若未成功上传 则 删除 上传的图片
+            if(!isCreated){
+                srcFile.delete();
+            }
+        }
+
+        System.out.println(("耗时："+(System.currentTimeMillis()-l)/1000)+" s 共检测照片 "+count+" 张");
+    }
+    public static boolean createImgFile(File img) throws ParseException, IOException, ImageProcessingException {
+        HashMap<String, String> imgInfo = getImgInfo(img);
+
+        String create_time = imgInfo.get("create_time");
+        String destDir;
+        // 将照片移入日期类文件夹
+        //照片包含时间信息的 移入照片创建的日期文件夹
+        if(create_time!=null){
+            destDir = imgpath+create_time.split(" ")[0].replace("-","\\");
+        }
+        //照片不包含时间信息的 移入导入时间的文件夹
+        else {
+            destDir = imgpath+ LocalDateTime.now().toString().split("T")[0].replace("-","\\");
+        }
+        // 创建文件夹
+        File file = new File(destDir);
+        if(!file.exists() || !file.isDirectory()) {
+            file.mkdirs();
+        }
+        return move_file(img.getAbsolutePath(), destDir);
+    }
     // 对图像的旋转 很好解决
     public  double getImageSimilar(String imgpathA,String imgpathB) throws IOException {
         //加载库

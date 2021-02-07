@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
-import java.time.temporal.Temporal;
 import java.util.*;
 
 import static ppppp.service.PictureService.*;
@@ -92,14 +91,19 @@ public class PictureController {
         System.out.println(i);
         return "redirect:/picture/page";
     }
-    static String imgpath = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\";
+    public static String imgpath = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\";
     @RequestMapping(value = "/upload",method = RequestMethod.POST)
     public String up(@RequestParam(value = "img",required = false) MultipartFile multipartFile,
                      Model model) throws ParseException, IOException, ImageProcessingException {
         System.out.println(multipartFile.getOriginalFilename());
 
         File temp = new File("D:\\Temp\\"+multipartFile.getOriginalFilename());
+        // 将上传的文件写入到 到文件夹
         multipartFile.transferTo(temp);
+        String  descDir= "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img";
+        pictureService.checkAndCreateImg(descDir,temp);
+
+        /*
 
         HashMap<String, String> imgInfo = getImgInfo(temp);
 
@@ -126,7 +130,7 @@ public class PictureController {
             // 2.若同名，在检查两个文件大小和时间信息是否一致
 
         move_file(temp.getAbsolutePath(),destDir);
-        System.out.println(multipartFile.getSize());
+        System.out.println(multipartFile.getSize());*/
 
         // 完成上传后 将照片信息写入数据库中
         /*try {
@@ -214,27 +218,7 @@ public class PictureController {
         System.out.println(("耗时："+(System.currentTimeMillis()-l)/1000)+" s 共检测照片 "+count+" 张");
     }
 
-    public static void createImgFile(File img) throws ParseException, IOException, ImageProcessingException {
-        HashMap<String, String> imgInfo = getImgInfo(img);
 
-        String create_time = imgInfo.get("create_time");
-        String destDir;
-        // 将照片移入日期类文件夹
-        //照片包含时间信息的 移入照片创建的日期文件夹
-        if(create_time!=null){
-            // 创建文件夹
-            File file = new File(imgpath+create_time.split(" ")[0].replace("-","\\"));
-            if(!file.exists() || !file.isDirectory()) {
-                file.mkdirs();
-            }
-            destDir = imgpath+create_time.split(" ")[0].replace("-","\\");
-        }
-        //照片不包含时间信息的 移入导入时间的文件夹
-        else {
-            destDir = imgpath+LocalDateTime.now().toString().split("T")[0].replace("-","\\");
-        }
-        move_file(img.getAbsolutePath(),destDir);
-    }
     @Test
     public void T_get_img_len_hig() throws IOException, ImageProcessingException, ParseException {
 
@@ -247,17 +231,19 @@ public class PictureController {
 
     public static boolean move_file(String scrpath,String destDir){
         //判断当前文件夹下是否有重名的文件
-        String[] list = new File(destDir).list();
+
         File file = new File(scrpath);
         String newFileName = file.getName();
-        ArrayList<String> fileList = new ArrayList<>();
-        for (String s : list) {
-            fileList.add(s);
+        String[] list = new File(destDir).list();
+        if(list != null){
+            ArrayList<String> fileList = new ArrayList<>();
+            for (String s : list) {
+                fileList.add(s);
+            }
+            if(fileList.contains(newFileName)){
+                newFileName = createNewName(fileList,newFileName);
+            }
         }
-        if(fileList.contains(newFileName)){
-            newFileName = createNewName(fileList,newFileName);
-        }
-
         boolean b = file.renameTo(new File(destDir+"\\" + newFileName));
         if(b){
             System.out.println("移动照片： "+scrpath+ "到文件夹 ："

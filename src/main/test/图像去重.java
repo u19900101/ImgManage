@@ -16,6 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static ppppp.controller.PictureController.*;
+import static ppppp.service.PictureService.createImgFile;
 import static ppppp.service.PictureService.isImgType;
 
 /**
