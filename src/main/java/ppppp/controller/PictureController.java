@@ -105,7 +105,13 @@ public class PictureController {
         String  descDir= "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img";
         String msg = pictureService.checkAndCreateImg(descDir, temp);
 
-        model.addAttribute("msg","图片："+multipartFile.getOriginalFilename()+ msg);
+        // 若成功  金色字体
+        // 若失败  红色字体
+        if(msg.contains("成功")){
+            model.addAttribute("succeed","图片："+multipartFile.getOriginalFilename()+ msg);
+        }else {
+            model.addAttribute("failed","图片："+multipartFile.getOriginalFilename()+ msg);
+        }
 
         /*
         // 完成上传后 将照片信息写入数据库中
@@ -119,6 +125,7 @@ public class PictureController {
         }*/
         return "forward:/demo.jsp";
     }
+
 
     // 照片去重
     @Test

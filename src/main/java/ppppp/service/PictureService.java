@@ -163,15 +163,13 @@ public class PictureService {
         getallpath(destDir,stringList);
         boolean isExist = false;
         boolean isCreated = false;
-        HashMap<String , Boolean> map = new HashMap<>();
         //判断图片在数据库中是否存在相似的照片
         long l = System.currentTimeMillis();
         int count = 0;
         for (String s : stringList) {
-            File fileExist = new File(s);
             String fileType = s.substring(s.indexOf(".")+1);
             if(isImgType(fileType)){
-                double imageSimilar = getImageSimilar(fileExist.getAbsolutePath(), srcFile.getAbsolutePath());
+                double imageSimilar = getImageSimilar(s, srcFile.getAbsolutePath());
                 System.out.println("图片 ："+s+"与原图的相似度为： "+imageSimilar);
                 count++;
                 if(imageSimilar>IMAGE_SIMILARITY){
@@ -219,12 +217,14 @@ public class PictureService {
         }
         return move_file(img.getAbsolutePath(), destDir);
     }
+
+
     // 对图像的旋转 很好解决
-    public  double getImageSimilar(String imgpathA,String imgpathB) throws IOException {
+    public  double getImageSimilar(String pathA,String pathB) throws IOException {
         //加载库
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         // System.out.println("opencv = " + Core.VERSION);
-        return diff(aHash(imgpathA), aHash(imgpathB));
+        return diff(aHash(pathA), aHash(pathB));
     }
     // 解决图片路径中包含中文
     public static boolean isContainChinese(String str) {
@@ -238,24 +238,29 @@ public class PictureService {
 
     /** 均值哈希算法*/
     public static int[] aHash(String src){
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        // System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         int[] res = new int[64];
         try {
             int width = 8;
             int height = 8;
             File srcPic = new File(src);
-            Mat  srcMat = new Mat();
+            Mat  srcMat = null;
+
             if(isContainChinese(src)){
                 FileInputStream inputStream = new FileInputStream(srcPic);
                 byte[] byt = new byte[(int) srcPic.length()];
                 int read = inputStream.read(byt);
                 srcMat =  Imgcodecs.imdecode(new MatOfByte(byt), Imgcodecs.IMREAD_COLOR);
+                // 不关闭的话 文件无法移动，尬。。。。
+                inputStream.close();
             }else{
-                srcMat = Imgcodecs.imread(srcPic.getAbsolutePath(), Imgcodecs.IMREAD_ANYCOLOR);
+                srcMat = Imgcodecs.imread(src, Imgcodecs.IMREAD_ANYCOLOR);
             }
 
             Mat resizeMat = new Mat();
             Imgproc.resize(srcMat,resizeMat, new Size(width, height),0,0);
+
+
             // 将缩小后的图片转换为64级灰度（简化色彩）
             int total = 0;
             int[] ints = new int[64];
@@ -290,27 +295,27 @@ public class PictureService {
     }
 
     // 判断两者之间的4个方向转换是否都不同，若有一个完全相同则说明两张图相似
-    public  double diff(int[] ints1,int[] ints2){
+    public  double diff(int[] imgA,int[] imgB){
         int []diffCount = new int[4];
-        diffCount[0] = caluDiff(ints1,ints2);
+        diffCount[0] = caluDiff(imgB,imgA);
         if(diffCount[0]==64){
             return 1.0;
         }
         //第1次旋转90度后比较
-        int[] turn90 = clockwise90Deg(ints2, 8);
-        diffCount[1] = caluDiff(ints1,turn90);
+        int[] turn90 = clockwise90Deg(imgA, 8);
+        diffCount[1] = caluDiff(imgB,turn90);
         if(diffCount[1]==64){
             return 1.0;
         }
         //第2次旋转90度后比较
         int[] turn180 = clockwise90Deg(turn90, 8);
-        diffCount[2] = caluDiff(ints1,clockwise90Deg(turn180, 8));
+        diffCount[2] = caluDiff(imgB,turn180);
         if(diffCount[1]==64){
             return 1.0;
         }
         //第3次旋转90度后比较
         int[] turn270 = clockwise90Deg(turn180, 8);
-        diffCount[3] = caluDiff(ints1,clockwise90Deg(turn270, 8));
+        diffCount[3] = caluDiff(imgB,turn270);
         if(diffCount[3]==64){
             return 1.0;
         }
@@ -318,10 +323,10 @@ public class PictureService {
         return (diffCount[0]+diffCount[1]+diffCount[2]+diffCount[3])/64.0/4.0;
     }
 
-    private int caluDiff(int[] ints1, int[] ints2) {
+    private int caluDiff(int[] imgB, int[] imgA) {
         int diffCount = 0;
-        for (int i = 0; i < ints1.length; i++) {
-            if (ints1[i] == ints2[i]) {
+        for (int i = 0; i < imgB.length; i++) {
+            if (imgB[i] == imgA[i]) {
                 diffCount++;
             }
         }
