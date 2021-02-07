@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
+import java.time.temporal.Temporal;
 import java.util.*;
 
 import static ppppp.service.PictureService.*;
@@ -249,11 +250,14 @@ public class PictureController {
         String[] list = new File(destDir).list();
         File file = new File(scrpath);
         String newFileName = file.getName();
+        ArrayList<String> fileList = new ArrayList<>();
         for (String s : list) {
-            if(file.getName().equalsIgnoreCase(s)){
-                newFileName = file.getName().split("\\.")[0]+"_."+file.getName().split("\\.")[1];
-            }
+            fileList.add(s);
         }
+        if(fileList.contains(newFileName)){
+            newFileName = createNewName(fileList,newFileName);
+        }
+
         boolean b = file.renameTo(new File(destDir+"\\" + newFileName));
         if(b){
             System.out.println("移动照片： "+scrpath+ "到文件夹 ："
@@ -265,6 +269,36 @@ public class PictureController {
     }
 
 
+    //生成不重名的文件名称
+    private static String createNewName(ArrayList<String> fileList, String s) {
+
+        String temp = s;
+
+        int count =1;
+        while (fileList.contains(temp)){
+            temp = s.split("\\.")[0]+"_"+count+"."+s.split("\\.")[1];
+            count++;
+        }
+        return temp;
+    }
+
+    @Test
+    public void T_createNewName(){
+        ArrayList<String> fileList =new ArrayList<>();
+        fileList.add("中国.jpg");
+        fileList.add("中国_1.jpg");
+        fileList.add("中国_2.jpg");
+        fileList.add("中国_5.jpg");
+        String s = "中国.jpg";
+        String temp = s;
+
+        int count =1;
+        while (fileList.contains(temp)){
+            temp = s.split("\\.")[0]+"_"+count+"."+s.split("\\.")[1];
+            count++;
+        }
+        System.out.println(temp);
+    }
 
     @RequestMapping("/setDesc")
     public String setDesc(){
