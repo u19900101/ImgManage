@@ -67,13 +67,7 @@ public class 图像去重 {
 
         System.out.println(("耗时："+(System.currentTimeMillis()-l)/1000)+" s 共检测照片 "+count+" 张");
     }
-    @Test
-    public void T_move_file(){
-        String srcpath ="C:\\Users\\Administrator\\Desktop\\中文.jpg";
-        String destDir = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\2019";
-        boolean b = move_file(srcpath, destDir);
-        System.out.println(b);
-    }
+
     @Test
     public void T() throws IOException {
         //加载库

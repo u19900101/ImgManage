@@ -157,12 +157,13 @@ public class PictureService {
         return map;
     }
 
-    public String checkAndCreateImg(String destDir, File srcFile) throws ParseException, IOException, ImageProcessingException {
+    public HashMap<String, String> checkAndCreateImg(String destDir, File srcFile) throws ParseException, IOException, ImageProcessingException {
         //在整个数据库中进行 照片去重检查
         ArrayList<String> stringList = new ArrayList<>();
+        HashMap<String,String> map =new HashMap<>();
         getallpath(destDir,stringList);
         boolean isExist = false;
-        boolean isCreated = false;
+
         //判断图片在数据库中是否存在相似的照片
         long l = System.currentTimeMillis();
         int count = 0;
@@ -174,29 +175,35 @@ public class PictureService {
                 count++;
                 if(imageSimilar>IMAGE_SIMILARITY){
                     isExist = true;
+                    map.put("failedMsg","上传失败,存在相同照片.....");
+                    map.put("existFilePath", s);
                     break;
                 }
             }
         }
         System.out.println(("耗时："+(System.currentTimeMillis()-l)/1000)+" s 共检测照片 "+count+" 张");
         //存在
-        if(isExist){
+        /*if(isExist){
             System.out.println("  存在相同照片.....");
-            srcFile.delete();
+            // srcFile.delete();
             return "  上传失败,存在相同照片.....";
-        }
+        }*/
         // 不存在，按照片信息建立文件夹上传
-        else {
-            isCreated =  createImgFile(srcFile);
+        if(!isExist) {
+            String isCreated =  createImgFile(srcFile);
             // 若未成功上传 则 删除 上传的图片
-            if(!isCreated){
-                srcFile.delete();
-                return "  上传失败,未能成功移动照片！！";
+            if(isCreated==null){
+                // srcFile.delete();
+                map.put("failedMsg","  上传失败,未能成功移动照片！！");
+                // return "  上传失败,未能成功移动照片！！";
+            }else {
+                map.put("successMsg","    上传成功！！");
+                map.put("successPath",isCreated);
             }
-            return "  上传成功！！";
         }
+        return map;
     }
-    public static boolean createImgFile(File img) throws ParseException, IOException, ImageProcessingException {
+    public static String createImgFile(File img) throws ParseException, IOException, ImageProcessingException {
         HashMap<String, String> imgInfo = getImgInfo(img);
 
         String create_time = imgInfo.get("create_time");
@@ -215,6 +222,7 @@ public class PictureService {
         if(!file.exists() || !file.isDirectory()) {
             file.mkdirs();
         }
+
         return move_file(img.getAbsolutePath(), destDir);
     }
 

@@ -95,7 +95,7 @@ public class PictureController {
     @RequestMapping(value = "/upload",method = RequestMethod.POST)
     public String up(@RequestParam(value = "img",required = false) MultipartFile multipartFile,
                      Model model) throws ParseException, IOException, ImageProcessingException {
-        File temp = new File("D:\\Temp\\"+multipartFile.getOriginalFilename());
+        File temp = new File("D:\\MyJava\\mylifeImg\\src\\main\\webapp\\temp\\"+multipartFile.getOriginalFilename());
         // 若父文件夹不存在则创建
         if(!temp.getParentFile().exists() || !temp.getParentFile().isDirectory()){
             temp.getParentFile().mkdirs();
@@ -103,15 +103,37 @@ public class PictureController {
         // 将上传的文件写入到 到文件夹
         multipartFile.transferTo(temp);
         String  descDir= "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img";
-        String msg = pictureService.checkAndCreateImg(descDir, temp);
+        HashMap<String, String> map = pictureService.checkAndCreateImg(descDir, temp);
 
+        /*
+        *  map.put("","上传失败,存在相同照片.....");
+        map.put("", s);
+         map.put("failedMsg","  上传失败,未能成功移动照片！！");
+                // return "  上传失败,未能成功移动照片！！";
+            }else {
+                map.put("successMsg","    上传成功！！");
+                map.put("",isCreated);
+
+        * */
         // 若成功  金色字体
         // 若失败  红色字体
-        if(msg.contains("成功")){
-            model.addAttribute("succeed","图片："+multipartFile.getOriginalFilename()+ msg);
+
+        String basepath = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\";
+        if(map.get("successMsg")!=null){
+            model.addAttribute("successMsg","图片："+multipartFile.getOriginalFilename()+ map.get("successMsg"));
+            model.addAttribute("successPath",map.get("successPath").substring(basepath.length()));
         }else {
-            model.addAttribute("failed","图片："+multipartFile.getOriginalFilename()+ msg);
+            model.addAttribute("uploadImgPath",temp.getAbsolutePath().substring(basepath.length()));
         }
+
+        if(map.get("failedMsg")!=null){
+            model.addAttribute("failedMsg","图片："+multipartFile.getOriginalFilename()+ map.get("failedMsg"));
+            // 上传失败有两种原因  存在重复图片  或者  移动照片失败
+            if(map.get("existFilePath")!=null){
+                model.addAttribute("failedImgPath",map.get("existFilePath").substring(basepath.length()));
+            }
+        }
+
 
         /*
         // 完成上传后 将照片信息写入数据库中
@@ -212,7 +234,7 @@ public class PictureController {
 
 
 
-    public static boolean move_file(String scrpath,String destDir){
+    public static String move_file(String scrpath,String destDir){
         //判断当前文件夹下是否有重名的文件
 
         File file = new File(scrpath);
@@ -234,7 +256,7 @@ public class PictureController {
         }else {
             System.out.println("移动图片失败.....");
         }
-        return b;
+        return b?destDir+"\\" + newFileName:null;
     }
 
 
@@ -251,23 +273,6 @@ public class PictureController {
         return temp;
     }
 
-    @Test
-    public void T_createNewName(){
-        ArrayList<String> fileList =new ArrayList<>();
-        fileList.add("中国.jpg");
-        fileList.add("中国_1.jpg");
-        fileList.add("中国_2.jpg");
-        fileList.add("中国_5.jpg");
-        String s = "中国.jpg";
-        String temp = s;
-
-        int count =1;
-        while (fileList.contains(temp)){
-            temp = s.split("\\.")[0]+"_"+count+"."+s.split("\\.")[1];
-            count++;
-        }
-        System.out.println(temp);
-    }
 
     @RequestMapping("/setDesc")
     public String setDesc(){
