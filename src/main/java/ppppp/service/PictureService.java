@@ -157,11 +157,13 @@ public class PictureService {
         return map;
     }
 
-    public void checkAndCreateImg(String destDir,File srcFile) throws ParseException, IOException, ImageProcessingException {
+    public String checkAndCreateImg(String destDir, File srcFile) throws ParseException, IOException, ImageProcessingException {
         //在整个数据库中进行 照片去重检查
         ArrayList<String> stringList = new ArrayList<>();
         getallpath(destDir,stringList);
-        boolean exist = false;
+        boolean isExist = false;
+        boolean isCreated = false;
+        HashMap<String , Boolean> map = new HashMap<>();
         //判断图片在数据库中是否存在相似的照片
         long l = System.currentTimeMillis();
         int count = 0;
@@ -173,27 +175,28 @@ public class PictureService {
                 System.out.println("图片 ："+s+"与原图的相似度为： "+imageSimilar);
                 count++;
                 if(imageSimilar>IMAGE_SIMILARITY){
-                    exist = true;
+                    isExist = true;
                     break;
                 }
             }
         }
-
+        System.out.println(("耗时："+(System.currentTimeMillis()-l)/1000)+" s 共检测照片 "+count+" 张");
         //存在
-        if(exist){
-            System.out.println("存在相同照片.....");
+        if(isExist){
+            System.out.println("  存在相同照片.....");
             srcFile.delete();
+            return "  上传失败,存在相同照片.....";
         }
         // 不存在，按照片信息建立文件夹上传
         else {
-            boolean isCreated =  createImgFile(srcFile);
+            isCreated =  createImgFile(srcFile);
             // 若未成功上传 则 删除 上传的图片
             if(!isCreated){
                 srcFile.delete();
+                return "  上传失败,未能成功移动照片！！";
             }
+            return "  上传成功！！";
         }
-
-        System.out.println(("耗时："+(System.currentTimeMillis()-l)/1000)+" s 共检测照片 "+count+" 张");
     }
     public static boolean createImgFile(File img) throws ParseException, IOException, ImageProcessingException {
         HashMap<String, String> imgInfo = getImgInfo(img);

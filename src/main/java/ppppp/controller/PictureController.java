@@ -95,43 +95,19 @@ public class PictureController {
     @RequestMapping(value = "/upload",method = RequestMethod.POST)
     public String up(@RequestParam(value = "img",required = false) MultipartFile multipartFile,
                      Model model) throws ParseException, IOException, ImageProcessingException {
-        System.out.println(multipartFile.getOriginalFilename());
-
         File temp = new File("D:\\Temp\\"+multipartFile.getOriginalFilename());
+        // 若父文件夹不存在则创建
+        if(!temp.getParentFile().exists() || !temp.getParentFile().isDirectory()){
+            temp.getParentFile().mkdirs();
+        }
         // 将上传的文件写入到 到文件夹
         multipartFile.transferTo(temp);
         String  descDir= "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img";
-        pictureService.checkAndCreateImg(descDir,temp);
+        String msg = pictureService.checkAndCreateImg(descDir, temp);
+
+        model.addAttribute("msg","图片："+multipartFile.getOriginalFilename()+ msg);
 
         /*
-
-        HashMap<String, String> imgInfo = getImgInfo(temp);
-
-        String create_time = imgInfo.get("create_time");
-        String destDir;
-        // 将照片移入日期类文件夹
-        //照片包含时间信息的 移入照片创建的日期文件夹
-        if(create_time!=null){
-            // 创建文件夹
-            File file = new File(imgpath+create_time.split(" ")[0].replace("-","\\"));
-            if(!file.exists() || !file.isDirectory()) {
-                file.mkdirs();
-            }
-            destDir = imgpath+create_time.split(" ")[0].replace("-","\\");
-        }
-        //照片不包含时间信息的 移入导入时间的文件夹
-        else {
-            destDir = imgpath+LocalDateTime.now().toString().split("T")[0].replace("-","\\");
-        }
-
-        // 将上传的文件保存
-        // 保存之前先进行去重检查
-            //1.检查是否存在同名的文件
-            // 2.若同名，在检查两个文件大小和时间信息是否一致
-
-        move_file(temp.getAbsolutePath(),destDir);
-        System.out.println(multipartFile.getSize());*/
-
         // 完成上传后 将照片信息写入数据库中
         /*try {
             // 按上传的日期做文件夹名称
@@ -141,7 +117,7 @@ public class PictureController {
         } catch (IOException e) {
             model.addAttribute("msg", "文件上传失败鸟！！！"+e.toString());
         }*/
-        return "redirect:/demo.jsp";
+        return "forward:/demo.jsp";
     }
 
     // 照片去重
