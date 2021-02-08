@@ -291,7 +291,7 @@ public class PictureController {
 
 
     @RequestMapping("/before_edit_picture")
-    public String before_edit_picture(long pid,Model model){
+    public String before_edit_picture(String pid,Model model){
         Picture picture = mapper.selectByPrimaryKey(pid);
 
         //不带后缀名显示
@@ -356,8 +356,7 @@ public class PictureController {
                     File temp = new File(s);
                     HashMap<String, String> map = pictureService.checkAndCreateImg(destdir, temp);
                     if(map.get("successMsg")!=null){
-
-                        pictureService.insertInfo(map.get("successPath"));
+                        pictureService.insertInfo(map.get("successPath"),map.get("picStrId"));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

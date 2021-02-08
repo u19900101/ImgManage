@@ -2,13 +2,13 @@ package ppppp.service;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
-import org.junit.Test;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ppppp.bean.Picture;
+import ppppp.bean.PictureExample;
 import ppppp.dao.PictureMapper;
 
 import java.io.*;
@@ -158,6 +158,15 @@ public class PictureService {
         return map;
     }
 
+
+    public int[] getIntNum(String str){
+
+        int []num = new int [str.length()];
+        for (int i = 0; i < str.length(); i++) {
+            num[i] = Integer.parseInt(String.valueOf(str.charAt(i)));
+        }
+        return num;
+    }
     public HashMap<String, String> checkAndCreateImg(String destDir, File srcFile) throws ParseException, IOException, ImageProcessingException {
         //在整个数据库中进行 照片去重检查
         ArrayList<String> stringList = new ArrayList<>();
@@ -168,10 +177,18 @@ public class PictureService {
         //判断图片在数据库中是否存在相似的照片
         long l = System.currentTimeMillis();
         int count = 0;
-        for (String s : stringList) {
+        int [] imgA = aHash(srcFile.getAbsolutePath());
+        // 查询库中所有的 图片
+        List<Picture> pictures = mapper.selectByExample(new PictureExample());
+        // 将上传的图片与 现有的所有id进行比对
+        for (Picture picture : pictures) {
+            String s = picture.getPath();
             String fileType = s.substring(s.indexOf(".")+1);
             if(isImgType(fileType)){
-                double imageSimilar = getImageSimilar(s, srcFile.getAbsolutePath());
+                // double imageSimilar = getImageSimilar(s, srcFile.getAbsolutePath());
+                String picturePid = picture.getPid();
+                int[] imgB = getIntNum(picturePid);
+                double imageSimilar = diff(imgA, imgB);
                 System.out.println("图片 ："+s+"与原图的相似度为： "+imageSimilar);
                 count++;
                 if(imageSimilar>IMAGE_SIMILARITY){
@@ -182,13 +199,14 @@ public class PictureService {
                 }
             }
         }
+
         System.out.println(("耗时："+(System.currentTimeMillis()-l)/1000)+" s 共检测照片 "+count+" 张");
         //存在
-        /*if(isExist){
+        if(isExist){
             System.out.println("  存在相同照片.....");
             // srcFile.delete();
-            return "  上传失败,存在相同照片.....";
-        }*/
+            map.put("failedMsg","    上传失败,存在相同照片.....");
+        }
         // 不存在，按照片信息建立文件夹上传
         if(!isExist) {
             String isCreated =  createImgFile(srcFile);
@@ -200,6 +218,7 @@ public class PictureService {
             }else {
                 map.put("successMsg","    上传成功！！");
                 map.put("successPath",isCreated);
+                map.put("picStrId",intsToStr(imgA));
             }
         }
         return map;
@@ -360,7 +379,7 @@ public class PictureService {
     }
 
     // 2.将照片或视频信息写入数据库中
-    public void insertInfo(String filepath) throws ParseException, IOException, ImageProcessingException {
+    public void insertInfo(String filepath,String picStrId) throws ParseException, IOException, ImageProcessingException {
         String filetype = filepath.split("\\.")[1].toLowerCase();
         HashMap<String,String> map = new HashMap<>();
         Picture pic = new Picture();
@@ -373,8 +392,7 @@ public class PictureService {
         }
         //将图片的相对路径存入数据库中 以便页面显示
         String path = file.getAbsolutePath();
-        long longNum = getPictureLongId(path);
-        pic.setPid(longNum);
+        pic.setPid(picStrId);
         pic.setPath(path.substring(path.indexOf("img")));
         pic.setPname(file.getName());
         pic.setPcreatime(map.get("create_time"));
@@ -386,13 +404,17 @@ public class PictureService {
 
     }
 
-    private long getPictureLongId(String path) {
+    private String getPictureLongId(String path) {
         int[] ints = aHash(path);
-        String s = "";
-        for (int anInt : ints) {
-            s+=anInt;
+        return intsToStr(ints);
+    }
+
+    private String intsToStr(int[] ints) {
+        String s ="";
+        for (int i = 0; i < ints.length; i++) {
+            s+=ints[i];
         }
-        return new BigInteger(s, 2).longValue();
+        return s;
     }
 
 
@@ -402,7 +424,7 @@ public class PictureService {
     public static boolean isVideoType(String filetype){
         return filetype.equals("mp4") || filetype.equals("avi")|| filetype.equals("mov")|| filetype.equals("rmvb");
     }
-    @Test
+   /* @Test
     public void T_img() throws ParseException, ImageProcessingException, IOException {
         insertInfo("D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\f2\\gofree.jpg");
     }
@@ -427,5 +449,5 @@ public class PictureService {
                 e.printStackTrace();
             }
         }
-    }
+    }*/
 }
