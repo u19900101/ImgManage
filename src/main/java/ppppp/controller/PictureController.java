@@ -119,7 +119,7 @@ public class PictureController {
         // 若成功  金色字体
         // 若失败  红色字体
 
-        String basepath = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\";
+       /* String basepath = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\";
         if(map.get("successMsg")!=null){
             model.addAttribute("successMsg","图片："+multipartFile.getOriginalFilename()+ map.get("successMsg"));
             model.addAttribute("successPath",map.get("successPath").substring(basepath.length()));
@@ -134,8 +134,35 @@ public class PictureController {
             if(map.get("existFilePath")!=null){
                 model.addAttribute("faileduploadimgDir",map.get("existFilePath"));
             }
+        }*/
+
+        /***************************/
+        String s = multipartFile.getOriginalFilename();
+        if(map.get("successMsg")!=null){
+            model.addAttribute("successMsg","图片："+s+ map.get("successMsg"));
+            String tempStr = map.get("successPath");
+            model.addAttribute("successPath",tempStr.substring(tempStr.indexOf("img")));
+        }else {
+            String temppath = temp.getAbsolutePath();
+            model.addAttribute("uploadImgPath",temppath.substring(temppath.indexOf("temp")));
         }
 
+        if(map.get("failedMsg")!=null){
+            model.addAttribute("failedMsg","图片："+s+ map.get("failedMsg"));
+            // 上传失败有两种原因  存在重复图片  或者  移动照片失败
+            if(map.get("existFilePath")!=null){
+                // 从数据库读的相对路径
+                model.addAttribute("failedImgPath",map.get("existFilePath"));
+
+                String sourcepath = request.getSession().getServletContext().getRealPath("img")+map.get("existFilePath").replace("img", "");
+                String destpath = temp.getParentFile()+"\\sameFile\\"+temp.getName();
+                copyFileUsingFileStreams(sourcepath, destpath);
+                String resPath = move_file(temp.getAbsolutePath(), temp.getParentFile() + "\\sameFile");
+                //移动后要修改 页面显示的路径
+                model.addAttribute("uploadImgPath",resPath.substring(resPath.indexOf("temp")));
+            }
+            return "forward:/demo.jsp";
+        }
 
         /*
         // 完成上传后 将照片信息写入数据库中
@@ -341,7 +368,7 @@ public class PictureController {
 
 
     @RequestMapping("/init")
-    public String insertInfo(Model model,HttpServletRequest request){
+    public String init(Model model,HttpServletRequest request){
         // 遍历文件夹下所有文件路径
         
         File firFile = new File(uploadimgDir);
