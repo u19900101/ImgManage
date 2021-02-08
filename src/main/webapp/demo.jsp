@@ -31,6 +31,7 @@
 <h1 style="color: lightgreen">${successMsg}</h1>
 <h1 style="color: red">${failedMsg}</h1>
 <form action="picture/upload" enctype="multipart/form-data" method="post">
+    <%--accept="image/*" ，表示提交的文件只能为图片，若没有添加该内容，则图片、文档等类型的文件都可以提交--%>
     图  像 ：<input type="file" name="img" value="pppp"/><br/>
     <input type="submit" value="上传">
 </form>
@@ -42,18 +43,6 @@
 
 
 <c:if test="${not empty failedImgPath}">
-<%--<div class="c1">
-
-    <div class="c2">
-        <h1 style="color: lightgreen;border: 1px solid gold;">上传的照片：${uploadImgPath}</h1><br/>
-        <img src="${uploadImgPath}">
-    </div>
-
-    <div class="c2" style="float: right">
-        <h1 style="color: red">本地照片:${failedImgPath}</h1><br/>
-        <img src="${failedImgPath}">
-    </div>
-</div>--%>
     <div class="outdiv">
         <h1 style="color: lightgreen;">上传的照片：${uploadImgPath}</h1>
         <div class="imgdiv">
@@ -67,10 +56,7 @@
         </div>
 
     </div>
-
-
 </c:if>
-
 
 </body>
 </html>

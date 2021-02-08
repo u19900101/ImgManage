@@ -33,6 +33,7 @@
     <load-on-startup>1</load-on-startup>
   </servlet>
   <!--拦截所有请求  -->
+
   <servlet-mapping>
     <servlet-name>springmvc</servlet-name>
     <!-- 此处的 / 会放行 jsp-->
@@ -40,7 +41,7 @@
   </servlet-mapping>
 
   <!-- 配置字符集 解决中文乱码问题 -->
- <!-- <filter>
+  <filter>
     <filter-name>encodingFilter</filter-name>
     <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
     <init-param>
@@ -56,7 +57,6 @@
     <filter-name>encodingFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
--->
   <!--创建过滤器，使得请求的方法可以使用rest中的put&delete-->
   <filter>
     <filter-name>HiddenHttpMethodFilter</filter-name>

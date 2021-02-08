@@ -16,11 +16,10 @@ import ppppp.bean.PictureExample;
 import ppppp.dao.PictureMapper;
 import ppppp.service.PictureService;
 
-import java.io.File;
+import javax.servlet.http.HttpServletRequest;
+import java.io.*;
 
-import java.io.IOException;
 import java.text.ParseException;
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static ppppp.service.PictureService.*;
@@ -91,18 +90,20 @@ public class PictureController {
         System.out.println(i);
         return "redirect:/picture/page";
     }
-    public static String imgpath = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\";
+    public static String uploadimgDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT\\img\\";
     @RequestMapping(value = "/upload",method = RequestMethod.POST)
     public String up(@RequestParam(value = "img",required = false) MultipartFile multipartFile,
-                     Model model) throws ParseException, IOException, ImageProcessingException {
-        File temp = new File("D:\\MyJava\\mylifeImg\\src\\main\\webapp\\temp\\"+multipartFile.getOriginalFilename());
+                     Model model, HttpServletRequest request) throws ParseException, IOException, ImageProcessingException {
+        String path = request.getSession().getServletContext().getRealPath("temp");
+
+        File temp = new File(path,multipartFile.getOriginalFilename());
         // 若父文件夹不存在则创建
         if(!temp.getParentFile().exists() || !temp.getParentFile().isDirectory()){
             temp.getParentFile().mkdirs();
         }
         // 将上传的文件写入到 到文件夹
         multipartFile.transferTo(temp);
-        String  descDir= "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img";
+        String  descDir= request.getSession().getServletContext().getRealPath("img");
         HashMap<String, String> map = pictureService.checkAndCreateImg(descDir, temp);
 
         /*
@@ -123,14 +124,15 @@ public class PictureController {
             model.addAttribute("successMsg","图片："+multipartFile.getOriginalFilename()+ map.get("successMsg"));
             model.addAttribute("successPath",map.get("successPath").substring(basepath.length()));
         }else {
-            model.addAttribute("uploadImgPath",temp.getAbsolutePath().substring(basepath.length()));
+            String temppath = temp.getAbsolutePath();
+            model.addAttribute("uploaduploadimgDir",temppath.substring(temppath.indexOf("temp")));
         }
 
         if(map.get("failedMsg")!=null){
             model.addAttribute("failedMsg","图片："+multipartFile.getOriginalFilename()+ map.get("failedMsg"));
             // 上传失败有两种原因  存在重复图片  或者  移动照片失败
             if(map.get("existFilePath")!=null){
-                model.addAttribute("failedImgPath",map.get("existFilePath"));
+                model.addAttribute("faileduploadimgDir",map.get("existFilePath"));
             }
         }
 
@@ -339,24 +341,47 @@ public class PictureController {
 
 
     @RequestMapping("/init")
-    public String insertInfo(){
+    public String insertInfo(Model model,HttpServletRequest request){
         // 遍历文件夹下所有文件路径
-        String destdir = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\";
-        File firFile = new File(destdir);
+        
+        File firFile = new File(uploadimgDir);
         // 若父文件夹不存在则创建
         if(!firFile.exists() || !firFile.isDirectory()){
             firFile.mkdirs();
         }
-        String scrDir = "C:\\Users\\Administrator\\Desktop\\img";
+        String scrDir = "C:\\Users\\Administrator\\Desktop\\demo\\img";
         List<String> stringList = new ArrayList<>();
         getallpath(scrDir,stringList);
         if(stringList.size()>0){
             for (String s : stringList) {
                 try {
-                    File temp = new File(s);
-                    HashMap<String, String> map = pictureService.checkAndCreateImg(destdir, temp);
+                    File src = new File(s);
+                    String copypath = request.getSession().getServletContext().getRealPath("temp")+"\\"+src.getName();
+                    copyFileUsingFileStreams(s,copypath);
+                    File temp = new File(copypath);
+                    HashMap<String, String> map = pictureService.checkAndCreateImg(uploadimgDir, temp);
                     if(map.get("successMsg")!=null){
-                        pictureService.insertInfo(map.get("successPath"),map.get("picStrId"));
+                        model.addAttribute("successMsg","图片："+s+ map.get("successMsg"));
+                        String tempStr = map.get("successPath");
+                        model.addAttribute("successPath",tempStr.substring(tempStr.indexOf("img")));
+                    }else {
+                        String temppath = temp.getAbsolutePath();
+                        model.addAttribute("uploadImgPath",temppath.substring(temppath.indexOf("temp")));
+                    }
+
+                    if(map.get("failedMsg")!=null){
+                        model.addAttribute("failedMsg","图片："+s+ map.get("failedMsg"));
+                        // 上传失败有两种原因  存在重复图片  或者  移动照片失败
+                        if(map.get("existFilePath")!=null){
+                            // 从数据库读的相对路径
+                            model.addAttribute("failedImgPath",map.get("existFilePath"));
+
+                            String sourcepath = request.getSession().getServletContext().getRealPath("img")+map.get("existFilePath").replace("img", "");
+                            String destpath = src.getParentFile().getParent()+"\\sameFile\\"+src.getName();
+                            copyFileUsingFileStreams(sourcepath, destpath);
+                            String s1 = move_file(s, src.getParentFile().getParent() + "\\sameFile\\");
+                        }
+                        return "forward:/demo.jsp";
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -365,6 +390,25 @@ public class PictureController {
         }
 
         return "success";
+    }
+
+    public static void copyFileUsingFileStreams(String source, String dest) throws IOException {
+        BufferedInputStream in = null;
+        BufferedOutputStream out = null;
+        try {
+            in = new BufferedInputStream(new FileInputStream(new File(source)));
+            out = new BufferedOutputStream(new FileOutputStream(new File(dest)));
+            byte []buf = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = in.read(buf))>0){
+                out.write(buf,0,bytesRead);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }finally {
+            in.close();
+            out.close();
+        }
     }
 
     @Test

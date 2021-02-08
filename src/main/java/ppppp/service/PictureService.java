@@ -177,13 +177,17 @@ public class PictureService {
         //判断图片在数据库中是否存在相似的照片
         long l = System.currentTimeMillis();
         int count = 0;
+        String fileType = srcFile.getName().substring(srcFile.getName().length()-3);
+        if(!isImgType(fileType)){
+            return map;
+        }
         int [] imgA = aHash(srcFile.getAbsolutePath());
         // 查询库中所有的 图片
         List<Picture> pictures = mapper.selectByExample(new PictureExample());
         // 将上传的图片与 现有的所有id进行比对
         for (Picture picture : pictures) {
             String s = picture.getPath();
-            String fileType = s.substring(s.indexOf(".")+1);
+            fileType = s.substring(s.indexOf(".")+1);
             if(isImgType(fileType)){
                 // double imageSimilar = getImageSimilar(s, srcFile.getAbsolutePath());
                 String picturePid = picture.getPid();
@@ -204,6 +208,8 @@ public class PictureService {
         //存在
         if(isExist){
             System.out.println("  存在相同照片.....");
+            // 删除复制到 temp 下的文件
+            // 不能删 删了页面就读不到....
             // srcFile.delete();
             map.put("failedMsg","    上传失败,存在相同照片.....");
         }
@@ -216,6 +222,8 @@ public class PictureService {
                 map.put("failedMsg","  上传失败,未能成功移动照片！！");
                 // return "  上传失败,未能成功移动照片！！";
             }else {
+                // 上传成功后马上将信息写入数据库 以免刷新时 的重复上传
+                insertInfo(isCreated, intsToStr(imgA));
                 map.put("successMsg","    上传成功！！");
                 map.put("successPath",isCreated);
                 map.put("picStrId",intsToStr(imgA));
@@ -231,11 +239,11 @@ public class PictureService {
         // 将照片移入日期类文件夹
         //照片包含时间信息的 移入照片创建的日期文件夹
         if(create_time!=null){
-            destDir = imgpath+create_time.split(" ")[0].replace("-","\\");
+            destDir = uploadimgDir+create_time.split(" ")[0].replace("-","\\");
         }
         //照片不包含时间信息的 移入导入时间的文件夹
         else {
-            destDir = imgpath+ LocalDateTime.now().toString().split("T")[0].replace("-","\\");
+            destDir = uploadimgDir+ LocalDateTime.now().toString().split("T")[0].replace("-","\\");
         }
         // 创建文件夹
         File file = new File(destDir);

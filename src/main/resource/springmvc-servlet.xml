@@ -25,6 +25,10 @@
     <!--处理静态资源无法访问到的情况-->
     <!--将spring无法处理的请求资源 交给tomcat处理-->
     <mvc:default-servlet-handler/>
+    <!--固定写法  不然只能访问到一个 路径 。。。-->
+    <!--<mvc:resources mapping="/temp/**" location="/temp/"></mvc:resources>-->
+    <!--<mvc:resources mapping="/img/**" location="/img/"></mvc:resources>-->
+    <!--<mvc:resources mapping="/static/**" location="/static/"></mvc:resources>-->
 
     <!--注册文件上传解析器-->
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
