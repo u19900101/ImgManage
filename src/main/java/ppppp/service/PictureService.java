@@ -404,11 +404,6 @@ public class PictureService {
 
     }
 
-    private String getPictureLongId(String path) {
-        int[] ints = aHash(path);
-        return intsToStr(ints);
-    }
-
     private String intsToStr(int[] ints) {
         String s ="";
         for (int i = 0; i < ints.length; i++) {

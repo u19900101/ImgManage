@@ -130,7 +130,7 @@ public class PictureController {
             model.addAttribute("failedMsg","图片："+multipartFile.getOriginalFilename()+ map.get("failedMsg"));
             // 上传失败有两种原因  存在重复图片  或者  移动照片失败
             if(map.get("existFilePath")!=null){
-                model.addAttribute("failedImgPath",map.get("existFilePath").substring(basepath.length()));
+                model.addAttribute("failedImgPath",map.get("existFilePath"));
             }
         }
 

@@ -39,6 +39,7 @@
             height:auto;*/
         }
 
+
         .c3{
             float: right;
             border: 1px solid gold;
