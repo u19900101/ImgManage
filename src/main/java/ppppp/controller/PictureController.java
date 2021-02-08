@@ -291,7 +291,7 @@ public class PictureController {
 
 
     @RequestMapping("/before_edit_picture")
-    public String before_edit_picture(Integer pid,Model model){
+    public String before_edit_picture(long pid,Model model){
         Picture picture = mapper.selectByPrimaryKey(pid);
 
         //不带后缀名显示
@@ -341,16 +341,30 @@ public class PictureController {
     @RequestMapping("/init")
     public String insertInfo(){
         // 遍历文件夹下所有文件路径
-        String dir = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\";
+        String destdir = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\";
+        File firFile = new File(destdir);
+        // 若父文件夹不存在则创建
+        if(!firFile.exists() || !firFile.isDirectory()){
+            firFile.mkdirs();
+        }
+        String scrDir = "C:\\Users\\Administrator\\Desktop\\img";
         List<String> stringList = new ArrayList<>();
-        getallpath(dir,stringList);
-        for (String s : stringList) {
-            try {
-                pictureService.insertInfo(s);
-            } catch (Exception e) {
-                e.printStackTrace();
+        getallpath(scrDir,stringList);
+        if(stringList.size()>0){
+            for (String s : stringList) {
+                try {
+                    File temp = new File(s);
+                    HashMap<String, String> map = pictureService.checkAndCreateImg(destdir, temp);
+                    if(map.get("successMsg")!=null){
+
+                        pictureService.insertInfo(map.get("successPath"));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
+
         return "success";
     }
 

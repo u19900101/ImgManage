@@ -12,6 +12,7 @@ import ppppp.bean.Picture;
 import ppppp.dao.PictureMapper;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -246,7 +247,7 @@ public class PictureService {
 
     /** 均值哈希算法*/
     public static int[] aHash(String src){
-        // System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         int[] res = new int[64];
         try {
             int width = 8;
@@ -372,6 +373,8 @@ public class PictureService {
         }
         //将图片的相对路径存入数据库中 以便页面显示
         String path = file.getAbsolutePath();
+        long longNum = getPictureLongId(path);
+        pic.setPid(longNum);
         pic.setPath(path.substring(path.indexOf("img")));
         pic.setPname(file.getName());
         pic.setPcreatime(map.get("create_time"));
@@ -382,6 +385,17 @@ public class PictureService {
         int insert = mapper.insert(pic);
 
     }
+
+    private long getPictureLongId(String path) {
+        int[] ints = aHash(path);
+        String s = "";
+        for (int anInt : ints) {
+            s+=anInt;
+        }
+        return new BigInteger(s, 2).longValue();
+    }
+
+
     public static boolean isImgType(String filetype){
         return filetype.equals("jpg") || filetype.equals("png")|| filetype.equals("jpeg")|| filetype.equals("gif")|| filetype.equals("bmp");
     }
