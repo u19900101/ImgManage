@@ -121,15 +121,11 @@ public class PictureController {
 
 
     // 可以改写成为  对文件夹进行上传
-    @RequestMapping("/init")
+    @RequestMapping("/uploadDir")
     public String init(Model model,HttpServletRequest request){
         // 遍历文件夹下所有文件路径
-
-        File firFile = new File(uploadimgDir);
         // 若父文件夹不存在则创建
-        if(!firFile.exists() || !firFile.isDirectory()){
-            firFile.mkdirs();
-        }
+        MyUtils.creatDir(uploadimgDir);
         String scrDir = "C:\\Users\\Administrator\\Desktop\\demo\\img";
         List<String> stringList = new ArrayList<>();
         MyUtils.getallpath(scrDir,stringList);

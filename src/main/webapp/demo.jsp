@@ -44,13 +44,13 @@
 
 <c:if test="${not empty failedImgPath}">
     <div class="outdiv">
-        <h1 style="color: lightgreen;">上传的照片：${uploadImgPath}</h1>
+        <h3 style="color: lightgreen;">上传的照片：${uploadImgPath}</h3>
         <div class="imgdiv">
             <img src="${uploadImgPath}" height="600px">
         </div>
     </div>
     <div class="outdiv" style="float: right">
-        <h1 style="color: red">本地照片:${failedImgPath}</h1>
+        <h3 style="color: red">本地照片:${failedImgPath}</h3>
         <div class="imgdiv">
             <img src="${failedImgPath}" height="600px">
         </div>
