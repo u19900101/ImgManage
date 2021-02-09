@@ -32,7 +32,15 @@
             width: 49%;
             height: 80%;
         }
+        span{
+            border: 1px solid #39987c;
+            width: 100%;
+            font-size: larger;
+        }
     </style>
+
+
+
 </head>
 <body>
 <h1>文件上传</h1>
@@ -49,19 +57,104 @@
     <img src="${successPath}" width="600">
 </c:if>
 
+<script type="text/javascript">
+    $(function(){
+        $('.saveBoth').on('click', function(){
+            alert("saveBoth");
+            /* $.ajax({
+                 cache: false,
+                 type: "POST",
+                 url:"/org/add_ask/",
+                 data:$('#jsStayForm').serialize(),
+                 async: true,
+                 success: function(data) {
+                     if(data.status == 'success'){
+                         $('#jsStayForm')[0].reset();
+                         alert("提交成功")
+                     }else if(data.status == 'fail'){
+                         $('#jsCompanyTips').html(data.msg)
+                     }
+                 },
+             });*/
+        });
+        $('.deleteBoth').on('click', function(){
+            alert("deleteBoth");
+            /* $.ajax({
+                 cache: false,
+                 type: "POST",
+                 url:"/org/add_ask/",
+                 data:$('#jsStayForm').serialize(),
+                 async: true,
+                 success: function(data) {
+                     if(data.status == 'success'){
+                         $('#jsStayForm')[0].reset();
+                         alert("提交成功")
+                     }else if(data.status == 'fail'){
+                         $('#jsCompanyTips').html(data.msg)
+                     }
+                 },
+             });*/
+        });
+        $('.saveExistOnly').on('click', function(){
+            alert("saveExistOnly");
+            /* $.ajax({
+                 cache: false,
+                 type: "POST",
+                 url:"/org/add_ask/",
+                 data:$('#jsStayForm').serialize(),
+                 async: true,
+                 success: function(data) {
+                     if(data.status == 'success'){
+                         $('#jsStayForm')[0].reset();
+                         alert("提交成功")
+                     }else if(data.status == 'fail'){
+                         $('#jsCompanyTips').html(data.msg)
+                     }
+                 },
+             });*/
+        });
+        $('.saveUploadOnly').on('click', function(){
+            alert("saveUploadOnly");
+            /* $.ajax({
+                 cache: false,
+                 type: "POST",
+                 url:"/org/add_ask/",
+                 data:$('#jsStayForm').serialize(),
+                 async: true,
+                 success: function(data) {
+                     if(data.status == 'success'){
+                         $('#jsStayForm')[0].reset();
+                         alert("提交成功")
+                     }else if(data.status == 'fail'){
+                         $('#jsCompanyTips').html(data.msg)
+                     }
+                 },
+             });*/
+        });
+    })
 
+</script>
 <c:if test="${not empty failedList}">
 
 
     <c:forEach items="${failedList}" var="picture">
         <div class="zuiOut" style="border: 3px solid #39987c;width: 100%;height: 100%">
 
-
             <h1 style="color: red">${picture.failedMsg}</h1>
+            <span align="left" style="float: right;width: 49%">
+                   <button class="saveBoth" align="center" style="font-size: larger">都保留</button>
+                </span>
+            <span align="right" style="float: left;width: 49%">
+                    <button class="deleteBoth" align="center" style="font-size: larger">都删除</button>
+            </span>
             <div class="outdiv" style="height: 100%">
                 <h3 style="color: lightgreen;">上传的照片：${picture.uploadImgPath}</h3>
                 <h4 style="color: chocolate">图片尺寸： ${picture.uploadPicture.pwidth}*${picture.uploadPicture.pheight}</h4>
                 <h4 style="color: gray">图片大小： ${picture.uploadPicture.psize} M</h4>
+                <span align="center" style="float: left">
+                   <button class="saveExistOnly" align="center" style="font-size: larger">只保留我</button>
+                </span>
+
                 <div class="imgdiv">
                     <img src="${picture.uploadImgPath}">
                 </div>
@@ -70,6 +163,9 @@
                 <h3 style="color: red">本地照片:${picture.failedImgPath}</h3>
                 <h4 style="color: chocolate">图片尺寸： ${picture.existPicture.pwidth}*${picture.existPicture.pheight}</h4>
                 <h4 style="color: gray">图片大小： ${picture.existPicture.psize} M</h4>
+                <span align="center" style="float: left">
+                   <button class="saveUploadOnly" align="center" style="font-size: larger">只保留我</button>
+                </span>
                 <div class="imgdiv">
                     <img src="${picture.failedImgPath}">
                 </div>
