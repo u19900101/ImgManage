@@ -2,6 +2,7 @@ package ppppp.service;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
+import org.junit.Test;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -40,7 +41,7 @@ public class PictureService {
         ImageMetadataReader.readMetadata(file)
                 .getDirectories().forEach(v ->
                 v.getTags().forEach(t -> {
-                        // System.out.println(t.getTagName() + " ： " + t.getDescription());
+                    // System.out.println(t.getTagName() + " ： " + t.getDescription());
                     switch (t.getTagName()) {
                         //                    经度
                         case "GPS Longitude":
@@ -72,30 +73,24 @@ public class PictureService {
                             // System.out.println(t.getDescription());
                             map.put("width",t.getDescription().split(" ")[0]);
                             break;
-                        //    这个时间没有太多参考意义
-                      /*  case "Date/Time":
-                            if(map.get("date_time")==null){
-                                map.put("date_time",t.getDescription());
-                            }*/
-
+                        /*   这个时间没有太多参考意义*/
+                        // case "Date/Time":
+                        //     if(map.get("date_time")==null){
+                        //         map.put("date_time",t.getDescription());
+                        //     }
                         default:
                             break;
                     }
                 })
         );
-        // 不进行转换，只获取第一个即可
-        // String dateStr = map.get("creatime");
-        // SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
-        //
-        // Date date = (Date) sdf.parse(dateStr);
-        // String formatStr= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
-        // map.put("creatime",formatStr);
+
         if(map.get("GPS_Longitude")!=null && map.get("GPS_Latitude")!=null){
             String lon = map.get("GPS_Longitude").replace(" ","").replace("\"","")
                     .replace("°","_").replace("'","_");
             String lat = map.get("GPS_Latitude").replace(" ","").replace("\"","")
                     .replace("°","_").replace("'","_");
-            map.put("location", lon+","+lat);
+            map.put("GPS_Longitude", lon);
+            map.put("GPS_Latitude", lat);
         }
         return map;
     }
@@ -402,10 +397,11 @@ public class PictureService {
         Picture pic = new Picture();
         File file = new File(filepath);
         // 以后缀名来判断文件是图片还是视频
-        if(isImgType(filetype)){
+        if(isImgType(filepath)){
             map = getImgInfo(file);
-        }else if(isVideoType(filetype)){
+        }else if(isVideoType(filepath)){
             map = getVideoInfo(filepath);
+            return;
         }
         //将图片的相对路径存入数据库中 以便页面显示
         String path = file.getAbsolutePath();
@@ -413,10 +409,12 @@ public class PictureService {
         pic.setPath(path.substring(path.indexOf("img")));
         pic.setPname(file.getName());
         pic.setPcreatime(map.get("create_time"));
-        pic.setPlocal(map.get("location"));
-        // if(pic.getPcreatime()!=null || pic.getPlocal()!=null){
-        //     System.out.println("成功写入图片___"+file.getName()+" create_time: "+ pic.getPcreatime()+"  location: "+ pic.getPlocal());
-        // }
+
+        pic.setGpsLatitude(map.get("gpsLatitude"));
+        pic.setGpsLongitude(map.get("gpsLongitude"));
+        pic.setPheight(Integer.valueOf(map.get("height")));
+        pic.setPwidth(Integer.valueOf(map.get("width")));
+        pic.setPsize(file.length()/1024.0/1024.0);
         int insert = mapper.insert(pic);
 
     }
@@ -430,10 +428,13 @@ public class PictureService {
     }
 
 
+
     public static boolean isImgType(String filetype){
+        filetype = filetype.substring(filetype.length()-3).toLowerCase();
         return filetype.equals("jpg") || filetype.equals("png")|| filetype.equals("jpeg")|| filetype.equals("gif")|| filetype.equals("bmp");
     }
     public static boolean isVideoType(String filetype){
+        filetype = filetype.substring(filetype.length()-3).toLowerCase();
         return filetype.equals("mp4") || filetype.equals("avi")|| filetype.equals("mov")|| filetype.equals("rmvb");
     }
 
