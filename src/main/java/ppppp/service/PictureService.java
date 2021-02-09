@@ -202,6 +202,14 @@ public class PictureService {
                     isExist = true;
                     map.put("failedMsg","上传失败,存在相同照片.....");
                     map.put("existFilePath", s);
+                    // 检测服务器上指定位置是否存在该文件
+                    File isExistFile = new File(uploadimgDir.replace("img", ""),s);
+                    if(!isExistFile.exists()){
+                        //检测父文件夹是否存在
+                        MyUtils.creatDir(isExistFile.getParent());
+                        //只能复制，不可移动过去，不然 页面显示又找不到文件
+                        MyUtils.copyFileUsingFileStreams(srcFile.getAbsolutePath(), isExistFile.getAbsolutePath());
+                    }
                     break;
                 }
             }
@@ -249,13 +257,11 @@ public class PictureService {
             destDir = uploadimgDir+ LocalDateTime.now().toString().split("T")[0].replace("-","\\");
         }
         // 创建文件夹
-        File file = new File(destDir);
-        if(!file.exists() || !file.isDirectory()) {
-            file.mkdirs();
-        }
-
+        MyUtils.creatDir(destDir);
         return MyUtils.move_file(img.getAbsolutePath(), destDir);
     }
+
+
 
 
     // 对图像的旋转 很好解决

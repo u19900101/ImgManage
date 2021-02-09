@@ -76,4 +76,11 @@ public class MyUtils {
             stringList.add(dir);
         }
     }
+
+    public static void creatDir(String destDir) {
+        File file = new File(destDir);
+        if(!file.exists() || !file.isDirectory()) {
+            file.mkdirs();
+        }
+    }
 }
