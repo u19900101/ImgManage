@@ -107,7 +107,7 @@ public class PictureController {
         // 将上传的文件写入到 到文件夹
         multipartFile.transferTo(temp);
         String  descDir= request.getSession().getServletContext().getRealPath("img");
-        HashMap<String, String> map = pictureService.checkAndCreateImg(descDir, temp);
+        HashMap<String, Object> map = pictureService.checkAndCreateImg(descDir, temp);
 
         // 若成功  金色字体
         // 若失败  红色字体
@@ -127,7 +127,7 @@ public class PictureController {
         MyUtils.creatDir(uploadimgDir);
         String path = request.getSession().getServletContext().getRealPath("temp");
         // 将所有检测出 重复的照片 路径保存到 list中
-        ArrayList<HashMap<String, String>> hashMaps = new ArrayList<>();
+        ArrayList<HashMap<String, Object>> hashMaps = new ArrayList<>();
         for (MultipartFile multipartFile : multipartFiles) {
 
             File temp = new File(path,multipartFile.getOriginalFilename());
@@ -138,7 +138,7 @@ public class PictureController {
             // 将上传的文件写入到 到文件夹
             multipartFile.transferTo(temp);
             String  descDir= request.getSession().getServletContext().getRealPath("img");
-            HashMap<String, String> map = pictureService.checkAndCreateImg(descDir, temp);
+            HashMap<String, Object> map = pictureService.checkAndCreateImg(descDir, temp);
 
             // 若成功  金色字体
             // 若失败  红色字体
@@ -146,10 +146,12 @@ public class PictureController {
             boolean forward = pictureService.setMapInfo(s, map,model, request, temp);
 
             if(forward){
-                HashMap<String, String> mapTemp = new HashMap<>();
+                HashMap<String, Object> mapTemp = new HashMap<>();
                 mapTemp.put("uploadImgPath", map.get("uploadImgPath"));
                 mapTemp.put("failedImgPath", map.get("failedImgPath"));
                 mapTemp.put("failedMsg", map.get("failedMsg"));
+                mapTemp.put("existPicture", map.get("existPicture"));
+                mapTemp.put("uploadPicture", map.get("uploadPicture"));
                 hashMaps.add(mapTemp);
             }
             model.addAttribute("failedList", hashMaps);
@@ -174,7 +176,7 @@ public class PictureController {
                     String copypath = request.getSession().getServletContext().getRealPath("temp")+"\\"+src.getName();
                     MyUtils.copyFileUsingFileStreams(s,copypath);
                     File temp = new File(copypath);
-                    HashMap<String, String> map = pictureService.checkAndCreateImg(uploadimgDir, temp);
+                    HashMap<String, Object> map = pictureService.checkAndCreateImg(uploadimgDir, temp);
                     boolean forward = pictureService.setMapInfo(s, map,model, request, temp);
                     // 只要一存在 检测出的照片 相似 就进行转发 显示到页面
                     if(forward){

@@ -64,6 +64,7 @@ public class MyUtils {
         }
     }
 
+    // 递归获取文件夹下的所有路径
     public static void getallpath(String dir, List<String> stringList){
         File dirfile = new File(dir);
         if(dirfile.isDirectory()){
@@ -82,5 +83,21 @@ public class MyUtils {
         if(!file.exists() || !file.isDirectory()) {
             file.mkdirs();
         }
+    }
+    public static String intsToStr(int[] ints) {
+        String s ="";
+        for (int i = 0; i < ints.length; i++) {
+            s+=ints[i];
+        }
+        return s;
+    }
+
+    // 将字符串拆为 字符数组
+    public static int[] getIntNum(String str){
+        int []num = new int [str.length()];
+        for (int i = 0; i < str.length(); i++) {
+            num[i] = Integer.parseInt(String.valueOf(str.charAt(i)));
+        }
+        return num;
     }
 }
