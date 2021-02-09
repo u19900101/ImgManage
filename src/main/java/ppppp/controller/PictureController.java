@@ -119,9 +119,47 @@ public class PictureController {
     }
 
 
+    @RequestMapping("/uploadDir")
+    public String uploadDir(Model model,HttpServletRequest request,
+                       @RequestParam(value = "imgList",required = false) MultipartFile[] multipartFiles) throws IOException, ImageProcessingException, ParseException {
+        // 遍历文件夹下所有文件路径
+        // 若父文件夹不存在则创建
+        MyUtils.creatDir(uploadimgDir);
+        String path = request.getSession().getServletContext().getRealPath("temp");
+        // 将所有检测出 重复的照片 路径保存到 list中
+        ArrayList<HashMap<String, String>> hashMaps = new ArrayList<>();
+        for (MultipartFile multipartFile : multipartFiles) {
+
+            File temp = new File(path,multipartFile.getOriginalFilename());
+            // 若父文件夹不存在则创建
+            if(!temp.getParentFile().exists() || !temp.getParentFile().isDirectory()){
+                temp.getParentFile().mkdirs();
+            }
+            // 将上传的文件写入到 到文件夹
+            multipartFile.transferTo(temp);
+            String  descDir= request.getSession().getServletContext().getRealPath("img");
+            HashMap<String, String> map = pictureService.checkAndCreateImg(descDir, temp);
+
+            // 若成功  金色字体
+            // 若失败  红色字体
+            String s = multipartFile.getOriginalFilename();
+            boolean forward = pictureService.setMapInfo(s, map,model, request, temp);
+
+            if(forward){
+                HashMap<String, String> mapTemp = new HashMap<>();
+                mapTemp.put("uploadImgPath", map.get("uploadImgPath"));
+                mapTemp.put("failedImgPath", map.get("failedImgPath"));
+                mapTemp.put("failedMsg", map.get("failedMsg"));
+                hashMaps.add(mapTemp);
+            }
+            model.addAttribute("failedList", hashMaps);
+        }
+
+        return "forward:/demo.jsp";
+    }
 
     // 可以改写成为  对文件夹进行上传
-    @RequestMapping("/uploadDir")
+    @RequestMapping("/init")
     public String init(Model model,HttpServletRequest request){
         // 遍历文件夹下所有文件路径
         // 若父文件夹不存在则创建

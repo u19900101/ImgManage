@@ -444,22 +444,22 @@ public class PictureService {
             model.addAttribute("successPath",tempStr.substring(tempStr.indexOf("img")));
         }else {
             String temppath = temp.getAbsolutePath();
-            model.addAttribute("uploadImgPath",temppath.substring(temppath.indexOf("temp")));
+            map.put("uploadImgPath",temppath.substring(temppath.indexOf("temp")));
         }
 
         if(map.get("failedMsg")!=null){
-            model.addAttribute("failedMsg","图片："+s+ map.get("failedMsg"));
+            map.put("failedMsg","图片："+s+ map.get("failedMsg"));
             // 上传失败有两种原因  存在重复图片  或者  移动照片失败
             if(map.get("existFilePath")!=null){
                 // 从数据库读的相对路径
-                model.addAttribute("failedImgPath",map.get("existFilePath"));
+                map.put("failedImgPath",map.get("existFilePath"));
 
                 String sourcepath = request.getSession().getServletContext().getRealPath("img")+map.get("existFilePath").replace("img", "");
                 String destpath = temp.getParentFile()+"\\sameFile\\"+temp.getName();
                 MyUtils.copyFileUsingFileStreams(sourcepath, destpath);
                 String resPath = MyUtils.move_file(temp.getAbsolutePath(), temp.getParentFile() + "\\sameFile");
                 //移动后要修改 页面显示的路径
-                model.addAttribute("uploadImgPath",resPath.substring(resPath.indexOf("temp")));
+                map.put("uploadImgPath",resPath.substring(resPath.indexOf("temp")));
             }
             return true;
         }
