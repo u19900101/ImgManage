@@ -11,11 +11,10 @@ import java.util.List;
 public class MyUtils {
     public static String move_file(String scrpath, String destDir){
         //判断当前文件夹下是否有重名的文件
-
         File file = new File(scrpath);
         String newFileName = file.getName();
         String[] list = new File(destDir).list();
-        if(list != null){
+        if(list.length > 0){
             ArrayList<String> fileList = new ArrayList<>();
             for (String s : list) {
                 fileList.add(s);
@@ -24,7 +23,7 @@ public class MyUtils {
                 newFileName = MyUtils.createNewName(fileList,newFileName);
             }
         }
-        boolean b = file.renameTo(new File(destDir+"\\" + newFileName));
+        boolean b = file.renameTo(new File(destDir,newFileName));
         if(b){
             System.out.println("移动照片： "+scrpath+ "到文件夹 ："
                     +destDir +" 下");
@@ -59,8 +58,12 @@ public class MyUtils {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }finally {
-            in.close();
-            out.close();
+            if (in!=null){
+                in.close();
+            }
+           if(out!=null){
+               out.close();
+           }
         }
     }
 

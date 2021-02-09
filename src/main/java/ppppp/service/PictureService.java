@@ -2,6 +2,7 @@ package ppppp.service;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
+import org.junit.Test;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -15,6 +16,7 @@ import ppppp.util.MyUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -162,8 +164,7 @@ public class PictureService {
         MyUtils.getallpath(destDir,stringList);
 
         //判断图片在数据库中是否存在相似的照片
-        String fileType = srcFile.getName().substring(srcFile.getName().length()-3);
-        if(!isImgType(fileType)){
+        if(!isImgType(srcFile.getName())){
             return map;
         }
         int [] imgA = aHash(srcFile.getAbsolutePath());
@@ -171,6 +172,7 @@ public class PictureService {
         List<Picture> pictures = mapper.selectByExample(new PictureExample());
         // 将上传的图片与 现有的所有id进行比对
         String picStrId = MyUtils.intsToStr(imgA);
+
         Picture uploadPicture = fileToPicture(srcFile.getAbsolutePath(),picStrId);
         map.put("uploadPicture", uploadPicture);
         boolean isExist = isPictureExist(srcFile,pictures,map,imgA);
@@ -178,24 +180,31 @@ public class PictureService {
         //存在
         if(isExist){
             System.out.println("  存在相同照片.....");
+            // 判断 服务器中是否存在  不存在就移动  存在就不动
+
+            MyUtils.copyFileUsingFileStreams(srcFile.getAbsolutePath(), uploadimgDir.replace("img", "")+map.get("existFilePath"));
+
             // 不能删 删了页面就读不到....
             map.put("failedMsg","    上传失败,存在相同照片.....");
         }
         // 不存在，按照片信息建立文件夹上传
-        if(!isExist) {
-            String isCreated =  createImgFile(srcFile);
+        else {
+            // 返回值为 按照时间写的项目 相对 路 径
+            String createdPath =  createImgFile(srcFile);
+            createdPath = createdPath.substring(createdPath.indexOf("img"));
             // 若未成功上传 则 删除 上传的图片
-            if(isCreated==null){
+            if(createdPath==null){
                 // srcFile.delete();
                 map.put("failedMsg","  上传失败,未能成功移动照片！！");
                 // return "  上传失败,未能成功移动照片！！";
             }else {
                 // 上传成功后马上将信息写入数据库 以免刷新时 的重复上传
+                uploadPicture.setPath(createdPath);
                 insertInfo(uploadPicture);
                 // 将照片信息放入map中 便于页面显示
                 map.put("uploadPicture", uploadPicture);
                 map.put("successMsg","    上传成功！！");
-                map.put("successPath",isCreated);
+                map.put("successPath",createdPath);
                 map.put("picStrId",MyUtils.intsToStr(imgA));
             }
         }
@@ -243,11 +252,11 @@ public class PictureService {
         // 将照片移入日期类文件夹
         //照片包含时间信息的 移入照片创建的日期文件夹
         if(create_time!=null){
-            destDir = uploadimgDir+create_time.split(" ")[0].replace("-","\\");
+            destDir = uploadimgDir+"\\"+create_time.split(" ")[0].replace("-","\\");
         }
         //照片不包含时间信息的 移入导入时间的文件夹
         else {
-            destDir = uploadimgDir+ LocalDateTime.now().toString().split("T")[0].replace("-","\\");
+            destDir = uploadimgDir+"\\"+LocalDateTime.now().toString().split("T")[0].replace("-","\\");
         }
         // 创建文件夹
         MyUtils.creatDir(destDir);
@@ -274,9 +283,8 @@ public class PictureService {
             map = getVideoInfo(filepath);
             return null;
         }
-        String path = file.getAbsolutePath();
+        // 路径在外面设置
         pic.setPid(picStrId);
-        pic.setPath(path.substring(path.indexOf("temp")));
         pic.setPname(file.getName());
         pic.setPcreatime(map.get("create_time"));
 
@@ -284,18 +292,18 @@ public class PictureService {
         pic.setGpsLongitude(map.get("gpsLongitude"));
         pic.setPheight(Integer.valueOf(map.get("height")));
         pic.setPwidth(Integer.valueOf(map.get("width")));
-        pic.setPsize(file.length()/1024.0/1024.0);
+        // 四舍五入保留两位小数
+        pic.setPsize(Double.valueOf(new DecimalFormat("0.00").format(file.length()/1024.0/1024.0)));
         return pic;
     }
 
-    public boolean setMapInfo(String s, HashMap<String, Object> map, Model model, HttpServletRequest request, File temp) throws IOException {
+
+    public boolean setMapInfo(String s, HashMap<String, Object> map, Model model,
+                              HttpServletRequest request, File temp) throws IOException {
         if(map.get("successMsg")!=null){
             model.addAttribute("successMsg","图片："+s+ map.get("successMsg"));
             String tempStr = (String) map.get("successPath");
             model.addAttribute("successPath",tempStr.substring(tempStr.indexOf("img")));
-        }else {
-            String temppath = temp.getAbsolutePath();
-            map.put("uploadImgPath",temppath.substring(temppath.indexOf("temp")));
         }
 
         if(map.get("failedMsg")!=null){
@@ -304,13 +312,14 @@ public class PictureService {
             if(map.get("existFilePath")!=null){
                 // 从数据库读的相对路径
                 map.put("failedImgPath",map.get("existFilePath"));
-                String temppp = (String) map.get("existFilePath");
-                String sourcepath = request.getSession().getServletContext().getRealPath("img")+temppp.replace("img", "");
-                String destpath = temp.getParentFile()+"\\sameFile\\"+temp.getName();
-                MyUtils.copyFileUsingFileStreams(sourcepath, destpath);
-                String resPath = MyUtils.move_file(temp.getAbsolutePath(), temp.getParentFile() + "\\sameFile");
+                // String temppp = (String) map.get("existFilePath");
+                // String sourcepath = request.getSession().getServletContext().getRealPath("img")+temppp.replace("img", "");
+                // String destpath = temp.getParentFile()+"\\sameFile\\"+temp.getName();
+                // MyUtils.copyFileUsingFileStreams(sourcepath, destpath);
+                // String resPath = MyUtils.move_file(temp.getAbsolutePath(), temp.getParentFile() + "\\sameFile");
                 //移动后要修改 页面显示的路径
-                map.put("uploadImgPath",resPath.substring(resPath.indexOf("temp")));
+                String temppath = temp.getAbsolutePath();
+                map.put("uploadImgPath",temppath.substring(temppath.indexOf("temp")));
             }
             return true;
         }
@@ -318,12 +327,12 @@ public class PictureService {
     }
 
     public static boolean isImgType(String filetype){
-        filetype = filetype.substring(filetype.length()-3).toLowerCase();
-        return filetype.equals("jpg") || filetype.equals("png")|| filetype.equals("jpeg")|| filetype.equals("gif")|| filetype.equals("bmp");
+        filetype = filetype.toLowerCase();
+        return filetype.endsWith("jpg") || filetype.endsWith("png")|| filetype.endsWith("jpeg")|| filetype.endsWith("gif")|| filetype.endsWith("bmp");
     }
     public static boolean isVideoType(String filetype){
-        filetype = filetype.substring(filetype.length()-3).toLowerCase();
-        return filetype.equals("mp4") || filetype.equals("avi")|| filetype.equals("mov")|| filetype.equals("rmvb");
+        filetype = filetype.toLowerCase();
+        return filetype.endsWith("mp4") || filetype.endsWith("avi")|| filetype.endsWith("mov")|| filetype.endsWith("rmvb")|| filetype.endsWith("mpeg");
     }
     /** 均值哈希算法*/
     public static int[] aHash(String src){

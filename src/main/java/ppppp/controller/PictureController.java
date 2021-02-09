@@ -38,7 +38,7 @@ public class PictureController {
     @Autowired
     PictureMapper mapper;
     // 直接上传到的服务器路径
-    public static String uploadimgDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT\\img\\";
+    public static String uploadimgDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT\\img";
 
     // 查询数据库中的图片信息  在页面中显示
     @RequestMapping("/page")
@@ -126,19 +126,20 @@ public class PictureController {
         // 若父文件夹不存在则创建
         MyUtils.creatDir(uploadimgDir);
         String path = request.getSession().getServletContext().getRealPath("temp");
+        MyUtils.creatDir(path);
         // 将所有检测出 重复的照片 路径保存到 list中
         ArrayList<HashMap<String, Object>> hashMaps = new ArrayList<>();
         for (MultipartFile multipartFile : multipartFiles) {
-
-            File temp = new File(path,multipartFile.getOriginalFilename());
-            // 若父文件夹不存在则创建
-            if(!temp.getParentFile().exists() || !temp.getParentFile().isDirectory()){
-                temp.getParentFile().mkdirs();
+            // 先只处理图片文件
+            if(!isImgType(multipartFile.getOriginalFilename())){
+                System.out.println(multipartFile.getOriginalFilename());
+                continue;
             }
+            File temp = new File(path,multipartFile.getOriginalFilename());
             // 将上传的文件写入到 到文件夹
             multipartFile.transferTo(temp);
-            String  descDir= request.getSession().getServletContext().getRealPath("img");
-            HashMap<String, Object> map = pictureService.checkAndCreateImg(descDir, temp);
+
+            HashMap<String, Object> map = pictureService.checkAndCreateImg(uploadimgDir, temp);
 
             // 若成功  金色字体
             // 若失败  红色字体

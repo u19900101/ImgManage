@@ -32,13 +32,6 @@
             width: 49%;
             height: 80%;
         }
-
-
-
-       /* .imgdiv img{
-            width:80%;
-            height:50%;
-        }*/
     </style>
 </head>
 <body>
@@ -65,16 +58,18 @@
 
 
             <h1 style="color: red">${picture.failedMsg}</h1>
-
-
             <div class="outdiv" style="height: 100%">
                 <h3 style="color: lightgreen;">上传的照片：${picture.uploadImgPath}</h3>
+                <h4 style="color: chocolate">图片尺寸： ${picture.uploadPicture.pwidth}*${picture.uploadPicture.pheight}</h4>
+                <h4 style="color: gray">图片大小： ${picture.uploadPicture.psize} M</h4>
                 <div class="imgdiv">
                     <img src="${picture.uploadImgPath}">
                 </div>
             </div>
             <div class="outdiv" style="float: right">
                 <h3 style="color: red">本地照片:${picture.failedImgPath}</h3>
+                <h4 style="color: chocolate">图片尺寸： ${picture.existPicture.pwidth}*${picture.existPicture.pheight}</h4>
+                <h4 style="color: gray">图片大小： ${picture.existPicture.psize} M</h4>
                 <div class="imgdiv">
                     <img src="${picture.failedImgPath}">
                 </div>
