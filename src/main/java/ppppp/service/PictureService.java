@@ -7,10 +7,13 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 import ppppp.bean.Picture;
 import ppppp.bean.PictureExample;
 import ppppp.dao.PictureMapper;
+import ppppp.util.MyUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.math.BigInteger;
 import java.text.ParseException;
@@ -171,7 +174,7 @@ public class PictureService {
         //在整个数据库中进行 照片去重检查
         ArrayList<String> stringList = new ArrayList<>();
         HashMap<String,String> map =new HashMap<>();
-        getallpath(destDir,stringList);
+        MyUtils.getallpath(destDir,stringList);
         boolean isExist = false;
 
         //判断图片在数据库中是否存在相似的照片
@@ -251,7 +254,7 @@ public class PictureService {
             file.mkdirs();
         }
 
-        return move_file(img.getAbsolutePath(), destDir);
+        return MyUtils.move_file(img.getAbsolutePath(), destDir);
     }
 
 
@@ -426,6 +429,36 @@ public class PictureService {
     }
     public static boolean isVideoType(String filetype){
         return filetype.equals("mp4") || filetype.equals("avi")|| filetype.equals("mov")|| filetype.equals("rmvb");
+    }
+
+    public boolean setMapInfo(String s, HashMap<String, String> map, Model model, HttpServletRequest request, File temp) throws IOException {
+        if(map.get("successMsg")!=null){
+            model.addAttribute("successMsg","图片："+s+ map.get("successMsg"));
+            String tempStr = map.get("successPath");
+            model.addAttribute("successPath",tempStr.substring(tempStr.indexOf("img")));
+        }else {
+            String temppath = temp.getAbsolutePath();
+            model.addAttribute("uploadImgPath",temppath.substring(temppath.indexOf("temp")));
+        }
+
+        if(map.get("failedMsg")!=null){
+            model.addAttribute("failedMsg","图片："+s+ map.get("failedMsg"));
+            // 上传失败有两种原因  存在重复图片  或者  移动照片失败
+            if(map.get("existFilePath")!=null){
+                // 从数据库读的相对路径
+                model.addAttribute("failedImgPath",map.get("existFilePath"));
+
+                String sourcepath = request.getSession().getServletContext().getRealPath("img")+map.get("existFilePath").replace("img", "");
+                String destpath = temp.getParentFile()+"\\sameFile\\"+temp.getName();
+                MyUtils.copyFileUsingFileStreams(sourcepath, destpath);
+                String resPath = MyUtils.move_file(temp.getAbsolutePath(), temp.getParentFile() + "\\sameFile");
+                //移动后要修改 页面显示的路径
+                model.addAttribute("uploadImgPath",resPath.substring(resPath.indexOf("temp")));
+            }
+            return true;
+        }
+        return false;
+
     }
    /* @Test
     public void T_img() throws ParseException, ImageProcessingException, IOException {

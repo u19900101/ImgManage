@@ -3,6 +3,7 @@ import org.junit.Test;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+import ppppp.util.MyUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,7 +38,7 @@ public class 图像去重 {
 
         //在整个数据库中进行 照片去重检查
         ArrayList<String> stringList = new ArrayList<>();
-        getallpath(destDir,stringList);
+        MyUtils.getallpath(destDir,stringList);
         boolean exist = false;
         //判断图片在数据库中是否存在相似的照片
         long l = System.currentTimeMillis();

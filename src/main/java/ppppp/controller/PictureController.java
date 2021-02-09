@@ -15,6 +15,7 @@ import ppppp.bean.Picture;
 import ppppp.bean.PictureExample;
 import ppppp.dao.PictureMapper;
 import ppppp.service.PictureService;
+import ppppp.util.MyUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
@@ -34,9 +35,10 @@ public class PictureController {
     static public final double IMAGE_SIMILARITY = 0.95;
     @Autowired
     PictureService pictureService;
-
     @Autowired
     PictureMapper mapper;
+    // 直接上传到的服务器路径
+    public static String uploadimgDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT\\img\\";
 
     // 查询数据库中的图片信息  在页面中显示
     @RequestMapping("/page")
@@ -90,9 +92,10 @@ public class PictureController {
         System.out.println(i);
         return "redirect:/picture/page";
     }
-    public static String uploadimgDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT\\img\\";
+
+    // 图片上传
     @RequestMapping(value = "/upload",method = RequestMethod.POST)
-    public String up(@RequestParam(value = "img",required = false) MultipartFile multipartFile,
+    public String uploadImg(@RequestParam(value = "img",required = false) MultipartFile multipartFile,
                      Model model, HttpServletRequest request) throws ParseException, IOException, ImageProcessingException {
         String path = request.getSession().getServletContext().getRealPath("temp");
 
@@ -106,201 +109,51 @@ public class PictureController {
         String  descDir= request.getSession().getServletContext().getRealPath("img");
         HashMap<String, String> map = pictureService.checkAndCreateImg(descDir, temp);
 
-        /*
-        *  map.put("","上传失败,存在相同照片.....");
-        map.put("", s);
-         map.put("failedMsg","  上传失败,未能成功移动照片！！");
-                // return "  上传失败,未能成功移动照片！！";
-            }else {
-                map.put("successMsg","    上传成功！！");
-                map.put("",isCreated);
-
-        * */
         // 若成功  金色字体
         // 若失败  红色字体
-
-       /* String basepath = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\";
-        if(map.get("successMsg")!=null){
-            model.addAttribute("successMsg","图片："+multipartFile.getOriginalFilename()+ map.get("successMsg"));
-            model.addAttribute("successPath",map.get("successPath").substring(basepath.length()));
-        }else {
-            String temppath = temp.getAbsolutePath();
-            model.addAttribute("uploaduploadimgDir",temppath.substring(temppath.indexOf("temp")));
-        }
-
-        if(map.get("failedMsg")!=null){
-            model.addAttribute("failedMsg","图片："+multipartFile.getOriginalFilename()+ map.get("failedMsg"));
-            // 上传失败有两种原因  存在重复图片  或者  移动照片失败
-            if(map.get("existFilePath")!=null){
-                model.addAttribute("faileduploadimgDir",map.get("existFilePath"));
-            }
-        }*/
-
-        /***************************/
         String s = multipartFile.getOriginalFilename();
-        if(map.get("successMsg")!=null){
-            model.addAttribute("successMsg","图片："+s+ map.get("successMsg"));
-            String tempStr = map.get("successPath");
-            model.addAttribute("successPath",tempStr.substring(tempStr.indexOf("img")));
-        }else {
-            String temppath = temp.getAbsolutePath();
-            model.addAttribute("uploadImgPath",temppath.substring(temppath.indexOf("temp")));
-        }
 
-        if(map.get("failedMsg")!=null){
-            model.addAttribute("failedMsg","图片："+s+ map.get("failedMsg"));
-            // 上传失败有两种原因  存在重复图片  或者  移动照片失败
-            if(map.get("existFilePath")!=null){
-                // 从数据库读的相对路径
-                model.addAttribute("failedImgPath",map.get("existFilePath"));
+        pictureService.setMapInfo(s,map,model,request,temp);
 
-                String sourcepath = request.getSession().getServletContext().getRealPath("img")+map.get("existFilePath").replace("img", "");
-                String destpath = temp.getParentFile()+"\\sameFile\\"+temp.getName();
-                copyFileUsingFileStreams(sourcepath, destpath);
-                String resPath = move_file(temp.getAbsolutePath(), temp.getParentFile() + "\\sameFile");
-                //移动后要修改 页面显示的路径
-                model.addAttribute("uploadImgPath",resPath.substring(resPath.indexOf("temp")));
-            }
-            return "forward:/demo.jsp";
-        }
-
-        /*
-        // 完成上传后 将照片信息写入数据库中
-        /*try {
-            // 按上传的日期做文件夹名称
-
-            multipartFile.transferTo(new File("D:\\fileupload\\"+multipartFile.getOriginalFilename()));
-            model.addAttribute("msg", "文件上传成功鸟！！！");
-        } catch (IOException e) {
-            model.addAttribute("msg", "文件上传失败鸟！！！"+e.toString());
-        }*/
         return "forward:/demo.jsp";
     }
 
 
-    // 照片去重
-    @Test
-    public void T_get_dir_file() throws ParseException, IOException, ImageProcessingException {
-        String destDir = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\";
-        File file = new File(destDir);
-        // File srcFile = new File("D:\\MyJava\\mylifeImg\\src\\main\\webapp\\2020\\10\\06\\0E4A2352.jpg");
-        File srcFile = new File("C:\\Users\\Administrator\\Desktop\\中文.jpg");
-        String srcFileName = srcFile.getName();
 
-        //在整个数据库中进行 照片去重检查
-        ArrayList<String> stringList = new ArrayList<>();
-        getallpath(destDir,stringList);
-        boolean exist = false;
-        //判断图片在数据库中是否存在相似的照片
-        long l = System.currentTimeMillis();
-        int count = 0;
-        for (String s : stringList) {
-            //1. 比较两个文件的大小
-            File fileExist = new File(s);
-            // long fileExist_length = fileExist.length();
-            // long srcFile_length = srcFile.length();
-           /* 此种判断可靠性不强.*/
-            // if(fileExist_length==srcFile_length){
-            //     System.out.println("大小相等");
-            //     HashMap<String, String> srcFile_imgInfo = getImgInfo(srcFile);
-            //     HashMap<String, String> fileExist_imgInfo = getImgInfo(fileExist);
-            //     // 2.尺寸
-            //     if(srcFile_imgInfo.get("width").equalsIgnoreCase(fileExist_imgInfo.get("width"))&&
-            //             srcFile_imgInfo.get("height").equalsIgnoreCase(fileExist_imgInfo.get("height"))){
-            //         System.out.println("尺寸相等");
-            //         if(srcFile_imgInfo.get("create_time")!=null&&fileExist_imgInfo.get("create_time")!=null){
-            //
-            //             if(srcFile_imgInfo.get("create_time").equalsIgnoreCase(fileExist_imgInfo.get("create_time"))){
-            //                 System.out.println("创建日期相等，照片相同鸟....");
-            //                 exist = true;
-            //                 break;
-            //             }
-            //         }else {
-            //             System.out.println("无创建日期，判定为图片相同");
-            //             exist = true;
-            //             break;
-            //         }
-            //     }else {
-            //         continue;
-            //     }
-            //
-            // }else {
-            //     continue;
-            // }
-            // 照片的 大小、尺寸、创建日期 都不相同，则判断  是否重名
-            // 只对图片文件进行判断
-            String fileType = s.substring(s.indexOf(".")+1);
-            if(isImgType(fileType)){
-                double imageSimilar = pictureService.getImageSimilar(fileExist.getAbsolutePath(), srcFile.getAbsolutePath());
-                System.out.println("图片 ："+s+"与原图的相似度为： "+imageSimilar);
-                count++;
-                if(imageSimilar>IMAGE_SIMILARITY){
-                    exist = true;
-                    break;
+    // 可以改写成为  对文件夹进行上传
+    @RequestMapping("/init")
+    public String init(Model model,HttpServletRequest request){
+        // 遍历文件夹下所有文件路径
+
+        File firFile = new File(uploadimgDir);
+        // 若父文件夹不存在则创建
+        if(!firFile.exists() || !firFile.isDirectory()){
+            firFile.mkdirs();
+        }
+        String scrDir = "C:\\Users\\Administrator\\Desktop\\demo\\img";
+        List<String> stringList = new ArrayList<>();
+        MyUtils.getallpath(scrDir,stringList);
+        if(stringList.size()>0){
+            for (String s : stringList) {
+                try {
+                    File src = new File(s);
+                    String copypath = request.getSession().getServletContext().getRealPath("temp")+"\\"+src.getName();
+                    MyUtils.copyFileUsingFileStreams(s,copypath);
+                    File temp = new File(copypath);
+                    HashMap<String, String> map = pictureService.checkAndCreateImg(uploadimgDir, temp);
+                    boolean forward = pictureService.setMapInfo(s, map,model, request, temp);
+                    // 只要一存在 检测出的照片 相似 就进行转发 显示到页面
+                    if(forward){
+                        return "forward:/demo.jsp";
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
-        //存在
-        if(exist){
-            System.out.println("存在相同照片.....");
-        }
-        // 不存在，按照片信息建立文件夹上传
-        else {
-            createImgFile(srcFile);
-        }
-
-        System.out.println(("耗时："+(System.currentTimeMillis()-l)/1000)+" s 共检测照片 "+count+" 张");
+        return "success";
     }
 
-
-    @Test
-    public void T_get_img_len_hig() throws IOException, ImageProcessingException, ParseException {
-
-        String picture = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\2020\\10\\06\\0E4A2352.jpg";
-        HashMap<String, String> imgInfo = getImgInfo(new File(picture));
-        System.out.println(imgInfo);
-    }
-
-
-
-    public static String move_file(String scrpath,String destDir){
-        //判断当前文件夹下是否有重名的文件
-
-        File file = new File(scrpath);
-        String newFileName = file.getName();
-        String[] list = new File(destDir).list();
-        if(list != null){
-            ArrayList<String> fileList = new ArrayList<>();
-            for (String s : list) {
-                fileList.add(s);
-            }
-            if(fileList.contains(newFileName)){
-                newFileName = createNewName(fileList,newFileName);
-            }
-        }
-        boolean b = file.renameTo(new File(destDir+"\\" + newFileName));
-        if(b){
-            System.out.println("移动照片： "+scrpath+ "到文件夹 ："
-            +destDir +" 下");
-        }else {
-            System.out.println("移动图片失败.....");
-        }
-        return b?destDir+"\\" + newFileName:null;
-    }
-
-
-    //生成不重名的文件名称
-    private static String createNewName(ArrayList<String> fileList, String s) {
-
-        String temp = s;
-
-        int count =1;
-        while (fileList.contains(temp)){
-            temp = s.split("\\.")[0]+"_"+count+"."+s.split("\\.")[1];
-            count++;
-        }
-        return temp;
-    }
 
 
     @RequestMapping("/setDesc")
@@ -367,116 +220,7 @@ public class PictureController {
 
 
 
-    @RequestMapping("/init")
-    public String init(Model model,HttpServletRequest request){
-        // 遍历文件夹下所有文件路径
-        
-        File firFile = new File(uploadimgDir);
-        // 若父文件夹不存在则创建
-        if(!firFile.exists() || !firFile.isDirectory()){
-            firFile.mkdirs();
-        }
-        String scrDir = "C:\\Users\\Administrator\\Desktop\\demo\\img";
-        List<String> stringList = new ArrayList<>();
-        getallpath(scrDir,stringList);
-        if(stringList.size()>0){
-            for (String s : stringList) {
-                try {
-                    File src = new File(s);
-                    String copypath = request.getSession().getServletContext().getRealPath("temp")+"\\"+src.getName();
-                    copyFileUsingFileStreams(s,copypath);
-                    File temp = new File(copypath);
-                    HashMap<String, String> map = pictureService.checkAndCreateImg(uploadimgDir, temp);
-                    if(map.get("successMsg")!=null){
-                        model.addAttribute("successMsg","图片："+s+ map.get("successMsg"));
-                        String tempStr = map.get("successPath");
-                        model.addAttribute("successPath",tempStr.substring(tempStr.indexOf("img")));
-                    }else {
-                        String temppath = temp.getAbsolutePath();
-                        model.addAttribute("uploadImgPath",temppath.substring(temppath.indexOf("temp")));
-                    }
 
-                    if(map.get("failedMsg")!=null){
-                        model.addAttribute("failedMsg","图片："+s+ map.get("failedMsg"));
-                        // 上传失败有两种原因  存在重复图片  或者  移动照片失败
-                        if(map.get("existFilePath")!=null){
-                            // 从数据库读的相对路径
-                            model.addAttribute("failedImgPath",map.get("existFilePath"));
 
-                            String sourcepath = request.getSession().getServletContext().getRealPath("img")+map.get("existFilePath").replace("img", "");
-                            String destpath = src.getParentFile().getParent()+"\\sameFile\\"+src.getName();
-                            copyFileUsingFileStreams(sourcepath, destpath);
-                            String s1 = move_file(s, src.getParentFile().getParent() + "\\sameFile\\");
-                        }
-                        return "forward:/demo.jsp";
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
 
-        return "success";
-    }
-
-    public static void copyFileUsingFileStreams(String source, String dest) throws IOException {
-        BufferedInputStream in = null;
-        BufferedOutputStream out = null;
-        try {
-            in = new BufferedInputStream(new FileInputStream(new File(source)));
-            out = new BufferedOutputStream(new FileOutputStream(new File(dest)));
-            byte []buf = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = in.read(buf))>0){
-                out.write(buf,0,bytesRead);
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }finally {
-            in.close();
-            out.close();
-        }
-    }
-
-    @Test
-    public void T_(){
-        String dir = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img";
-        List<String> stringList = new ArrayList<>();
-        getallpath(dir,stringList);
-        for (String s : stringList) {
-            try {
-                String img = s.substring(s.indexOf("img"));
-
-                System.out.println(img);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    @Test
-    public void T(){
-        String dir = "D:\\MyJava\\mylifeImg\\src\\main\\webapp\\img\\";
-        List<String> stringList = new ArrayList<>();
-        getallpath(dir, stringList);
-        for (String s : stringList) {
-            if(s.contains(" ")){
-                File file = new File(s);
-                file.renameTo(new File(s.replace(" ", "_")));
-            }
-        }
-
-    }
-
-    public static void getallpath(String dir,List<String> stringList){
-        File dirfile = new File(dir);
-        if(dirfile.isDirectory()){
-            String[] list = dirfile.list();
-            for (String s : list) {
-                getallpath(dirfile.getAbsolutePath() + "\\" + s,stringList);
-            }
-        }else {
-            // System.out.println(dir);
-            stringList.add(dir);
-        }
-    }
 }
