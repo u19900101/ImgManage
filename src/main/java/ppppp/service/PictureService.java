@@ -181,11 +181,10 @@ public class PictureService {
         if(isExist){
             System.out.println("  存在相同照片.....");
             // 判断 服务器中是否存在  不存在就移动  存在就不动
-
-            MyUtils.copyFileUsingFileStreams(srcFile.getAbsolutePath(), uploadimgDir.replace("img", "")+map.get("existFilePath"));
+            MyUtils.copyFileUsingFileStreams(srcFile.getAbsolutePath(), uploadimgDir.replace("img", "")+map.get("existImgPath"));
 
             // 不能删 删了页面就读不到....
-            map.put("failedMsg","    上传失败,存在相同照片.....");
+            // map.put("failedMsg","    上传失败,存在相同照片.....");
         }
         // 不存在，按照片信息建立文件夹上传
         else {
@@ -224,7 +223,7 @@ public class PictureService {
                 count++;
                 if(imageSimilar>IMAGE_SIMILARITY){
                     map.put("failedMsg","上传失败,存在相同照片.....");
-                    map.put("existFilePath", s);
+                    map.put("existImgPath", s);
                     // 将存在的照片信息放入map中 便于页面显示
                     map.put("existPicture", picture);
                     // 检测服务器上指定位置是否存在该文件
@@ -309,10 +308,9 @@ public class PictureService {
         if(map.get("failedMsg")!=null){
             map.put("failedMsg","图片："+s+ map.get("failedMsg"));
             // 上传失败有两种原因  存在重复图片  或者  移动照片失败
-            if(map.get("existFilePath")!=null){
+            if(map.get("existImgPath")!=null){
                 // 从数据库读的相对路径
-                map.put("failedImgPath",map.get("existFilePath"));
-                // String temppp = (String) map.get("existFilePath");
+                // String temppp = (String) map.get("existImgPath");
                 // String sourcepath = request.getSession().getServletContext().getRealPath("img")+temppp.replace("img", "");
                 // String destpath = temp.getParentFile()+"\\sameFile\\"+temp.getName();
                 // MyUtils.copyFileUsingFileStreams(sourcepath, destpath);

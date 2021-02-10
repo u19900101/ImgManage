@@ -78,7 +78,6 @@
                 var pname = this.value;
                 var picpath = $(this).attr('picpath');
                 var pictype = $(this).attr('pictype');
-                // alert(pictype);
                 $.post(
                     "${basePath}picture/ajaxexistPname",
                     "pname="+pname+"&picpath="+picpath+"&pictype="+pictype,
@@ -117,11 +116,12 @@
             </c:if>
 
             <span>坐标：</span>
-            <c:if test="${empty picture.plocal}">
+            <c:if test="${empty picture.gpsLongitude}">
                 <span style="color: green">神秘未知</span>
             </c:if>
-            <c:if test="${not empty picture.plocal}">
-                <span style="color: green">${picture.plocal}</span>
+            <c:if test="${not empty picture.gpsLongitude}">
+                <span style="color: green">${picture.gpsLongitude}</span>
+                <span style="color: green">${picture.gpsLatitude}</span>
             </c:if>
 
 

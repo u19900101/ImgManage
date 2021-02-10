@@ -121,7 +121,7 @@ public class PictureController {
 
     @RequestMapping("/uploadDir")
     public String uploadDir(Model model,HttpServletRequest request,
-                       @RequestParam(value = "imgList",required = false) MultipartFile[] multipartFiles) throws IOException, ImageProcessingException, ParseException {
+                       @RequestParam(value = "imgList",required = false) MultipartFile[] multipartFiles) throws IOException, ImageProcessingException, ParseException   {
         // 遍历文件夹下所有文件路径
         // 若父文件夹不存在则创建
         MyUtils.creatDir(uploadimgDir);
@@ -149,7 +149,7 @@ public class PictureController {
             if(forward){
                 HashMap<String, Object> mapTemp = new HashMap<>();
                 mapTemp.put("uploadImgPath", map.get("uploadImgPath"));
-                mapTemp.put("failedImgPath", map.get("failedImgPath"));
+                mapTemp.put("existImgPath", map.get("existImgPath"));
                 mapTemp.put("failedMsg", map.get("failedMsg"));
                 mapTemp.put("existPicture", map.get("existPicture"));
                 mapTemp.put("uploadPicture", map.get("uploadPicture"));
@@ -221,12 +221,12 @@ public class PictureController {
         return "forward:/pages/edit_picture.jsp";
     }
 
-    // 实时验证是否重名
+
+    // 实时监测文件是否重名
     @ResponseBody
     @RequestMapping(value = "/ajaxexistPname",method = RequestMethod.POST)
     public String ajaxexistPname(String pname,String picpath,String pictype){
         // 修改本地文件名  要解决重名问题
-
         //1.查看是否 存在同名的pname，不存在则可用，存在 则查看path的上一层文件是否同名
         PictureExample pictureExample = new PictureExample();
         PictureExample.Criteria criteria = pictureExample.createCriteria();
@@ -254,10 +254,36 @@ public class PictureController {
 
         return new Gson().toJson(map);
     }
+    
+    // 对相同照片进行处理
+    @ResponseBody
+    @RequestMapping(value = "/ajaxHandleSamePic",method = RequestMethod.POST)
+    public String ajaxHandleSamePic(String handleMethod,String uploadImgPath,String existImgPath){
 
+        HashMap<String,Object> map = new HashMap<>();
 
+        switch (handleMethod){
+            case "saveBoth":
+                System.out.println("saveBoth");
+                String destDir = uploadimgDir.replace("img", "")+existImgPath.substring(0,existImgPath.lastIndexOf("\\"));
+                MyUtils.move_file(uploadimgDir.replace("img", "")+uploadImgPath, destDir);
+                map.put("status", "success");
+                break;
+            case "deleteBoth":
+                System.out.println("deleteBoth");
+                break;
+            case "saveExistOnly":
+                System.out.println("saveExistOnly");
+                break;
+            case "saveUploadOnly":
+                System.out.println("saveUploadOnly");
+                break;
+            default:
+                map.put("status", "fail");
+        }
 
-
+        return new Gson().toJson(map);
+    }
 
 
 }

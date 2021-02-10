@@ -9,11 +9,11 @@ import java.util.List;
  * @create 2021-02-09 8:44
  */
 public class MyUtils {
-    public static String move_file(String scrpath, String destDir){
+    public static String move_file(String absoulteSrcpath, String absoulteDestDir){
         //判断当前文件夹下是否有重名的文件
-        File file = new File(scrpath);
+        File file = new File(absoulteSrcpath);
         String newFileName = file.getName();
-        String[] list = new File(destDir).list();
+        String[] list = new File(absoulteDestDir).list();
         if(list.length > 0){
             ArrayList<String> fileList = new ArrayList<>();
             for (String s : list) {
@@ -23,14 +23,14 @@ public class MyUtils {
                 newFileName = MyUtils.createNewName(fileList,newFileName);
             }
         }
-        boolean b = file.renameTo(new File(destDir,newFileName));
+        boolean b = file.renameTo(new File(absoulteDestDir,newFileName));
         if(b){
-            System.out.println("移动照片： "+scrpath+ "到文件夹 ："
-                    +destDir +" 下");
+            System.out.println("移动照片： "+absoulteSrcpath+ "到文件夹 ："
+                    +absoulteDestDir +" 下");
         }else {
             System.out.println("移动图片失败.....");
         }
-        return b?destDir+"\\" + newFileName:null;
+        return b?absoulteDestDir+"\\" + newFileName:null;
     }
     //生成不重名的文件名称
     public static String createNewName(ArrayList<String> fileList, String s) {
