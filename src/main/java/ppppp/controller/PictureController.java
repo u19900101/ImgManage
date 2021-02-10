@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 import ppppp.bean.Picture;
 import ppppp.bean.PictureExample;
 import ppppp.dao.PictureMapper;
@@ -96,7 +98,7 @@ public class PictureController {
     // 图片上传
     @RequestMapping(value = "/upload",method = RequestMethod.POST)
     public String uploadImg(@RequestParam(value = "img",required = false) MultipartFile multipartFile,
-                     Model model, HttpServletRequest request) throws ParseException, IOException, ImageProcessingException {
+                      HttpServletRequest request) throws ParseException, IOException, ImageProcessingException {
         String path = request.getSession().getServletContext().getRealPath("temp");
 
         File temp = new File(path,multipartFile.getOriginalFilename());
@@ -113,15 +115,14 @@ public class PictureController {
         // 若失败  红色字体
         String s = multipartFile.getOriginalFilename();
 
-        pictureService.setMapInfo(s,map,model,request,temp);
+        pictureService.setMapInfo(s,map,request,temp);
 
         return "forward:/demo.jsp";
     }
 
-
     @RequestMapping("/uploadDir")
-    public String uploadDir(Model model,HttpServletRequest request,
-                       @RequestParam(value = "imgList",required = false) MultipartFile[] multipartFiles) throws IOException, ImageProcessingException, ParseException   {
+    public String uploadDir(HttpServletRequest request,
+            @RequestParam(value = "imgList",required = false) MultipartFile[] multipartFiles) throws IOException, ImageProcessingException, ParseException   {
         // 遍历文件夹下所有文件路径
         // 若父文件夹不存在则创建
         MyUtils.creatDir(uploadimgDir);
@@ -144,26 +145,20 @@ public class PictureController {
             // 若成功  金色字体
             // 若失败  红色字体
             String s = multipartFile.getOriginalFilename();
-            boolean forward = pictureService.setMapInfo(s, map,model, request, temp);
+            boolean forward = pictureService.setMapInfo(s, map, request, temp);
 
             if(forward){
-                HashMap<String, Object> mapTemp = new HashMap<>();
-                mapTemp.put("uploadImgPath", map.get("uploadImgPath"));
-                mapTemp.put("existImgPath", map.get("existImgPath"));
-                mapTemp.put("failedMsg", map.get("failedMsg"));
-                mapTemp.put("existPicture", map.get("existPicture"));
-                mapTemp.put("uploadPicture", map.get("uploadPicture"));
-                hashMaps.add(mapTemp);
+                hashMaps.add(map);
             }
-            model.addAttribute("failedList", hashMaps);
         }
-
-        return "forward:/demo.jsp";
+        // 防止页面重复提交
+        request.getSession().setAttribute("failedList", hashMaps);
+        return "redirect:/demo.jsp";
     }
 
     // 可以改写成为  对文件夹进行上传
     @RequestMapping("/init")
-    public String init(Model model,HttpServletRequest request){
+    public String init(HttpServletRequest request){
         // 遍历文件夹下所有文件路径
         // 若父文件夹不存在则创建
         MyUtils.creatDir(uploadimgDir);
@@ -178,9 +173,10 @@ public class PictureController {
                     MyUtils.copyFileUsingFileStreams(s,copypath);
                     File temp = new File(copypath);
                     HashMap<String, Object> map = pictureService.checkAndCreateImg(uploadimgDir, temp);
-                    boolean forward = pictureService.setMapInfo(s, map,model, request, temp);
+                    boolean forward = pictureService.setMapInfo(s, map, request, temp);
                     // 只要一存在 检测出的照片 相似 就进行转发 显示到页面
                     if(forward){
+                        request.getSession().setAttribute("failedList", map);
                         return "forward:/demo.jsp";
                     }
                 } catch (Exception e) {
@@ -188,7 +184,7 @@ public class PictureController {
                 }
             }
         }
-        return "success";
+        return "forward:/demo.jsp";
     }
 
 

@@ -297,24 +297,18 @@ public class PictureService {
     }
 
 
-    public boolean setMapInfo(String s, HashMap<String, Object> map, Model model,
+    public boolean setMapInfo(String s, HashMap<String, Object> map,
                               HttpServletRequest request, File temp) throws IOException {
         if(map.get("successMsg")!=null){
-            model.addAttribute("successMsg","图片："+s+ map.get("successMsg"));
+            map.put("successMsg","图片："+s+ map.get("successMsg"));
             String tempStr = (String) map.get("successPath");
-            model.addAttribute("successPath",tempStr.substring(tempStr.indexOf("img")));
+            map.put("successPath",tempStr.substring(tempStr.indexOf("img")));
         }
 
         if(map.get("failedMsg")!=null){
             map.put("failedMsg","图片："+s+ map.get("failedMsg"));
             // 上传失败有两种原因  存在重复图片  或者  移动照片失败
             if(map.get("existImgPath")!=null){
-                // 从数据库读的相对路径
-                // String temppp = (String) map.get("existImgPath");
-                // String sourcepath = request.getSession().getServletContext().getRealPath("img")+temppp.replace("img", "");
-                // String destpath = temp.getParentFile()+"\\sameFile\\"+temp.getName();
-                // MyUtils.copyFileUsingFileStreams(sourcepath, destpath);
-                // String resPath = MyUtils.move_file(temp.getAbsolutePath(), temp.getParentFile() + "\\sameFile");
                 //移动后要修改 页面显示的路径
                 String temppath = temp.getAbsolutePath();
                 map.put("uploadImgPath",temppath.substring(temppath.indexOf("temp")));

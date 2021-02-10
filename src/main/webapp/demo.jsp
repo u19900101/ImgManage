@@ -100,6 +100,20 @@
                  <input class="myselect" value="都删除" type="button" style="color: red;font-size: larger;width: 100%;text-align:left"
                         handleMethod ="deleteBoth" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath} divID = ${picture.existPicture.pid}>
             </span>
+            <%--本地照片--%>
+            <div class="outdiv" style="float: left">
+                <h3 style="color: red">本地照片:${picture.existImgPath}</h3>
+                <h4 style="color: chocolate">图片尺寸： ${picture.existPicture.pwidth}*${picture.existPicture.pheight}</h4>
+                <h4 style="color: gray">图片大小： ${picture.existPicture.psize} M</h4>
+                <span align="center" style="float: left">
+                   <input class="myselect" type="button" value="只保留我" style="font-size: larger;width: 100%;text-align:center"
+                          handleMethod ="saveExistOnly" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath} divID = ${picture.existPicture.pid}>
+                </span>
+                <div class="imgdiv">
+                    <img src="${picture.existImgPath}">
+                </div>
+            </div>
+            <%--上传的照片--%>
             <div class="outdiv" style="height: 100%">
                 <h3 style="color: lightgreen;">上传的照片：${picture.uploadImgPath}</h3>
                 <h4 style="color: chocolate">图片尺寸： ${picture.uploadPicture.pwidth}*${picture.uploadPicture.pheight}</h4>
@@ -113,18 +127,7 @@
                     <img src="${picture.uploadImgPath}">
                 </div>
             </div>
-            <div class="outdiv" style="float: right">
-                <h3 style="color: red">本地照片:${picture.existImgPath}</h3>
-                <h4 style="color: chocolate">图片尺寸： ${picture.existPicture.pwidth}*${picture.existPicture.pheight}</h4>
-                <h4 style="color: gray">图片大小： ${picture.existPicture.psize} M</h4>
-                <span align="center" style="float: left">
-                   <input class="myselect" type="button" value="只保留我" style="font-size: larger;width: 100%;text-align:center"
-                          handleMethod ="saveExistOnly" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath} divID = ${picture.existPicture.pid}>
-                </span>
-                <div class="imgdiv">
-                    <img src="${picture.existImgPath}">
-                </div>
-            </div>
+
         </div>
     </c:forEach>
 </c:if>
