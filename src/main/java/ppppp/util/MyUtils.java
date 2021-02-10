@@ -103,4 +103,18 @@ public class MyUtils {
         }
         return num;
     }
+
+    public static boolean deleteFile(String ...absImgPath) {
+        for (String path : absImgPath) {
+            File img = new File(path);
+            if(img.exists()){
+                img.delete();
+                System.out.println("已删除照片...."+path);
+            }else {
+                System.out.println("删除照片失败 .... "+path+" 不存在 ");
+                return false;
+            }
+        }
+        return true;
+    }
 }

@@ -262,21 +262,50 @@ public class PictureController {
 
         HashMap<String,Object> map = new HashMap<>();
 
+        String absUploadImgPath = uploadimgDir.replace("img", "")+uploadImgPath;
+        String absExistImgPath = uploadimgDir.replace("img", "")+existImgPath;
         switch (handleMethod){
             case "saveBoth":
                 System.out.println("saveBoth");
-                String destDir = uploadimgDir.replace("img", "")+existImgPath.substring(0,existImgPath.lastIndexOf("\\"));
-                MyUtils.move_file(uploadimgDir.replace("img", "")+uploadImgPath, destDir);
-                map.put("status", "success");
+                String destDir = absExistImgPath.substring(0,absExistImgPath.lastIndexOf("\\"));
+                String move_file = MyUtils.move_file(absUploadImgPath, destDir);
+                if(move_file!=null){
+                    map.put("status", "success");
+                    map.put("msg", "成功保存两张照片");
+                }else {
+                    map.put("status", "fail");
+                }
                 break;
             case "deleteBoth":
                 System.out.println("deleteBoth");
+                boolean deleteFile = MyUtils.deleteFile(absUploadImgPath, absExistImgPath);
+                if(deleteFile){
+                    map.put("status", "success");
+                    map.put("msg", "成功删除两张照片");
+                }else {
+                    map.put("status", "fail");
+                }
+
                 break;
             case "saveExistOnly":
                 System.out.println("saveExistOnly");
+                boolean deleteFile1 = MyUtils.deleteFile(absUploadImgPath);
+                if(deleteFile1){
+                    map.put("status", "success");
+                    map.put("msg", "成功保存已存在的照片");
+                }else {
+                    map.put("status", "fail");
+                }
                 break;
             case "saveUploadOnly":
                 System.out.println("saveUploadOnly");
+                boolean deleteFile2 = MyUtils.deleteFile(absExistImgPath);
+                if(deleteFile2){
+                    map.put("status", "success");
+                    map.put("msg", "成功保存上传的照片");
+                }else {
+                    map.put("status", "fail");
+                }
                 break;
             default:
                 map.put("status", "fail");
@@ -284,6 +313,4 @@ public class PictureController {
 
         return new Gson().toJson(map);
     }
-
-
 }

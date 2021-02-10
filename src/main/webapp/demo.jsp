@@ -40,7 +40,7 @@
     </style>
 </head>
 <body>
-<h1 style="color: red">文件夹</h1>
+<h1 style="color: red">文件夹上传</h1>
 <form action="picture/uploadDir" enctype="multipart/form-data" method="post">
     图  像 ：<input type="file" name="imgList" value="pppp" webkitdirectory/><br/>
     <input type="submit" value="上传文件夹">
@@ -61,86 +61,26 @@
 
 <script type="text/javascript">
     $(function(){
-        function c(){
-            alert("执行了c函数");
-            $("#t1").remove("#t1");
-            alert("执行了完毕 c函数");
-        };
-        $('.saveBoth').on('click', function(){
+        $('.myselect').on('click', function(){
             var handleMethod = $(this).attr('handleMethod');
             var uploadImgPath = $(this).attr('uploadImgPath');
             var existImgPath = $(this).attr('existImgPath');
             var divID = $(this).attr('divID');
-             $.post(
-                 "http://localhost:8080/pic/picture/ajaxHandleSamePic",
-                  "handleMethod="+handleMethod+"&uploadImgPath="+uploadImgPath+"&existImgPath="+existImgPath,
-                 function(data) {
-                     if(data.status == 'success'){
-                         alert("提交成功");
-                         $("#"+divID).remove();
-                     }else if(data.status == 'fail'){
-                         alert("提交失败");
-                     }else {
-                         alert("其他未知错误.....please enjoy debug");
-                     }
-                 },
-                 "json"
-             );
-        });
-
-        $('.deleteBoth').on('click', function(){
-            alert("deleteBoth");
-            /* $.ajax({
-                 cache: false,
-                 type: "POST",
-                 url:"/org/add_ask/",
-                 data:$('#jsStayForm').serialize(),
-                 async: true,
-                 success: function(data) {
-                     if(data.status == 'success'){
-                         $('#jsStayForm')[0].reset();
-                         alert("提交成功")
-                     }else if(data.status == 'fail'){
-                         $('#jsCompanyTips').html(data.msg)
-                     }
-                 },
-             });*/
-        });
-        $('.saveExistOnly').on('click', function(){
-            alert("saveExistOnly");
-            /* $.ajax({
-                 cache: false,
-                 type: "POST",
-                 url:"/org/add_ask/",
-                 data:$('#jsStayForm').serialize(),
-                 async: true,
-                 success: function(data) {
-                     if(data.status == 'success'){
-                         $('#jsStayForm')[0].reset();
-                         alert("提交成功")
-                     }else if(data.status == 'fail'){
-                         $('#jsCompanyTips').html(data.msg)
-                     }
-                 },
-             });*/
-        });
-        $('.saveUploadOnly').on('click', function(){
-            alert("saveUploadOnly");
-            /* $.ajax({
-                 cache: false,
-                 type: "POST",
-                 url:"/org/add_ask/",
-                 data:$('#jsStayForm').serialize(),
-                 async: true,
-                 success: function(data) {
-                     if(data.status == 'success'){
-                         $('#jsStayForm')[0].reset();
-                         alert("提交成功")
-                     }else if(data.status == 'fail'){
-                         $('#jsCompanyTips').html(data.msg)
-                     }
-                 },
-             });*/
+            $.post(
+                "http://localhost:8080/pic/picture/ajaxHandleSamePic",
+                "handleMethod="+handleMethod+"&uploadImgPath="+uploadImgPath+"&existImgPath="+existImgPath,
+                function(data) {
+                    if(data.status == 'success'){
+                        $("#"+divID).remove();
+                        alert(data.msg);
+                    }else if(data.status == 'fail'){
+                        alert("提交失败");
+                    }else {
+                        alert("其他未知错误.....please enjoy debug");
+                    }
+                },
+                "json"
+            );
         });
     })
 
@@ -153,18 +93,20 @@
 
             <h1 style="color: red">${picture.failedMsg}</h1>
             <span align="right" style="float: left;width: 49%">
-                <input class="saveBoth" value="都保留" type="button" style="color:green;font-size: larger;width: 100%;text-align:right"
+                <input class="myselect" value="都保留" type="button" style="color:green;font-size: larger;width: 100%;text-align:right"
                        handleMethod ="saveBoth" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath} divID = ${picture.existPicture.pid}>
             </span>
             <span align="left" style="float: right;width: 49%">
-                 <input class="deleteBoth" value="都删除" type="button" style="color: red;font-size: larger;width: 100%;text-align:left">
+                 <input class="myselect" value="都删除" type="button" style="color: red;font-size: larger;width: 100%;text-align:left"
+                        handleMethod ="deleteBoth" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath} divID = ${picture.existPicture.pid}>
             </span>
             <div class="outdiv" style="height: 100%">
                 <h3 style="color: lightgreen;">上传的照片：${picture.uploadImgPath}</h3>
                 <h4 style="color: chocolate">图片尺寸： ${picture.uploadPicture.pwidth}*${picture.uploadPicture.pheight}</h4>
                 <h4 style="color: gray">图片大小： ${picture.uploadPicture.psize} M</h4>
                 <span align="center" style="float: left">
-                    <input class="saveExistOnly" type="button" value="只保留我" style="font-size: larger;width: 100%;text-align:center">
+                    <input class="myselect" type="button" value="只保留我" style="font-size: larger;width: 100%;text-align:center"
+                           handleMethod ="saveUploadOnly" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath} divID = ${picture.existPicture.pid}>
                 </span>
 
                 <div class="imgdiv">
@@ -176,7 +118,8 @@
                 <h4 style="color: chocolate">图片尺寸： ${picture.existPicture.pwidth}*${picture.existPicture.pheight}</h4>
                 <h4 style="color: gray">图片大小： ${picture.existPicture.psize} M</h4>
                 <span align="center" style="float: left">
-                   <input class="saveUploadOnly" type="button" value="只保留我" style="font-size: larger;width: 100%;text-align:center">
+                   <input class="myselect" type="button" value="只保留我" style="font-size: larger;width: 100%;text-align:center"
+                          handleMethod ="saveExistOnly" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath} divID = ${picture.existPicture.pid}>
                 </span>
                 <div class="imgdiv">
                     <img src="${picture.existImgPath}">
