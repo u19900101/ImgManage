@@ -115,7 +115,8 @@
         <input name =  "handleMethod" type="hidden" value="saveBoth">
         <input type="submit" value="保存全部">
     </form>--%>
-    <input class="myselectAll" handleMethod ="saveBoth" type="button" value="保存全部" infoList = ${failedList}>
+    <input class="myselectAll" handleMethod ="saveBoth" type="button" value="保存全部">
+    <input class="myselectAll" handleMethod ="deleteBoth" type="button" value="删除全部">
     <input class="myselectAll" handleMethod ="saveExistOnly" type="button" value="只保存全部本地">
     <input class="myselectAll" handleMethod ="saveUploadOnly" type="button" value="只保存全部上传">
     <c:forEach items="${failedList}" var="picture">
@@ -144,7 +145,7 @@
                 </div>
             </div>
             <%--上传的照片--%>
-            <div class="outdiv" style="height: 100%">
+            <div class="outdiv" style="height: 100%;float: right">
                 <h3 style="color: lightgreen;">上传的照片：${picture.uploadImgPath}</h3>
                 <h4 style="color: chocolate">图片尺寸： ${picture.uploadPicture.pwidth}*${picture.uploadPicture.pheight}</h4>
                 <h4 style="color: gray">图片大小： ${picture.uploadPicture.psize} M</h4>
