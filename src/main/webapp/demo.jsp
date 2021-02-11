@@ -107,7 +107,7 @@
     })
 
 </script>
-
+${failedList}
 <c:if test="${not empty failedList}">
 
 <div id = "main">

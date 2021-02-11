@@ -297,8 +297,7 @@ public class PictureService {
     }
 
 
-    public boolean setMapInfo(String s, HashMap<String, Object> map,
-                              HttpServletRequest request, File temp) throws IOException {
+    public boolean setMapInfo(String s, HashMap<String, Object> map, File temp){
         if(map.get("successMsg")!=null){
             map.put("successMsg","图片："+s+ map.get("successMsg"));
             String tempStr = (String) map.get("successPath");
@@ -452,6 +451,17 @@ public class PictureService {
     public HashMap insertMsg(HashMap map, ArrayList<String> errorInfoList, String successMsg) {
 
         if(errorInfoList.size() == 0){
+            map.put("status", "success");
+            map.put("msg", successMsg);
+        }else {
+            map.put("status", "fail");
+        }
+        return map;
+    }
+
+    public HashMap insertMsg(HashMap map, boolean isSucceed, String successMsg) {
+
+        if(isSucceed){
             map.put("status", "success");
             map.put("msg", successMsg);
         }else {
