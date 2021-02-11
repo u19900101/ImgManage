@@ -149,47 +149,8 @@ public class PictureController {
         }
         // 防止页面重复提交
         request.getSession().setAttribute("failedList", hashMaps);
-        String id = request.getSession().getId();
-
-        // response.header("Access-Control-Allow-Origin：*");
         return "redirect:/demo.jsp";
     }
-
-
-
-
-    // 可以改写成为  对文件夹进行上传
-    @RequestMapping("/init")
-    public String init(HttpServletRequest request){
-        // 遍历文件夹下所有文件路径
-        // 若父文件夹不存在则创建
-        MyUtils.creatDir(uploadimgDir);
-        String scrDir = "C:\\Users\\Administrator\\Desktop\\demo\\img";
-        List<String> stringList = new ArrayList<>();
-        MyUtils.getallpath(scrDir,stringList);
-        if(stringList.size()>0){
-            for (String s : stringList) {
-                try {
-                    File src = new File(s);
-                    String copypath = request.getSession().getServletContext().getRealPath("temp")+"\\"+src.getName();
-                    MyUtils.copyFileUsingFileStreams(s,copypath);
-                    File temp = new File(copypath);
-                    HashMap<String, Object> map = pictureService.checkAndCreateImg(uploadimgDir, temp);
-                    boolean forward = pictureService.setMapInfo(s, map,temp);
-                    // 只要一存在 检测出的照片 相似 就进行转发 显示到页面
-                    if(forward){
-                        request.getSession().setAttribute("failedList", map);
-                        return "forward:/demo.jsp";
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return "forward:/demo.jsp";
-    }
-
-
 
     @RequestMapping("/setDesc")
     public String setDesc(){
@@ -256,7 +217,7 @@ public class PictureController {
     // 对相同单个照片进行处理
     @ResponseBody
     @RequestMapping(value = "/ajaxHandleSamePic",method = RequestMethod.POST)
-    public String ajaxHandleSamePic(String handleMethod,String uploadImgPath,String existImgPath,HttpServletRequest req){
+    public String ajaxHandleSamePic(String handleMethod,String uploadImgPath,String existImgPath,HttpServletRequest req) throws ParseException, ImageProcessingException, IOException {
 
         HashMap<String,Object> map = new HashMap<>();
 
@@ -268,13 +229,17 @@ public class PictureController {
             case "saveBoth":
                 System.out.println("saveBoth");
                 String destDir = absExistImgPath.substring(0,absExistImgPath.lastIndexOf("\\"));
-                String move_file = MyUtils.move_file(absUploadImgPath, destDir);
+                String move_absUploadImgPath = MyUtils.move_file(absUploadImgPath, destDir);
+                int i = pictureService.insertPicture(move_absUploadImgPath);
                 successMsg = "成功保存两张照片";
-                isSucceed = move_file!=null;
+                isSucceed = move_absUploadImgPath!=null & i==1;
                 break;
             case "deleteBoth":
                 System.out.println("deleteBoth");
                 isSucceed = MyUtils.deleteFile(absUploadImgPath, absExistImgPath);
+                // 将数据库中的 保存文件也删除
+                i = pictureService.deletePicture(mapper,absExistImgPath.substring(absExistImgPath.indexOf("img")));
+                isSucceed = isSucceed & i==1;
                 successMsg = "成功删除两张照片";
                 break;
             case "saveExistOnly":
@@ -285,6 +250,8 @@ public class PictureController {
             case "saveUploadOnly":
                 System.out.println("saveUploadOnly");
                 isSucceed = MyUtils.deleteFile(absExistImgPath);
+                i = pictureService.deletePicture(mapper,absExistImgPath.substring(absExistImgPath.indexOf("img")));
+                isSucceed = isSucceed & i==1;
                 successMsg = "成功保存上传的照片";
                 break;
             default:
@@ -369,4 +336,34 @@ public class PictureController {
         return new Gson().toJson(map);
     }
 
+    // 可以改写成为  对文件夹进行上传
+    @RequestMapping("/init")
+    public String init(HttpServletRequest request){
+        // 遍历文件夹下所有文件路径
+        // 若父文件夹不存在则创建
+        MyUtils.creatDir(uploadimgDir);
+        String scrDir = "C:\\Users\\Administrator\\Desktop\\demo\\img";
+        List<String> stringList = new ArrayList<>();
+        MyUtils.getallpath(scrDir,stringList);
+        if(stringList.size()>0){
+            for (String s : stringList) {
+                try {
+                    File src = new File(s);
+                    String copypath = request.getSession().getServletContext().getRealPath("temp")+"\\"+src.getName();
+                    MyUtils.copyFileUsingFileStreams(s,copypath);
+                    File temp = new File(copypath);
+                    HashMap<String, Object> map = pictureService.checkAndCreateImg(uploadimgDir, temp);
+                    boolean forward = pictureService.setMapInfo(s, map,temp);
+                    // 只要一存在 检测出的照片 相似 就进行转发 显示到页面
+                    if(forward){
+                        request.getSession().setAttribute("failedList", map);
+                        return "forward:/demo.jsp";
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return "forward:/demo.jsp";
+    }
 }

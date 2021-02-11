@@ -4,6 +4,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ppppp.service.PictureService.aHash;
+
 /**
  * @author lppppp
  * @create 2021-02-09 8:44
@@ -116,5 +118,9 @@ public class MyUtils {
             }
         }
         return true;
+    }
+
+    public static String createPicIdByAbsPath(String absImgPath) {
+        return intsToStr(aHash(absImgPath));
     }
 }

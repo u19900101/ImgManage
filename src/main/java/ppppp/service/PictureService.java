@@ -171,9 +171,7 @@ public class PictureService {
         // 查询库中所有的 图片
         List<Picture> pictures = mapper.selectByExample(new PictureExample());
         // 将上传的图片与 现有的所有id进行比对
-        String picStrId = MyUtils.intsToStr(imgA);
-
-        Picture uploadPicture = fileToPicture(srcFile.getAbsolutePath(),picStrId);
+        Picture uploadPicture = fileToPicture(srcFile.getAbsolutePath());
         map.put("uploadPicture", uploadPicture);
         boolean isExist = isPictureExist(srcFile,pictures,map,imgA);
 
@@ -199,7 +197,7 @@ public class PictureService {
             }else {
                 // 上传成功后马上将信息写入数据库 以免刷新时 的重复上传
                 uploadPicture.setPath(createdPath);
-                insertInfo(uploadPicture);
+                insertPicture(uploadPicture);
                 // 将照片信息放入map中 便于页面显示
                 map.put("uploadPicture", uploadPicture);
                 map.put("successMsg","    上传成功！！");
@@ -262,27 +260,24 @@ public class PictureService {
         return MyUtils.move_file(img.getAbsolutePath(), destDir);
     }
 
+    public Picture fileToPicture(String fileAbspath) throws ParseException, IOException, ImageProcessingException {
 
-    // 2.将照片或视频信息写入数据库中
-    public int insertInfo(Picture uploadPicture){
-
-        //将图片的相对路径存入数据库中 以便页面显示
-        int insert = mapper.insert(uploadPicture);
-        return insert;
-    }
-
-    private Picture fileToPicture(String filepath,String picStrId) throws ParseException, IOException, ImageProcessingException {
+        String picStrId = MyUtils.createPicIdByAbsPath(fileAbspath);
         HashMap<String, String> map = new HashMap<>();
         Picture pic = new Picture();
-        File file = new File(filepath);
+        File file = new File(fileAbspath);
         // 以后缀名来判断文件是图片还是视频
-        if(isImgType(filepath)){
+        if(isImgType(fileAbspath)){
             map = getImgInfo(file);
-        }else if(isVideoType(filepath)){
-            map = getVideoInfo(filepath);
+        }else if(isVideoType(fileAbspath)){
+            map = getVideoInfo(fileAbspath);
             return null;
         }
-        // 路径在外面设置
+        // 凑合解决一下 路径为空的 问题  照片名称包含 img 也没关系
+        if(fileAbspath.contains("img")){
+            pic.setPath(fileAbspath.substring(fileAbspath.indexOf("img")));
+        }
+
         pic.setPid(picStrId);
         pic.setPname(file.getName());
         pic.setPcreatime(map.get("create_time"));
@@ -468,5 +463,25 @@ public class PictureService {
             map.put("status", "fail");
         }
         return map;
+    }
+
+    public int deletePicture(PictureMapper mapper, String imgPath) {
+        PictureExample example = new PictureExample();
+        PictureExample.Criteria criteria = example.createCriteria();
+        criteria.andPathEqualTo(imgPath);
+        return mapper.deleteByExample(example);
+    }
+    // 2.将照片或视频信息写入数据库中
+    public int insertPicture(String absUploadImgPath) throws ParseException, ImageProcessingException, IOException {
+        Picture picture = fileToPicture(absUploadImgPath);
+        //将图片的相对路径存入数据库中 以便页面显示
+        int insert = mapper.insert(picture);
+        return insert;
+    }
+
+    public int insertPicture(Picture picture){
+        //将图片的相对路径存入数据库中 以便页面显示
+        int insert = mapper.insert(picture);
+        return insert;
     }
 }

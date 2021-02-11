@@ -37,6 +37,12 @@
             width: 100%;
             font-size: larger;
         }
+
+        span.firstSpan{
+            float: left;
+            width: 24%;
+            align:right;
+        }
     </style>
 </head>
 <body>
@@ -107,18 +113,13 @@
     })
 
 </script>
-${failedList}
 <c:if test="${not empty failedList}">
 
 <div id = "main">
-   <%-- <form action="picture/ajaxHandleSamePicAll">
-        <input name =  "handleMethod" type="hidden" value="saveBoth">
-        <input type="submit" value="保存全部">
-    </form>--%>
-    <input class="myselectAll" handleMethod ="saveBoth" type="button" value="保存全部">
-    <input class="myselectAll" handleMethod ="deleteBoth" type="button" value="删除全部">
-    <input class="myselectAll" handleMethod ="saveExistOnly" type="button" value="只保存全部本地">
-    <input class="myselectAll" handleMethod ="saveUploadOnly" type="button" value="只保存全部上传">
+    <span class="firstSpan"><input class="myselectAll" handleMethod ="saveBoth" type="button" value="保存全部" style="color:green;font-size: larger;width: 100%;"></span>
+    <span class="firstSpan"><input class="myselectAll" handleMethod ="deleteBoth" type="button" value="删除全部" style="color:red;font-size: larger;width:100%;"></span>
+    <span class="firstSpan" style="float: right;"><input class="myselectAll" handleMethod ="saveExistOnly" type="button" value="只保存全部本地" style="color:navy;font-size: larger;width: 100%;"></span>
+    <span class="firstSpan" style="float: right;"><input class="myselectAll" handleMethod ="saveUploadOnly" type="button" value="只保存全部上传" style="color:firebrick;font-size: larger;width: 100%;"></span>
     <c:forEach items="${failedList}" var="picture">
         <div id = ${picture.existPicture.pid} class="zuiOut" style="border: 3px solid #39987c;width: 100%;height: 100%">
 
