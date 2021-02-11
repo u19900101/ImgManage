@@ -40,19 +40,20 @@
     </style>
 </head>
 <body>
+<%--文件夹上传--%>
 <h1 style="color: red">文件夹上传</h1>
 <form action="picture/uploadDir" enctype="multipart/form-data" method="post">
     图  像 ：<input type="file" name="imgList" value="pppp" webkitdirectory/><br/>
     <input type="submit" value="上传文件夹">
 </form>
-
-<h1 style="color: #ffe57d">文件上传</h1>
+<%--文件上传--%>
+<%--<h1 style="color: #ffe57d">文件上传</h1>
 <h1 style="color: lightgreen">${successMsg}</h1>
 <form action="picture/upload" enctype="multipart/form-data" method="post">
-    <%--accept="image/*" ，表示提交的文件只能为图片，若没有添加该内容，则图片、文档等类型的文件都可以提交--%>
+    &lt;%&ndash;accept="image/*" ，表示提交的文件只能为图片，若没有添加该内容，则图片、文档等类型的文件都可以提交&ndash;%&gt;
     图  像 ：<input type="file" name="img" value="pppp"/><br/>
     <input type="submit" value="上传">
-</form>
+</form>--%>
 
 
 <c:if test="${not empty successPath}">
@@ -82,12 +83,41 @@
                 "json"
             );
         });
+
+        $('.myselectAll').on('click', function(){
+            var handleMethod = $(this).attr('handleMethod');
+            $.ajax({
+                type:'post',
+                contentType : 'application/json;charset=utf-8',
+                url:"http://localhost:8080/pic/picture/ajaxHandleSamePicAll?handleMethod="+handleMethod,
+                data:{},
+                success:function(data) {
+                    if(data.status == 'success'){
+                        alert(data.msg);
+                        $("#main").remove();
+                    }else if(data.status == 'fail'){
+                        alert("提交失败");
+                    }else {
+                        alert("其他未知错误.....please enjoy debug");
+                    }
+                },
+                dataType:"json"
+            });
+        });
     })
 
 </script>
+
 <c:if test="${not empty failedList}">
 
-
+<div id = "main">
+   <%-- <form action="picture/ajaxHandleSamePicAll">
+        <input name =  "handleMethod" type="hidden" value="saveBoth">
+        <input type="submit" value="保存全部">
+    </form>--%>
+    <input class="myselectAll" handleMethod ="saveBoth" type="button" value="保存全部" infoList = ${failedList}>
+    <input class="myselectAll" handleMethod ="saveExistOnly" type="button" value="只保存全部本地">
+    <input class="myselectAll" handleMethod ="saveUploadOnly" type="button" value="只保存全部上传">
     <c:forEach items="${failedList}" var="picture">
         <div id = ${picture.existPicture.pid} class="zuiOut" style="border: 3px solid #39987c;width: 100%;height: 100%">
 
@@ -110,7 +140,7 @@
                           handleMethod ="saveExistOnly" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath} divID = ${picture.existPicture.pid}>
                 </span>
                 <div class="imgdiv">
-                    <img src="${picture.existImgPath}">
+                    <img src="${picture.existImgPath}" align="莫方,照片已提交">
                 </div>
             </div>
             <%--上传的照片--%>
@@ -124,12 +154,13 @@
                 </span>
 
                 <div class="imgdiv">
-                    <img src="${picture.uploadImgPath}">
+                    <img src="${picture.uploadImgPath}" alt="莫方,照片已提交">
                 </div>
             </div>
 
         </div>
     </c:forEach>
+</div>
 </c:if>
 
 </body>

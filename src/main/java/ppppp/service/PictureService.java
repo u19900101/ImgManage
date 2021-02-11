@@ -448,4 +448,15 @@ public class PictureService {
         }
         return false;
     }
+
+    public HashMap insertMsg(HashMap map, ArrayList<String> errorInfoList, String successMsg) {
+
+        if(errorInfoList.size() == 0){
+            map.put("status", "success");
+            map.put("msg", successMsg);
+        }else {
+            map.put("status", "fail");
+        }
+        return map;
+    }
 }
