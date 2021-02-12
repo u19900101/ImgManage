@@ -2,7 +2,6 @@ package ppppp.controller;
 
 import com.drew.imaging.ImageProcessingException;
 import com.google.gson.Gson;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -105,13 +104,11 @@ public class PictureController {
         // 将上传的文件写入到 到文件夹
         multipartFile.transferTo(temp);
         String  descDir= request.getSession().getServletContext().getRealPath("img");
-        HashMap<String, Object> map = pictureService.checkAndCreateImg(descDir, temp);
+        ArrayList<HashMap<String, Object>> successMapList = new ArrayList<>();
+        ArrayList<HashMap<String, Object>> failedMapList = new ArrayList<>();
 
-        // 若成功  金色字体
-        // 若失败  红色字体
-        String s = multipartFile.getOriginalFilename();
+        pictureService.checkAndCreateImg(descDir, temp, successMapList, failedMapList);
 
-        pictureService.setMapInfo(s,map,temp);
 
         return "forward:/demo.jsp";
     }
@@ -125,28 +122,24 @@ public class PictureController {
         String path = request.getSession().getServletContext().getRealPath("temp");
         MyUtils.creatDir(path);
         // 将所有检测出 重复的照片 路径保存到 list中
-        ArrayList<HashMap<String, Object>> hashMaps = new ArrayList<>();
+        ArrayList<HashMap<String, Object>> successMapList = new ArrayList<>();
+        ArrayList<HashMap<String, Object>> failedMapList = new ArrayList<>();
         for (MultipartFile multipartFile : multipartFiles) {
             // 先只处理图片文件
             if(!isImgType(multipartFile.getOriginalFilename())){
                 System.out.println(multipartFile.getOriginalFilename());
                 continue;
             }
-            File temp = new File(path,multipartFile.getOriginalFilename());
+            File uploadImgTemp = new File(path,multipartFile.getOriginalFilename());
             // 将上传的文件写入到 到文件夹
-            multipartFile.transferTo(temp);
+            multipartFile.transferTo(uploadImgTemp);
 
-            HashMap<String, Object> map = pictureService.checkAndCreateImg(uploadimgDir, temp);
-
-            // 若成功  金色字体
-            // 若失败  红色字体
-            String s = multipartFile.getOriginalFilename();
-            pictureService.setMapInfo(s, map, temp);
-            hashMaps.add(map);
+            pictureService.checkAndCreateImg(uploadimgDir, uploadImgTemp,successMapList,failedMapList);
 
         }
         // 防止页面重复提交
-        request.getSession().setAttribute("failedList", hashMaps);
+        request.getSession().setAttribute("failedMapList", failedMapList);
+        request.getSession().setAttribute("successMapList", successMapList);
         return "redirect:/demo.jsp";
     }
 
@@ -277,7 +270,7 @@ public class PictureController {
     public String ajaxHandleSamePicAll(String handleMethod,HttpServletRequest req) throws ParseException, ImageProcessingException, IOException {
 
         HashMap map = new HashMap();
-        ArrayList<HashMap<String, Object>> failedList = (ArrayList<HashMap<String, Object>>) req.getSession().getAttribute("failedList");
+        ArrayList<HashMap<String, Object>> failedList = (ArrayList<HashMap<String, Object>>) req.getSession().getAttribute("failedMapList");
 
         ArrayList<String> errorInfoList = new ArrayList<>();
         String successMsg = "";
@@ -370,6 +363,8 @@ public class PictureController {
         MyUtils.creatDir(uploadimgDir);
         String scrDir = "C:\\Users\\Administrator\\Desktop\\demo\\img";
         List<String> stringList = new ArrayList<>();
+        ArrayList<HashMap<String, Object>> successMapList = new ArrayList<>();
+        ArrayList<HashMap<String, Object>> failedMapList = new ArrayList<>();
         MyUtils.getallpath(scrDir,stringList);
         if(stringList.size()>0){
             for (String s : stringList) {
@@ -378,13 +373,12 @@ public class PictureController {
                     String copypath = request.getSession().getServletContext().getRealPath("temp")+"\\"+src.getName();
                     MyUtils.copyFileUsingFileStreams(s,copypath);
                     File temp = new File(copypath);
-                    HashMap<String, Object> map = pictureService.checkAndCreateImg(uploadimgDir, temp);
-                    boolean forward = pictureService.setMapInfo(s, map,temp);
+                    pictureService.checkAndCreateImg(uploadimgDir, temp, successMapList, failedMapList);
+
                     // 只要一存在 检测出的照片 相似 就进行转发 显示到页面
-                    if(forward){
-                        request.getSession().setAttribute("failedList", map);
-                        return "forward:/demo.jsp";
-                    }
+                    request.getSession().setAttribute("failedMapList", failedMapList);
+                    request.getSession().setAttribute("successMapList", successMapList);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

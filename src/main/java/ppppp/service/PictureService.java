@@ -2,19 +2,16 @@ package ppppp.service;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
-import org.junit.Test;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 import ppppp.bean.Picture;
 import ppppp.bean.PictureExample;
 import ppppp.dao.PictureMapper;
 import ppppp.util.MyUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -157,34 +154,36 @@ public class PictureService {
     }
 
 
-    public HashMap<String, Object> checkAndCreateImg(String destDir, File srcFile) throws ParseException, IOException, ImageProcessingException {
+    public void checkAndCreateImg(String destDir, File uploadImgTemp,
+                                                     ArrayList<HashMap<String, Object>> successMapList,
+                                                     ArrayList<HashMap<String, Object>> failedMapList) throws ParseException, IOException, ImageProcessingException {
         //在整个数据库中进行 照片去重检查
         ArrayList<String> stringList = new ArrayList<>();
         HashMap<String,Object> map =new HashMap<>();
         MyUtils.getallpath(destDir,stringList);
 
         //判断图片在数据库中是否存在相似的照片
-        if(!isImgType(srcFile.getName())){
-            return map;
+        if(!isImgType(uploadImgTemp.getName())){
+            return;
         }
-        int [] imgA = aHash(srcFile.getAbsolutePath());
+        int [] imgA = aHash(uploadImgTemp.getAbsolutePath());
         // 查询库中所有的 图片
         List<Picture> pictures = mapper.selectByExample(new PictureExample());
         // 将上传的图片与 现有的所有id进行比对
-        Picture uploadPicture = fileToPicture(srcFile.getAbsolutePath());
+        Picture uploadPicture = fileToPicture(uploadImgTemp.getAbsolutePath());
         map.put("uploadPicture", uploadPicture);
-        boolean isExist = isPictureExist(srcFile,pictures,map,imgA);
+        boolean isExist = isPictureExist(uploadImgTemp,pictures,map,imgA);
 
         //存在
         if(isExist){
             System.out.println("  存在相同照片.....");
             // 判断 服务器中是否存在  不存在就移动  存在就不动
-            MyUtils.copyFileUsingFileStreams(srcFile.getAbsolutePath(), uploadimgDir.replace("img", "")+map.get("existImgPath"));
+            MyUtils.copyFileUsingFileStreams(uploadImgTemp.getAbsolutePath(), uploadimgDir.replace("img", "")+map.get("existImgPath"));
         }
         // 不存在，按照片信息建立文件夹上传
         else {
             // 返回值为 按照时间写的项目 相对 路 径
-            String createdPath =  createImgFile(srcFile);
+            String createdPath =  createImgFile(uploadImgTemp);
             createdPath = createdPath.substring(createdPath.indexOf("img"));
             // 若未成功上传 则 删除 上传的图片
             if(createdPath==null){
@@ -199,7 +198,10 @@ public class PictureService {
                 map.put("existImgPath",createdPath);
             }
         }
-        return map;
+
+        // 若成功  金色字体
+        // 若失败  红色字体
+        setMapInfo(map, uploadImgTemp,successMapList,failedMapList);
     }
 
     private boolean isPictureExist(File srcFile, List<Picture> pictures, HashMap<String, Object> map, int[] imgA) throws IOException {
@@ -287,22 +289,22 @@ public class PictureService {
     }
 
 
-    public boolean setMapInfo(String s, HashMap<String, Object> map, File temp){
+    public void setMapInfo(HashMap<String, Object> map, File uploadImgTemp, ArrayList<HashMap<String, Object>> successMapList, ArrayList<HashMap<String, Object>> failedMapList){
         if(map.get("successMsg")!=null){
-            map.put("successMsg","图片："+s+ map.get("successMsg"));
+            map.put("successMsg","图片："+uploadImgTemp.getName()+ map.get("successMsg"));
+            successMapList.add(map);
         }
 
         if(map.get("failedMsg")!=null){
-            map.put("failedMsg","图片："+s+ map.get("failedMsg"));
+            map.put("failedMsg","图片："+uploadImgTemp.getName()+ map.get("failedMsg"));
             // 上传失败有两种原因  存在重复图片  或者  移动照片失败
             if(map.get("existImgPath")!=null){
                 //移动后要修改 页面显示的路径
-                String temppath = temp.getAbsolutePath();
+                String temppath = uploadImgTemp.getAbsolutePath();
                 map.put("uploadImgPath",temppath.substring(temppath.indexOf("temp")));
             }
-            return true;
+            failedMapList.add(map);
         }
-        return false;
     }
 
     public static boolean isImgType(String filetype){

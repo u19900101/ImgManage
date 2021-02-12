@@ -111,28 +111,29 @@
     <input type="submit" value="上传">
 </form>--%>
 
-
-
-<c:if test="${not empty failedList}">
-
 <div id = "main">
     <span class="firstSpan"><input class="myselectAll" handleMethod ="saveBoth" type="button" value="保存全部" style="color:green;font-size: larger;width: 100%;"></span>
     <span class="firstSpan"><input class="myselectAll" handleMethod ="deleteBoth" type="button" value="删除全部" style="color:red;font-size: larger;width:100%;"></span>
     <span class="firstSpan" style="float: right;"><input class="myselectAll" handleMethod ="saveExistOnly" type="button" value="只保存全部本地" style="color:navy;font-size: larger;width: 100%;"></span>
     <span class="firstSpan" style="float: right;"><input class="myselectAll" handleMethod ="saveUploadOnly" type="button" value="只保存全部上传" style="color:firebrick;font-size: larger;width: 100%;"></span>
-    <c:forEach items="${failedList}" var="picture">
 
-        <%-- 展示成功上传的信息--%>
-        <c:if test="${not empty picture.successMsg}">
-        <div  class="zuiOut" style="border: 3px solid #39987c;width: 100%;height: 100%">
-            <h1 style="color: red">${picture.successMsg}</h1>
-            <img src="${picture.existImgPath}" width="600">
-        </div>
-        </c:if>
+    <%-- 展示成功上传的信息--%>
+    <c:if test="${not empty successMapList}">
+        <c:forEach items="${successMapList}" var="picture">
+            <c:if test="${not empty picture.successMsg}">
+                <div  class="zuiOut" style="border: 3px solid #39987c;width: 100%;height: 100%">
+                    <h1 style="color: red">${picture.successMsg}</h1>
+                    <img src="${picture.existImgPath}" width="600">
+                </div>
+            </c:if>
+        </c:forEach>
+    </c:if>
 
+    <%-- 显示疑似可能重复的照片信息 --%>
+    <c:if test="${not empty failedMapList}">
+       <c:forEach items="${failedMapList}" var="picture">
         <%-- 展示 存在相同照片的信息 --%>
         <c:if test="${not empty picture.failedMsg}">
-
             <div id = ${picture.existPicture.path.replace('\\', '').replace('_', '').replace('.', '')} class="zuiOut" style="border: 3px solid #39987c;width: 100%;height: 100%">
                 <h1 style="color: red">${picture.failedMsg}</h1>
                 <span align="right" style="float: left;width: 49%">
@@ -162,16 +163,16 @@
                     <input class="myselect" type="button" value="只保留我" style="font-size: larger;width: 100%;text-align:center"
                            handleMethod ="saveUploadOnly" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath}></span>
 
-                    <div class="imgdiv">
+                <div class="imgdiv">
                         <img src="${picture.uploadImgPath}" alt="莫方,照片已提交">
                     </div>
                 </div>
             </div>
         </c:if>
-
     </c:forEach>
+    </c:if>
 </div>
-</c:if>
+
 
 </body>
 </html>
