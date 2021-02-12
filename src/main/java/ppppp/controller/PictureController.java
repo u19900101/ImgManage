@@ -141,11 +141,9 @@ public class PictureController {
             // 若成功  金色字体
             // 若失败  红色字体
             String s = multipartFile.getOriginalFilename();
-            boolean forward = pictureService.setMapInfo(s, map, temp);
+            pictureService.setMapInfo(s, map, temp);
+            hashMaps.add(map);
 
-            if(forward){
-                hashMaps.add(map);
-            }
         }
         // 防止页面重复提交
         request.getSession().setAttribute("failedList", hashMaps);
@@ -232,26 +230,32 @@ public class PictureController {
                 String move_absUploadImgPath = MyUtils.move_file(absUploadImgPath, destDir);
                 int i = pictureService.insertPicture(move_absUploadImgPath);
                 successMsg = "成功保存两张照片";
-                isSucceed = move_absUploadImgPath!=null & i==1;
+                isSucceed = move_absUploadImgPath!=null && i==1;
                 break;
             case "deleteBoth":
                 System.out.println("deleteBoth");
                 isSucceed = MyUtils.deleteFile(absUploadImgPath, absExistImgPath);
                 // 将数据库中的 保存文件也删除
                 i = pictureService.deletePicture(mapper,absExistImgPath.substring(absExistImgPath.indexOf("img")));
-                isSucceed = isSucceed & i==1;
+                isSucceed = isSucceed && i==1;
                 successMsg = "成功删除两张照片";
                 break;
             case "saveExistOnly":
                 System.out.println("saveExistOnly");
+                // 不操作数据库
                 isSucceed = MyUtils.deleteFile(absUploadImgPath);
                 successMsg = "成功保存已存在的照片";
                 break;
             case "saveUploadOnly":
                 System.out.println("saveUploadOnly");
+                // 先删除 存在的文件 和 数据库中的内容
                 isSucceed = MyUtils.deleteFile(absExistImgPath);
                 i = pictureService.deletePicture(mapper,absExistImgPath.substring(absExistImgPath.indexOf("img")));
-                isSucceed = isSucceed & i==1;
+                // 将 上传的文件写入数据库中
+                // 1.移动数据到img文件夹下  2.写入到数据库中
+                boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(absUploadImgPath);
+
+                isSucceed = isSucceed && i==1 && moveSuccess;
                 successMsg = "成功保存上传的照片";
                 break;
             default:
@@ -266,6 +270,8 @@ public class PictureController {
         );
         return new Gson().toJson(map);
     }
+
+
     // 批量处理
     @ResponseBody
     @RequestMapping(value = "/ajaxHandleSamePicAll",method = RequestMethod.POST)

@@ -295,8 +295,6 @@ public class PictureService {
     public boolean setMapInfo(String s, HashMap<String, Object> map, File temp){
         if(map.get("successMsg")!=null){
             map.put("successMsg","图片："+s+ map.get("successMsg"));
-            String tempStr = (String) map.get("successPath");
-            map.put("successPath",tempStr.substring(tempStr.indexOf("img")));
         }
 
         if(map.get("failedMsg")!=null){
@@ -483,5 +481,17 @@ public class PictureService {
         //将图片的相对路径存入数据库中 以便页面显示
         int insert = mapper.insert(picture);
         return insert;
+    }
+
+    public boolean moveImgToDirByAbsPathAndInsert(String absUploadImgPath) throws ParseException, IOException, ImageProcessingException {
+        //1.获取信息 2.移动
+        String imgAbsPath = createImgFile(new File(absUploadImgPath));
+
+        //3.写入数据库
+        if(imgAbsPath!=null){
+            return insertPicture(imgAbsPath)==1;
+        }
+
+        return false;
     }
 }
