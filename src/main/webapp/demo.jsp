@@ -113,8 +113,6 @@
 
 
 
-
-
 <c:if test="${not empty failedList}">
 
 <div id = "main">
@@ -125,10 +123,10 @@
     <c:forEach items="${failedList}" var="picture">
 
         <%-- 展示成功上传的信息--%>
-        <c:if test="${not empty picture.successPath}">
+        <c:if test="${not empty picture.successMsg}">
         <div  class="zuiOut" style="border: 3px solid #39987c;width: 100%;height: 100%">
             <h1 style="color: red">${picture.successMsg}</h1>
-            <img src="${picture.successPath}" width="600">
+            <img src="${picture.existImgPath}" width="600">
         </div>
         </c:if>
 
@@ -150,7 +148,7 @@
                     <h4 style="color: gray">图片大小： ${picture.existPicture.psize} M</h4>
                     <span align="center" style="float: left">
                         <input class="myselect" type="button" value="只保留我" style="font-size: larger;width: 100%;text-align:center"
-                          handleMethod ="saveExistOnly" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath} divID = ${picture.existPicture.path}></span>
+                          handleMethod ="saveExistOnly" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath}></span>
                     <div class="imgdiv">
                         <img src="${picture.existImgPath}" align="莫方,照片已提交">
                     </div>
@@ -162,7 +160,7 @@
                     <h4 style="color: gray">图片大小： ${picture.uploadPicture.psize} M</h4>
                     <span align="center" style="float: left">
                     <input class="myselect" type="button" value="只保留我" style="font-size: larger;width: 100%;text-align:center"
-                           handleMethod ="saveUploadOnly" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath} divID = ${picture.existPicture.path}></span>
+                           handleMethod ="saveUploadOnly" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath}></span>
 
                     <div class="imgdiv">
                         <img src="${picture.uploadImgPath}" alt="莫方,照片已提交">

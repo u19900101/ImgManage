@@ -265,6 +265,7 @@ public class PictureController {
 
         // 单张照片操作完毕后 要将 session中的list值进行更新,删除 list中的 uploadImgPath 和 existImgPath
         ArrayList<HashMap<String, Object>> failedList = (ArrayList<HashMap<String, Object>>) req.getSession().getAttribute("failedList");
+
         failedList.removeIf(
                 mapp -> mapp.get("existImgPath").equals(existImgPath)
         );

@@ -180,9 +180,6 @@ public class PictureService {
             System.out.println("  存在相同照片.....");
             // 判断 服务器中是否存在  不存在就移动  存在就不动
             MyUtils.copyFileUsingFileStreams(srcFile.getAbsolutePath(), uploadimgDir.replace("img", "")+map.get("existImgPath"));
-
-            // 不能删 删了页面就读不到....
-            // map.put("failedMsg","    上传失败,存在相同照片.....");
         }
         // 不存在，按照片信息建立文件夹上传
         else {
@@ -191,9 +188,7 @@ public class PictureService {
             createdPath = createdPath.substring(createdPath.indexOf("img"));
             // 若未成功上传 则 删除 上传的图片
             if(createdPath==null){
-                // srcFile.delete();
                 map.put("failedMsg","  上传失败,未能成功移动照片！！");
-                // return "  上传失败,未能成功移动照片！！";
             }else {
                 // 上传成功后马上将信息写入数据库 以免刷新时 的重复上传
                 uploadPicture.setPath(createdPath);
@@ -201,8 +196,7 @@ public class PictureService {
                 // 将照片信息放入map中 便于页面显示
                 map.put("uploadPicture", uploadPicture);
                 map.put("successMsg","    上传成功！！");
-                map.put("successPath",createdPath);
-                map.put("picStrId",MyUtils.intsToStr(imgA));
+                map.put("existImgPath",createdPath);
             }
         }
         return map;
