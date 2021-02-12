@@ -213,6 +213,7 @@ public class PictureService {
                 double imageSimilar = diff(imgA, imgB);
                 System.out.println("图片 ："+s+"与原图的相似度为： "+imageSimilar);
                 count++;
+                // 返回找到的第一张相似照片
                 if(imageSimilar>IMAGE_SIMILARITY){
                     map.put("failedMsg","上传失败,存在相同照片.....");
                     map.put("existImgPath", s);
@@ -457,11 +458,17 @@ public class PictureService {
         return map;
     }
 
-    public int deletePicture(PictureMapper mapper, String imgPath) {
-        PictureExample example = new PictureExample();
-        PictureExample.Criteria criteria = example.createCriteria();
-        criteria.andPathEqualTo(imgPath);
-        return mapper.deleteByExample(example);
+    public int deletePicture(PictureMapper mapper, String ...imgPath) {
+        int count = 0;
+        for (String s : imgPath) {
+            PictureExample example = new PictureExample();
+            PictureExample.Criteria criteria = example.createCriteria();
+            criteria.andPathEqualTo(s);
+            int i = mapper.deleteByExample(example);
+            count+=i;
+        }
+
+        return count;
     }
     // 2.将照片或视频信息写入数据库中
     public int insertPicture(String absUploadImgPath) throws ParseException, ImageProcessingException, IOException {

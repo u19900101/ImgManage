@@ -223,20 +223,18 @@ public class PictureController {
         String absExistImgPath = uploadimgDir.replace("img", "")+existImgPath;
         String successMsg = "";
         boolean isSucceed = false;
+        int i = 0;
         switch (handleMethod){
             case "saveBoth":
                 System.out.println("saveBoth");
-                String destDir = absExistImgPath.substring(0,absExistImgPath.lastIndexOf("\\"));
-                String move_absUploadImgPath = MyUtils.move_file(absUploadImgPath, destDir);
-                int i = pictureService.insertPicture(move_absUploadImgPath);
                 successMsg = "成功保存两张照片";
-                isSucceed = move_absUploadImgPath!=null && i==1;
+                isSucceed = pictureService.moveImgToDirByAbsPathAndInsert(absUploadImgPath);
                 break;
             case "deleteBoth":
                 System.out.println("deleteBoth");
                 isSucceed = MyUtils.deleteFile(absUploadImgPath, absExistImgPath);
                 // 将数据库中的 保存文件也删除
-                i = pictureService.deletePicture(mapper,absExistImgPath.substring(absExistImgPath.indexOf("img")));
+                i = pictureService.deletePicture(mapper,existImgPath);
                 isSucceed = isSucceed && i==1;
                 successMsg = "成功删除两张照片";
                 break;
@@ -276,62 +274,83 @@ public class PictureController {
     // 批量处理
     @ResponseBody
     @RequestMapping(value = "/ajaxHandleSamePicAll",method = RequestMethod.POST)
-    public String ajaxHandleSamePicAll(String handleMethod,HttpServletRequest req){
+    public String ajaxHandleSamePicAll(String handleMethod,HttpServletRequest req) throws ParseException, ImageProcessingException, IOException {
 
         HashMap map = new HashMap();
         ArrayList<HashMap<String, Object>> failedList = (ArrayList<HashMap<String, Object>>) req.getSession().getAttribute("failedList");
 
         ArrayList<String> errorInfoList = new ArrayList<>();
         String successMsg = "";
+        int i = 0;
         switch (handleMethod){
             case "saveBoth":
                 for (HashMap<String, Object> hashMap : failedList) {
-                    Object uploadImgPath = hashMap.get("uploadImgPath");
-                    Object existImgPath = hashMap.get("existImgPath");
-                    String absUploadImgPath = uploadimgDir.replace("img", "")+uploadImgPath;
-                    String absExistImgPath = uploadimgDir.replace("img", "")+existImgPath;
-                    String destDir = absExistImgPath.substring(0,absExistImgPath.lastIndexOf("\\"));
-                    String move_file = MyUtils.move_file(absUploadImgPath, destDir);
-                    if(move_file==null){
-                        errorInfoList.add((String) uploadImgPath);
+                    if(hashMap.get("successMsg")!=null){
+                        continue;
+                    }
+                    String absUploadImgPath = uploadimgDir.replace("img", "")+hashMap.get("uploadImgPath");
+                    boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(absUploadImgPath);
+                    if(!moveSuccess){
+                        errorInfoList.add(absUploadImgPath);
                     }
                 }
                 successMsg = "成功保存了本地和上传所有照片";
                 break;
             case "deleteBoth":
                 for (HashMap<String, Object> hashMap : failedList) {
-                    Object uploadImgPath = hashMap.get("uploadImgPath");
-                    Object existImgPath = hashMap.get("existImgPath");
+                    // 对成功上传的照片不操作
+                    if(hashMap.get("successMsg")!=null){
+                        continue;
+                    }
+                    String uploadImgPath = (String) hashMap.get("uploadImgPath");
+                    String existImgPath = (String) hashMap.get("existImgPath");
                     String absUploadImgPath = uploadimgDir.replace("img", "")+uploadImgPath;
                     String absExistImgPath = uploadimgDir.replace("img", "")+existImgPath;
                     boolean isDelete = MyUtils.deleteFile(absExistImgPath,absUploadImgPath);
+
+
+                    i = pictureService.deletePicture(mapper,existImgPath);
+                    isDelete = isDelete && i==1;
                     if(isDelete==false){
                         // 随便写一个吧
-                        errorInfoList.add((String) uploadImgPath);
+                        errorInfoList.add(uploadImgPath);
                     }
                 }
                 successMsg = "成功删除了本地和上传的所有照片";
                 break;
             case "saveExistOnly":
                 for (HashMap<String, Object> hashMap : failedList) {
-                    Object uploadImgPath = hashMap.get("uploadImgPath");
-                    String absUploadImgPath = uploadimgDir.replace("img", "")+uploadImgPath;
+                    // 对成功上传的照片不操作
+                    if(hashMap.get("successMsg")!=null){
+                        continue;
+                    }
+                    String absUploadImgPath = uploadimgDir.replace("img", "")+hashMap.get("uploadImgPath");
                     boolean isDelete = MyUtils.deleteFile(absUploadImgPath);
                     if(isDelete==false){
                         // 随便写一个吧
-                        errorInfoList.add((String) uploadImgPath);
+                        errorInfoList.add(absUploadImgPath);
                     }
                 }
                 successMsg = "成功只保存了所有本地照片";
                 break;
             case "saveUploadOnly":
                 for (HashMap<String, Object> hashMap : failedList) {
-                    Object existImgPath = hashMap.get("existImgPath");
+                    // 对成功上传的照片不操作
+                    if(hashMap.get("successMsg")!=null){
+                        continue;
+                    }
+                    String existImgPath = (String) hashMap.get("existImgPath");
+                    String absUploadImgPath = uploadimgDir.replace("img", "")+hashMap.get("uploadImgPath");
                     String absExistImgPath = uploadimgDir.replace("img", "")+existImgPath;
+
                     boolean isDelete = MyUtils.deleteFile(absExistImgPath);
+                    i = pictureService.deletePicture(mapper,existImgPath);
+
+                    boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(absUploadImgPath);
+                    isDelete = isDelete && i==1 &&moveSuccess;
                     if(isDelete==false){
                         // 随便写一个吧
-                        errorInfoList.add((String) absExistImgPath);
+                        errorInfoList.add(absExistImgPath);
                     }
                 }
                 successMsg = "成功只保存所有上传照片";
