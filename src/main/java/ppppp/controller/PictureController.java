@@ -36,6 +36,8 @@ public class PictureController {
     PictureMapper mapper;
     // 直接上传到的服务器路径
     public static String uploadimgDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT\\img";
+    public static String baseDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT";
+    public static String tempimgDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT\\temp\\img";
 
     // 查询数据库中的图片信息  在页面中显示
     @RequestMapping("/page")
@@ -91,7 +93,7 @@ public class PictureController {
     }
 
     // 图片上传
-    @RequestMapping(value = "/upload",method = RequestMethod.POST)
+  /*  @RequestMapping(value = "/upload",method = RequestMethod.POST)
     public String uploadImg(@RequestParam(value = "img",required = false) MultipartFile multipartFile,
                       HttpServletRequest request) throws ParseException, IOException, ImageProcessingException {
         String path = request.getSession().getServletContext().getRealPath("temp");
@@ -112,21 +114,21 @@ public class PictureController {
 
         return "forward:/demo.jsp";
     }
+*/
 
     @RequestMapping("/uploadDir")
     public String uploadDir(HttpServletRequest request,
             @RequestParam(value = "imgList",required = false) MultipartFile[] multipartFiles) throws IOException, ImageProcessingException, ParseException   {
         // 遍历文件夹下所有文件路径
         // 若父文件夹不存在则创建
-        MyUtils.creatDir(uploadimgDir);
-        String path = request.getSession().getServletContext().getRealPath("temp");
+        String path = request.getSession().getServletContext().getRealPath("temp//img");
         MyUtils.creatDir(path);
         // 将所有检测出 重复的照片 路径保存到 list中
         ArrayList<HashMap<String, Object>> successMapList = new ArrayList<>();
         ArrayList<HashMap<String, Object>> failedMapList = new ArrayList<>();
         for (MultipartFile multipartFile : multipartFiles) {
             // 先只处理图片文件
-            if(!isImgType(multipartFile.getOriginalFilename())){
+            if(!MyUtils.isImgType(multipartFile.getOriginalFilename())){
                 System.out.println(multipartFile.getOriginalFilename());
                 continue;
             }
@@ -134,7 +136,7 @@ public class PictureController {
             // 将上传的文件写入到 到文件夹
             multipartFile.transferTo(uploadImgTemp);
 
-            pictureService.checkAndCreateImg(uploadimgDir, uploadImgTemp,successMapList,failedMapList);
+            pictureService.checkAndCreateImg(tempimgDir, uploadImgTemp,successMapList,failedMapList);
 
         }
         // 防止页面重复提交
@@ -142,7 +144,6 @@ public class PictureController {
         request.getSession().setAttribute("successMapList", successMapList);
         return "redirect:/demo.jsp";
     }
-
     @RequestMapping("/setDesc")
     public String setDesc(){
         // 修改文件名  要解决重名问题
@@ -212,8 +213,8 @@ public class PictureController {
 
         HashMap<String,Object> map = new HashMap<>();
 
-        String absUploadImgPath = uploadimgDir.replace("img", "")+uploadImgPath;
-        String absExistImgPath = uploadimgDir.replace("img", "")+existImgPath;
+        String absUploadImgPath = baseDir+"\\"+uploadImgPath;
+        String absExistImgPath = baseDir+"\\"+existImgPath;
         String successMsg = "";
         boolean isSucceed = false;
         int i = 0;
@@ -249,16 +250,29 @@ public class PictureController {
                 isSucceed = isSucceed && i==1 && moveSuccess;
                 successMsg = "成功保存上传的照片";
                 break;
+            case "saveSingle":
+                System.out.println("saveSingle");
+                // 将 上传的文件写入数据库中
+                // 1.移动数据到img文件夹下  2.写入到数据库中
+                isSucceed = pictureService.moveImgToDirByAbsPathAndInsert(absUploadImgPath);
+                successMsg = "成功保存上传的照片";
+                break;
+            case "deleteSingle":
+                System.out.println("deleteSingle");
+                // 先删除 存在的文件 和 数据库中的内容
+                isSucceed = MyUtils.deleteFile(absUploadImgPath);
+                successMsg = "成功删除照片";
+                break;
             default:
                 map.put("status", "fail");
         }
-        pictureService.insertMsg(map, isSucceed,successMsg);
+        MyUtils.insertMsg(map, isSucceed,successMsg);
 
         // 单张照片操作完毕后 要将 session中的list值进行更新,删除 list中的 uploadImgPath 和 existImgPath
         ArrayList<HashMap<String, Object>> failedMapList = (ArrayList<HashMap<String, Object>>) req.getSession().getAttribute("failedMapList");
 
         failedMapList.removeIf(
-                mapp -> mapp.get("existImgPath").equals(existImgPath)
+                mapp -> ((Picture)mapp.get("existPicture")).getPath().equals(existImgPath)
         );
         return new Gson().toJson(map);
     }
@@ -281,7 +295,8 @@ public class PictureController {
                     if(hashMap.get("successMsg")!=null){
                         continue;
                     }
-                    String absUploadImgPath = uploadimgDir.replace("img", "")+hashMap.get("uploadImgPath");
+                    String uploadImgPath = ((Picture)hashMap.get("uploadPicture")).getPath();
+                    String absUploadImgPath = baseDir+"\\"+uploadImgPath;
                     boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(absUploadImgPath);
                     if(!moveSuccess){
                         errorInfoList.add(absUploadImgPath);
@@ -295,13 +310,12 @@ public class PictureController {
                     if(hashMap.get("successMsg")!=null){
                         continue;
                     }
-                    String uploadImgPath = (String) hashMap.get("uploadImgPath");
-                    String existImgPath = (String) hashMap.get("existImgPath");
-                    String absUploadImgPath = uploadimgDir.replace("img", "")+uploadImgPath;
-                    String absExistImgPath = uploadimgDir.replace("img", "")+existImgPath;
+                    String uploadImgPath = ((Picture)hashMap.get("uploadPicture")).getPath();
+                    String existImgPath = ((Picture)hashMap.get("existPicture")).getPath();
+
+                    String absUploadImgPath = baseDir+"\\"+uploadImgPath;
+                    String absExistImgPath =baseDir+"\\"+existImgPath;
                     boolean isDelete = MyUtils.deleteFile(absExistImgPath,absUploadImgPath);
-
-
                     i = pictureService.deletePicture(mapper,existImgPath);
                     isDelete = isDelete && i==1;
                     if(isDelete==false){
@@ -317,7 +331,8 @@ public class PictureController {
                     if(hashMap.get("successMsg")!=null){
                         continue;
                     }
-                    String absUploadImgPath = uploadimgDir.replace("img", "")+hashMap.get("uploadImgPath");
+                    String absUploadImgPath = baseDir+"\\"+ ((Picture)hashMap.get("uploadPicture")).getPath();
+
                     boolean isDelete = MyUtils.deleteFile(absUploadImgPath);
                     if(isDelete==false){
                         // 随便写一个吧
@@ -332,9 +347,12 @@ public class PictureController {
                     if(hashMap.get("successMsg")!=null){
                         continue;
                     }
-                    String existImgPath = (String) hashMap.get("existImgPath");
-                    String absUploadImgPath = uploadimgDir.replace("img", "")+hashMap.get("uploadImgPath");
-                    String absExistImgPath = uploadimgDir.replace("img", "")+existImgPath;
+
+                    String uploadImgPath = ((Picture)hashMap.get("uploadPicture")).getPath();
+                    String existImgPath = ((Picture)hashMap.get("existPicture")).getPath();
+
+                    String absUploadImgPath = baseDir+"\\"+uploadImgPath;
+                    String absExistImgPath =baseDir+"\\"+existImgPath;
 
                     boolean isDelete = MyUtils.deleteFile(absExistImgPath);
                     i = pictureService.deletePicture(mapper,existImgPath);
@@ -351,12 +369,12 @@ public class PictureController {
             default:
                 map.put("status", "fail");
         }
-        pictureService.insertMsg(map,errorInfoList,successMsg);
+        MyUtils.insertMsg(map,errorInfoList,successMsg);
         return new Gson().toJson(map);
     }
 
     // 可以改写成为  对文件夹进行上传
-    @RequestMapping("/init")
+  /*  @RequestMapping("/init")
     public String init(HttpServletRequest request){
         // 遍历文件夹下所有文件路径
         // 若父文件夹不存在则创建
@@ -385,5 +403,5 @@ public class PictureController {
             }
         }
         return "forward:/demo.jsp";
-    }
+    }*/
 }

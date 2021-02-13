@@ -1,19 +1,192 @@
 package ppppp.util;
 
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import static ppppp.service.PictureService.aHash;
 
 /**
  * @author lppppp
  * @create 2021-02-09 8:44
  */
 public class MyUtils {
-    public static String move_file(String absoulteSrcpath, String absoulteDestDir){
+    /** 均值哈希算法*/
+    public static int[] aHash(String src){
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        int[] res = new int[64];
+        try {
+            int width = 8;
+            int height = 8;
+            File srcPic = new File(src);
+            Mat srcMat = null;
+
+            if(MyUtils.isContainChinese(src)){
+                FileInputStream inputStream = new FileInputStream(srcPic);
+                byte[] byt = new byte[(int) srcPic.length()];
+                int read = inputStream.read(byt);
+                srcMat =  Imgcodecs.imdecode(new MatOfByte(byt), Imgcodecs.IMREAD_COLOR);
+                // 不关闭的话 文件无法移动，尬。。。。
+                inputStream.close();
+            }else{
+                srcMat = Imgcodecs.imread(src, Imgcodecs.IMREAD_ANYCOLOR);
+            }
+
+            Mat resizeMat = new Mat();
+            Imgproc.resize(srcMat,resizeMat, new Size(width, height),0,0);
+
+
+            // 将缩小后的图片转换为64级灰度（简化色彩）
+            int total = 0;
+            int[] ints = new int[64];
+
+            int index = 0;
+            for (int i = 0;i < height;i++){
+                for (int j = 0;j < width;j++){
+                    int gray = gray(resizeMat.get(i, j));
+                    ints[index++] = gray;
+                    total = total + gray;
+                }
+            }
+            // 计算灰度平均值
+            int grayAvg = total / (width * height);
+            // 比较像素的灰度
+            for (int i =0;i<ints.length;i++) {
+                if (ints[i] >= grayAvg) {
+                    res[i] = 1;
+                } else {
+                    res[i] = 0;
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return res;
+    }
+    private static int gray(double[] bgr) {
+        int rgb = (int) (bgr[2] * 77 + bgr[1] * 151 + bgr[0] * 28) >> 8;
+        int gray = (rgb << 16) | (rgb << 8) | rgb;
+        return gray;
+    }
+    public static void setMapInfo(HashMap<String, Object> map, File uploadImgTemp, ArrayList<HashMap<String, Object>> successMapList, ArrayList<HashMap<String, Object>> failedMapList){
+        if(map.get("successMsg")!=null){
+            map.put("successMsg","图片："+uploadImgTemp.getName()+ map.get("successMsg"));
+            successMapList.add(map);
+        }
+
+        if(map.get("failedMsg")!=null){
+            map.put("failedMsg","图片："+uploadImgTemp.getName()+ map.get("failedMsg"));
+            failedMapList.add(map);
+        }
+    }
+
+    // 判断两者之间的4个方向转换是否都不同，若有一个完全相同则说明两张图相似
+    public static double diff(int[] imgA, int[] imgB){
+        int []diffCount = new int[4];
+        diffCount[0] = caluDiff(imgB,imgA);
+        if(diffCount[0]==64){
+            return 1.0;
+        }
+        //第1次旋转90度后比较
+        int[] turn90 = clockwise90Deg(imgA, 8);
+        diffCount[1] = caluDiff(imgB,turn90);
+        if(diffCount[1]==64){
+            return 1.0;
+        }
+        //第2次旋转90度后比较
+        int[] turn180 = clockwise90Deg(turn90, 8);
+        diffCount[2] = caluDiff(imgB,turn180);
+        if(diffCount[1]==64){
+            return 1.0;
+        }
+        //第3次旋转90度后比较
+        int[] turn270 = clockwise90Deg(turn180, 8);
+        diffCount[3] = caluDiff(imgB,turn270);
+        if(diffCount[3]==64){
+            return 1.0;
+        }
+
+        return (diffCount[0]+diffCount[1]+diffCount[2]+diffCount[3])/64.0/4.0;
+    }
+
+    private static int caluDiff(int[] imgB, int[] imgA) {
+        int diffCount = 0;
+        for (int i = 0; i < imgB.length; i++) {
+            if (imgB[i] == imgA[i]) {
+                diffCount++;
+            }
+        }
+        return diffCount;
+    }
+
+    public static int[] clockwise90Deg(int[] origin, int row){
+        int col = origin.length/row;
+        int [][]list = new int[row][col];
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                list[i][j] = origin[i*col+j];
+            }
+        }
+        int []newlist = new int[col*row];
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                newlist[j*col+row-1-i] = list[i][j];
+            }
+        }
+        return newlist;
+    }
+    // 解决图片路径中包含中文
+    public static boolean isContainChinese(String str) {
+        Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
+        Matcher m = p.matcher(str);
+        if (m.find()) {
+            return true;
+        }
+        return false;
+    }
+
+    public static HashMap insertMsg(HashMap map, ArrayList<String> errorInfoList, String successMsg) {
+
+        if(errorInfoList.size() == 0){
+            map.put("status", "success");
+            map.put("msg", successMsg);
+        }else {
+            map.put("status", "fail");
+        }
+        return map;
+    }
+
+    public static HashMap insertMsg(HashMap map, boolean isSucceed, String successMsg) {
+
+        if(isSucceed){
+            map.put("status", "success");
+            map.put("msg", successMsg);
+        }else {
+            map.put("status", "fail");
+        }
+        return map;
+    }
+    public static boolean isImgType(String filetype){
+        filetype = filetype.toLowerCase();
+        return filetype.endsWith("jpg") || filetype.endsWith("png")|| filetype.endsWith("jpeg")|| filetype.endsWith("gif")|| filetype.endsWith("bmp");
+    }
+    public static boolean isVideoType(String filetype){
+        filetype = filetype.toLowerCase();
+        return filetype.endsWith("mp4") || filetype.endsWith("avi")|| filetype.endsWith("mov")|| filetype.endsWith("rmvb")|| filetype.endsWith("mpeg");
+    }
+
+    public static String move_file(String absoulteSrcPath, String absoulteDestDir){
         //判断当前文件夹下是否有重名的文件
-        File file = new File(absoulteSrcpath);
+        File file = new File(absoulteSrcPath);
         String newFileName = file.getName();
         String[] list = new File(absoulteDestDir).list();
         if(list.length > 0){
@@ -27,7 +200,7 @@ public class MyUtils {
         }
         boolean b = file.renameTo(new File(absoulteDestDir,newFileName));
         if(b){
-            System.out.println("移动照片： "+absoulteSrcpath+ "到文件夹 ："
+            System.out.println("移动照片： "+absoulteSrcPath+ "到文件夹 ："
                     +absoulteDestDir +" 下");
         }else {
             System.out.println("移动图片失败.....");

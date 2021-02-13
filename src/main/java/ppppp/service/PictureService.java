@@ -22,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static ppppp.controller.PictureController.*;
+import static ppppp.controller.PictureController.uploadimgDir;
 
 /**
  * @author lppppp
@@ -155,22 +156,22 @@ public class PictureService {
 
 
     public void checkAndCreateImg(String destDir, File uploadImgTemp,
-                                                     ArrayList<HashMap<String, Object>> successMapList,
-                                                     ArrayList<HashMap<String, Object>> failedMapList) throws ParseException, IOException, ImageProcessingException {
+                                  ArrayList<HashMap<String, Object>> successMapList,
+                                  ArrayList<HashMap<String, Object>> failedMapList) throws ParseException, IOException, ImageProcessingException {
         //在整个数据库中进行 照片去重检查
         ArrayList<String> stringList = new ArrayList<>();
         HashMap<String,Object> map =new HashMap<>();
         MyUtils.getallpath(destDir,stringList);
 
         //判断图片在数据库中是否存在相似的照片
-        if(!isImgType(uploadImgTemp.getName())){
+        if(!MyUtils.isImgType(uploadImgTemp.getName())){
             return;
         }
-        int [] imgA = aHash(uploadImgTemp.getAbsolutePath());
+        int [] imgA = MyUtils.aHash(uploadImgTemp.getAbsolutePath());
         // 查询库中所有的 图片
         List<Picture> pictures = mapper.selectByExample(new PictureExample());
         // 将上传的图片与 现有的所有id进行比对
-        Picture uploadPicture = fileToPicture(uploadImgTemp.getAbsolutePath());
+        Picture uploadPicture = createImgFile(tempimgDir,uploadImgTemp);
         map.put("uploadPicture", uploadPicture);
         boolean isExist = isPictureExist(uploadImgTemp,pictures,map,imgA);
 
@@ -178,30 +179,27 @@ public class PictureService {
         if(isExist){
             System.out.println("  存在相同照片.....");
             // 判断 服务器中是否存在  不存在就移动  存在就不动
-            MyUtils.copyFileUsingFileStreams(uploadImgTemp.getAbsolutePath(), uploadimgDir.replace("img", "")+map.get("existImgPath"));
+            MyUtils.copyFileUsingFileStreams(tempimgDir.replace("temp\\img", "")+uploadPicture.getPath(), uploadimgDir.replace("img", "")+map.get("existImgPath"));
         }
         // 不存在，按照片信息建立文件夹上传
         else {
             // 返回值为 按照时间写的项目 相对 路 径
-            String createdPath =  createImgFile(uploadImgTemp);
-            createdPath = createdPath.substring(createdPath.indexOf("img"));
+            String createdPath =  uploadPicture.getPath();
             // 若未成功上传 则 删除 上传的图片
             if(createdPath==null){
                 map.put("failedMsg","  上传失败,未能成功移动照片！！");
             }else {
                 // 上传成功后马上将信息写入数据库 以免刷新时 的重复上传
-                uploadPicture.setPath(createdPath);
-                insertPicture(uploadPicture);
+                // insertPicture(uploadPicture);
                 // 将照片信息放入map中 便于页面显示
                 map.put("uploadPicture", uploadPicture);
                 map.put("successMsg","    上传成功！！");
-                map.put("existImgPath",createdPath);
             }
         }
 
         // 若成功  金色字体
         // 若失败  红色字体
-        setMapInfo(map, uploadImgTemp,successMapList,failedMapList);
+        MyUtils.setMapInfo(map, uploadImgTemp,successMapList,failedMapList);
     }
 
     private boolean isPictureExist(File srcFile, List<Picture> pictures, HashMap<String, Object> map, int[] imgA) throws IOException {
@@ -209,16 +207,15 @@ public class PictureService {
         int count = 0;
         for (Picture picture : pictures) {
             String s = picture.getPath();
-            if(isImgType(s.substring(s.length()-3))){
+            if(MyUtils.isImgType(s)){
                 String picturePid = picture.getPid();
                 int[] imgB = MyUtils.getIntNum(picturePid);
-                double imageSimilar = diff(imgA, imgB);
+                double imageSimilar = MyUtils.diff(imgA, imgB);
                 System.out.println("图片 ："+s+"与原图的相似度为： "+imageSimilar);
                 count++;
                 // 返回找到的第一张相似照片
                 if(imageSimilar>IMAGE_SIMILARITY){
                     map.put("failedMsg","上传失败,存在相同照片.....");
-                    map.put("existImgPath", s);
                     // 将存在的照片信息放入map中 便于页面显示
                     map.put("existPicture", picture);
                     // 检测服务器上指定位置是否存在该文件
@@ -238,43 +235,50 @@ public class PictureService {
         return false;
     }
 
-    public static String createImgFile(File img) throws ParseException, IOException, ImageProcessingException {
-        HashMap<String, String> imgInfo = getImgInfo(img);
-
-        String create_time = imgInfo.get("create_time");
+    public  Picture createImgFile(String preDestDir,File img) throws ParseException, IOException, ImageProcessingException {
+        HashMap<String, String> imgInfoMap = getImgInfo(img);
+        Picture picture = null;
+        String create_time = imgInfoMap.get("create_time");
         String destDir;
         // 将照片移入日期类文件夹
         //照片包含时间信息的 移入照片创建的日期文件夹
         if(create_time!=null){
-            destDir = uploadimgDir+"\\"+create_time.split(" ")[0].replace("-","\\");
+            destDir = preDestDir+"\\"+create_time.split(" ")[0].replace("-","\\");
         }
         //照片不包含时间信息的 移入导入时间的文件夹
         else {
-            destDir = uploadimgDir+"\\"+LocalDateTime.now().toString().split("T")[0].replace("-","\\");
+            destDir = preDestDir+"\\"+LocalDateTime.now().toString().split("T")[0].replace("-","\\");
         }
         // 创建文件夹
         MyUtils.creatDir(destDir);
-        return MyUtils.move_file(img.getAbsolutePath(), destDir);
+        String move_file = MyUtils.move_file(img.getAbsolutePath(), destDir);
+        if(move_file!=null){
+            picture = fileToPicture(imgInfoMap,move_file);
+        }
+        return picture;
     }
 
-    public Picture fileToPicture(String fileAbspath) throws ParseException, IOException, ImageProcessingException {
+    public Picture fileToPicture(HashMap<String, String> map,String fileAbspath) throws ParseException, IOException, ImageProcessingException {
 
         String picStrId = MyUtils.createPicIdByAbsPath(fileAbspath);
-        HashMap<String, String> map = new HashMap<>();
+
         Picture pic = new Picture();
         File file = new File(fileAbspath);
         // 以后缀名来判断文件是图片还是视频
-        if(isImgType(fileAbspath)){
+        if(MyUtils.isImgType(fileAbspath)){
             map = getImgInfo(file);
-        }else if(isVideoType(fileAbspath)){
+        }else if(MyUtils.isVideoType(fileAbspath)){
             map = getVideoInfo(fileAbspath);
             return null;
         }
-        // 凑合解决一下 路径为空的 问题  照片名称包含 img 也没关系
-        if(fileAbspath.contains("img")){
+
+        // 凑合解决一下 路径为空的 问题  照片名称包含 temp 也没关系
+        // 文件刚上传时 需要 将 转换  页面点击选择时 也需要转换
+        if(fileAbspath.contains("temp")){
+            pic.setPath(fileAbspath.substring(fileAbspath.indexOf("temp")));
+        }else {
             pic.setPath(fileAbspath.substring(fileAbspath.indexOf("img")));
         }
-
         pic.setPid(picStrId);
         pic.setPname(file.getName());
         pic.setPcreatime(map.get("create_time"));
@@ -288,177 +292,17 @@ public class PictureService {
         return pic;
     }
 
+    public boolean moveImgToDirByAbsPathAndInsert(String absUploadImgPath) throws ParseException, IOException, ImageProcessingException {
+        //1.获取信息 2.移动
+        Picture picture = createImgFile(uploadimgDir,new File(absUploadImgPath));
 
-    public void setMapInfo(HashMap<String, Object> map, File uploadImgTemp, ArrayList<HashMap<String, Object>> successMapList, ArrayList<HashMap<String, Object>> failedMapList){
-        if(map.get("successMsg")!=null){
-            map.put("successMsg","图片："+uploadImgTemp.getName()+ map.get("successMsg"));
-            successMapList.add(map);
-        }
-
-        if(map.get("failedMsg")!=null){
-            map.put("failedMsg","图片："+uploadImgTemp.getName()+ map.get("failedMsg"));
-            // 上传失败有两种原因  存在重复图片  或者  移动照片失败
-            if(map.get("existImgPath")!=null){
-                //移动后要修改 页面显示的路径
-                String temppath = uploadImgTemp.getAbsolutePath();
-                map.put("uploadImgPath",temppath.substring(temppath.indexOf("temp")));
-            }
-            failedMapList.add(map);
-        }
-    }
-
-    public static boolean isImgType(String filetype){
-        filetype = filetype.toLowerCase();
-        return filetype.endsWith("jpg") || filetype.endsWith("png")|| filetype.endsWith("jpeg")|| filetype.endsWith("gif")|| filetype.endsWith("bmp");
-    }
-    public static boolean isVideoType(String filetype){
-        filetype = filetype.toLowerCase();
-        return filetype.endsWith("mp4") || filetype.endsWith("avi")|| filetype.endsWith("mov")|| filetype.endsWith("rmvb")|| filetype.endsWith("mpeg");
-    }
-    /** 均值哈希算法*/
-    public static int[] aHash(String src){
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        int[] res = new int[64];
-        try {
-            int width = 8;
-            int height = 8;
-            File srcPic = new File(src);
-            Mat  srcMat = null;
-
-            if(isContainChinese(src)){
-                FileInputStream inputStream = new FileInputStream(srcPic);
-                byte[] byt = new byte[(int) srcPic.length()];
-                int read = inputStream.read(byt);
-                srcMat =  Imgcodecs.imdecode(new MatOfByte(byt), Imgcodecs.IMREAD_COLOR);
-                // 不关闭的话 文件无法移动，尬。。。。
-                inputStream.close();
-            }else{
-                srcMat = Imgcodecs.imread(src, Imgcodecs.IMREAD_ANYCOLOR);
-            }
-
-            Mat resizeMat = new Mat();
-            Imgproc.resize(srcMat,resizeMat, new Size(width, height),0,0);
-
-
-            // 将缩小后的图片转换为64级灰度（简化色彩）
-            int total = 0;
-            int[] ints = new int[64];
-
-            int index = 0;
-            for (int i = 0;i < height;i++){
-                for (int j = 0;j < width;j++){
-                    int gray = gray(resizeMat.get(i, j));
-                    ints[index++] = gray;
-                    total = total + gray;
-                }
-            }
-            // 计算灰度平均值
-            int grayAvg = total / (width * height);
-            // 比较像素的灰度
-            for (int i =0;i<ints.length;i++) {
-                if (ints[i] >= grayAvg) {
-                    res[i] = 1;
-                } else {
-                    res[i] = 0;
-                }
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return res;
-    }
-    private static int gray(double[] bgr) {
-        int rgb = (int) (bgr[2] * 77 + bgr[1] * 151 + bgr[0] * 28) >> 8;
-        int gray = (rgb << 16) | (rgb << 8) | rgb;
-        return gray;
-    }
-
-    // 判断两者之间的4个方向转换是否都不同，若有一个完全相同则说明两张图相似
-    public  double diff(int[] imgA,int[] imgB){
-        int []diffCount = new int[4];
-        diffCount[0] = caluDiff(imgB,imgA);
-        if(diffCount[0]==64){
-            return 1.0;
-        }
-        //第1次旋转90度后比较
-        int[] turn90 = clockwise90Deg(imgA, 8);
-        diffCount[1] = caluDiff(imgB,turn90);
-        if(diffCount[1]==64){
-            return 1.0;
-        }
-        //第2次旋转90度后比较
-        int[] turn180 = clockwise90Deg(turn90, 8);
-        diffCount[2] = caluDiff(imgB,turn180);
-        if(diffCount[1]==64){
-            return 1.0;
-        }
-        //第3次旋转90度后比较
-        int[] turn270 = clockwise90Deg(turn180, 8);
-        diffCount[3] = caluDiff(imgB,turn270);
-        if(diffCount[3]==64){
-            return 1.0;
-        }
-
-        return (diffCount[0]+diffCount[1]+diffCount[2]+diffCount[3])/64.0/4.0;
-    }
-
-    private int caluDiff(int[] imgB, int[] imgA) {
-        int diffCount = 0;
-        for (int i = 0; i < imgB.length; i++) {
-            if (imgB[i] == imgA[i]) {
-                diffCount++;
-            }
-        }
-        return diffCount;
-    }
-
-    public int[] clockwise90Deg(int []origin, int row){
-        int col = origin.length/row;
-        int [][]list = new int[row][col];
-        for (int i = 0; i < row; i++) {
-            for (int j = 0; j < col; j++) {
-                list[i][j] = origin[i*col+j];
-            }
-        }
-        int []newlist = new int[col*row];
-        for (int i = 0; i < row; i++) {
-            for (int j = 0; j < col; j++) {
-                newlist[j*col+row-1-i] = list[i][j];
-            }
-        }
-        return newlist;
-    }
-    // 解决图片路径中包含中文
-    public static boolean isContainChinese(String str) {
-        Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
-        Matcher m = p.matcher(str);
-        if (m.find()) {
-            return true;
+        //3.写入数据库
+        if(picture!=null){
+            return insertPicture(picture)==1;
         }
         return false;
     }
 
-    public HashMap insertMsg(HashMap map, ArrayList<String> errorInfoList, String successMsg) {
-
-        if(errorInfoList.size() == 0){
-            map.put("status", "success");
-            map.put("msg", successMsg);
-        }else {
-            map.put("status", "fail");
-        }
-        return map;
-    }
-
-    public HashMap insertMsg(HashMap map, boolean isSucceed, String successMsg) {
-
-        if(isSucceed){
-            map.put("status", "success");
-            map.put("msg", successMsg);
-        }else {
-            map.put("status", "fail");
-        }
-        return map;
-    }
 
     public int deletePicture(PictureMapper mapper, String ...imgPath) {
         int count = 0;
@@ -472,29 +316,10 @@ public class PictureService {
 
         return count;
     }
-    // 2.将照片或视频信息写入数据库中
-    public int insertPicture(String absUploadImgPath) throws ParseException, ImageProcessingException, IOException {
-        Picture picture = fileToPicture(absUploadImgPath);
-        //将图片的相对路径存入数据库中 以便页面显示
-        int insert = mapper.insert(picture);
-        return insert;
-    }
 
     public int insertPicture(Picture picture){
         //将图片的相对路径存入数据库中 以便页面显示
         int insert = mapper.insert(picture);
         return insert;
-    }
-
-    public boolean moveImgToDirByAbsPathAndInsert(String absUploadImgPath) throws ParseException, IOException, ImageProcessingException {
-        //1.获取信息 2.移动
-        String imgAbsPath = createImgFile(new File(absUploadImgPath));
-
-        //3.写入数据库
-        if(imgAbsPath!=null){
-            return insertPicture(imgAbsPath)==1;
-        }
-
-        return false;
     }
 }

@@ -90,7 +90,7 @@
                 var uploadImgPath = $(this).attr('uploadImgPath');
                 var existImgPath = $(this).attr('existImgPath');
                 // 要replaceAll  下面的则不需要 尬
-                var divID = $(this).attr('existImgPath').replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
+                var divID = $(this).attr('uploadImgPath').replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
                 $.post(
                     "http://localhost:8080/pic/picture/ajaxHandleSamePic",
                     "handleMethod="+handleMethod+"&uploadImgPath="+uploadImgPath+"&existImgPath="+existImgPath,
@@ -130,6 +130,11 @@
                 });
             });
         });
+
+
+    </script>
+    <%--alert自动消失--%>
+    <script type="text/javascript">
         var prompt = function (message, style, time)
         {
             style = (style === undefined) ? 'alert-success' : style;
@@ -163,7 +168,6 @@
         {
             prompt(message, 'alert-info', time);
         };
-
     </script>
 </head>
 <body>
@@ -181,7 +185,6 @@
     图  像 ：<input type="file" name="img" value="pppp"/><br/>
     <input type="submit" value="上传">
 </form>--%>
-
 <div id = "main">
     <span class="firstSpan"><input class="myselectAll" handleMethod ="saveBoth" type="button" value="保存全部" style="color:green;font-size: larger;width: 100%;"></span>
     <span class="firstSpan"><input class="myselectAll" handleMethod ="deleteBoth" type="button" value="删除全部" style="color:red;font-size: larger;width:100%;"></span>
@@ -192,55 +195,63 @@
     <c:if test="${not empty successMapList}">
         <c:forEach items="${successMapList}" var="picture">
             <c:if test="${not empty picture.successMsg}">
-                <div  class="zuiOut" style="border: 3px solid #39987c;width: 100%;height: 100%">
+            <div id = ${picture.uploadPicture.path.replace('\\', '').replace('_', '').replace('.', '')} style="border: 3px solid #39987c;width: 49%;height: 100%;float: left">
                     <h1 style="color: red">${picture.successMsg}</h1>
-                    <h3 style="color: red">本地照片:${picture.existImgPath}</h3>
-                    <h4 style="color: chocolate">图片尺寸： ${picture.existPicture.pwidth}*${picture.existPicture.pheight}</h4>
-                    <h4 style="color: gray">图片大小： ${picture.existPicture.psize} M</h4>
-                    <img src="${picture.existImgPath}" width="600">
+                    <h3 style="color: red">本地照片:${picture.uploadPicture.path}</h3>
+                    <h4 style="color: chocolate">图片尺寸： ${picture.uploadPicture.pwidth}*${picture.uploadPicture.pheight}</h4>
+                    <h4 style="color: gray">图片大小： ${picture.uploadPicture.psize} M</h4>
+                    <span align="center" style="float: left;width: 25%;">
+                        <input class="myselect" type="button" value="保存" style="font-size: larger;width: 100%;text-align:center"
+                               handleMethod ="saveSingle" uploadImgPath = ${picture.uploadPicture.path}></span>
+                    <span align="center" style="float: right;width: 25%;">
+                        <input class="myselect" type="button" value="删除" style="font-size: larger;width: 100%;text-align:center"
+                               handleMethod ="deleteSingle" uploadImgPath = ${picture.uploadPicture.path}></span>
+                    <div class="imgdiv">
+                        <img src="${picture.uploadPicture.path}" width="600">
+                    </div>
                 </div>
             </c:if>
         </c:forEach>
-    </c:if>
+</c:if>
 
     <%-- 显示疑似可能重复的照片信息 --%>
     <c:if test="${not empty failedMapList}">
        <c:forEach items="${failedMapList}" var="picture">
         <%-- 展示 存在相同照片的信息 --%>
         <c:if test="${not empty picture.failedMsg}">
-            <div id = ${picture.existPicture.path.replace('\\', '').replace('_', '').replace('.', '')} class="zuiOut" style="border: 3px solid #39987c;width: 100%;height: 100%">
+            <div id = ${picture.uploadPicture.path.replace('\\', '').replace('_', '').replace('.', '')} class="zuiOut" style="border: 3px solid #39987c;width: 100%;height: 100%">
                 <h1 style="color: red">${picture.failedMsg}</h1>
                 <span align="right" style="float: left;width: 49%">
                     <input class="myselect" value="都保留" type="button" style="color:green;font-size: larger;width: 100%;text-align:right"
-                       handleMethod ="saveBoth" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath}></span>
+                       handleMethod ="saveBoth" uploadImgPath = ${picture.uploadPicture.path} existImgPath=${picture.existPicture.path}></span>
                 <span align="left" style="float: right;width: 49%">
                     <input class="myselect" value="都删除" type="button" style="color: red;font-size: larger;width: 100%;text-align:left"
-                        handleMethod ="deleteBoth" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath}></span>
+                        handleMethod ="deleteBoth" uploadImgPath = ${picture.uploadPicture.path} existImgPath=${picture.existPicture.path}></span>
                     <%--本地照片--%>
                 <div class="outdiv" style="float: left">
-                    <h3 style="color: red">本地照片:${picture.existImgPath}</h3>
+                    <h3 style="color: red">本地照片:${picture.existPicture.path}</h3>
                     <h4 style="color: chocolate">图片尺寸： ${picture.existPicture.pwidth}*${picture.existPicture.pheight}</h4>
                     <h4 style="color: gray">图片大小： ${picture.existPicture.psize} M</h4>
                     <span align="center" style="float: left">
                         <input class="myselect" type="button" value="只保留我" style="font-size: larger;width: 100%;text-align:center"
-                          handleMethod ="saveExistOnly" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath}></span>
-                    <c:if test="${not empty picture.existImgPath}">
+                          handleMethod ="saveExistOnly" uploadImgPath = ${picture.uploadPicture.path} existImgPath=${picture.existPicture.path}></span>
+                    <c:if test="${not empty picture.existPicture.path}">
                         <div class="imgdiv">
-                            <img src="${picture.existImgPath}" align="莫方,照片已提交">
+                            <img src="${picture.existPicture.path}" align="莫方,照片已提交">
                         </div>
                     </c:if>
                 </div>
                     <%--上传的照片--%>
                 <div class="outdiv" style="height: 100%;float: right">
-                    <h3 style="color: lightgreen;">上传的照片：${picture.uploadImgPath}</h3>
+                    <h3 style="color: lightgreen;">上传的照片：${picture.uploadPicture.path}</h3>
                     <h4 style="color: chocolate">图片尺寸： ${picture.uploadPicture.pwidth}*${picture.uploadPicture.pheight}</h4>
                     <h4 style="color: gray">图片大小： ${picture.uploadPicture.psize} M</h4>
                     <span align="center" style="float: left">
                     <input class="myselect" type="button" value="只保留我" style="font-size: larger;width: 100%;text-align:center"
-                           handleMethod ="saveUploadOnly" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath}></span>
-            <c:if test="${not empty picture.uploadImgPath}">
+                           handleMethod ="saveUploadOnly" uploadImgPath = ${picture.uploadPicture.path} existImgPath=${picture.existPicture.path}></span>
+            <c:if test="${not empty picture.uploadPicture.path}">
                 <div class="imgdiv">
-                    <img src="${picture.uploadImgPath}" align="莫方,照片已提交">
+                    <img src="${picture.uploadPicture.path}" align="莫方,照片已提交">
                 </div>
             </c:if>
             </div>
