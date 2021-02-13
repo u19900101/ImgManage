@@ -43,6 +43,45 @@
             width: 24%;
             align:right;
         }
+
+        .alert {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            min-width: 200px;
+            margin-left: -100px;
+            z-index: 99999;
+            padding: 15px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+            font-size: xx-large;
+        }
+
+        .alert-info {
+            color: #31708f;
+            background-color: #d9edf7;
+            border-color: #bce8f1;
+        }
+
+        .alert-warning {
+            color: #8a6d3b;
+            background-color: #fcf8e3;
+            border-color: #faebcc;
+        }
+
+        .alert-danger {
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
+        }
+
     </style>
     <script type="text/javascript">
         $(function(){
@@ -58,12 +97,11 @@
                     function(data) {
                         if(data.status == 'success'){
                             $("#"+divID).remove();
-                            // alert(divID);
-                            alert(data.msg);
+                            success_prompt(data.msg,2500);
                         }else if(data.status == 'fail'){
-                            alert("提交失败");
+                            fail_prompt(data.msg,2500);
                         }else {
-                            alert("其他未知错误.....please enjoy debug");
+                            warning_prompt("其他未知错误.....please enjoy debug",2500);
                         }
                     },
                     "json"
@@ -80,18 +118,51 @@
                     data:{},
                     success:function(data) {
                         if(data.status == 'success'){
-                            alert(data.msg);
                             $("#main").remove();
+                            success_prompt(data.msg,2500);
                         }else if(data.status == 'fail'){
-                            alert("提交失败");
+                            fail_prompt(data.msg,2500);
                         }else {
-                            alert("其他未知错误.....please enjoy debug");
+                            warning_prompt("其他未知错误.....please enjoy debug",2500);
                         }
                     },
                     dataType:"json"
                 });
             });
-        })
+        });
+        var prompt = function (message, style, time)
+        {
+            style = (style === undefined) ? 'alert-success' : style;
+            time = (time === undefined) ? 1200 : time;
+            $('<div>')
+                .appendTo('body')
+                .addClass('alert ' + style)
+                .html(message)
+                .show()
+                .delay(time)
+                .fadeOut();
+        };
+        var success_prompt = function(message, time)
+        {
+            prompt(message, 'alert-success', time);
+        };
+
+        // 失败提示
+        var fail_prompt = function(message, time)
+        {
+            prompt(message, 'alert-danger', time);
+        };
+
+        // 提醒
+        var warning_prompt = function(message, time)
+        {
+            prompt(message, 'alert-warning', time);
+        }
+        // 信息提示
+        var info_prompt = function(message, time)
+        {
+            prompt(message, 'alert-info', time);
+        };
 
     </script>
 </head>

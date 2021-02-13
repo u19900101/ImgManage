@@ -255,9 +255,9 @@ public class PictureController {
         pictureService.insertMsg(map, isSucceed,successMsg);
 
         // 单张照片操作完毕后 要将 session中的list值进行更新,删除 list中的 uploadImgPath 和 existImgPath
-        ArrayList<HashMap<String, Object>> failedList = (ArrayList<HashMap<String, Object>>) req.getSession().getAttribute("failedList");
+        ArrayList<HashMap<String, Object>> failedMapList = (ArrayList<HashMap<String, Object>>) req.getSession().getAttribute("failedMapList");
 
-        failedList.removeIf(
+        failedMapList.removeIf(
                 mapp -> mapp.get("existImgPath").equals(existImgPath)
         );
         return new Gson().toJson(map);
