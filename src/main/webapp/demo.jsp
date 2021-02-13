@@ -194,6 +194,9 @@
             <c:if test="${not empty picture.successMsg}">
                 <div  class="zuiOut" style="border: 3px solid #39987c;width: 100%;height: 100%">
                     <h1 style="color: red">${picture.successMsg}</h1>
+                    <h3 style="color: red">本地照片:${picture.existImgPath}</h3>
+                    <h4 style="color: chocolate">图片尺寸： ${picture.existPicture.pwidth}*${picture.existPicture.pheight}</h4>
+                    <h4 style="color: gray">图片大小： ${picture.existPicture.psize} M</h4>
                     <img src="${picture.existImgPath}" width="600">
                 </div>
             </c:if>
@@ -221,9 +224,11 @@
                     <span align="center" style="float: left">
                         <input class="myselect" type="button" value="只保留我" style="font-size: larger;width: 100%;text-align:center"
                           handleMethod ="saveExistOnly" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath}></span>
-                    <div class="imgdiv">
-                        <img src="${picture.existImgPath}" align="莫方,照片已提交">
-                    </div>
+                    <c:if test="${not empty picture.existImgPath}">
+                        <div class="imgdiv">
+                            <img src="${picture.existImgPath}" align="莫方,照片已提交">
+                        </div>
+                    </c:if>
                 </div>
                     <%--上传的照片--%>
                 <div class="outdiv" style="height: 100%;float: right">
@@ -233,11 +238,11 @@
                     <span align="center" style="float: left">
                     <input class="myselect" type="button" value="只保留我" style="font-size: larger;width: 100%;text-align:center"
                            handleMethod ="saveUploadOnly" uploadImgPath = ${picture.uploadImgPath} existImgPath=${picture.existImgPath}></span>
-
+            <c:if test="${not empty picture.uploadImgPath}">
                 <div class="imgdiv">
-                        <img src="${picture.uploadImgPath}" alt="莫方,照片已提交">
-                    </div>
+                    <img src="${picture.uploadImgPath}" align="莫方,照片已提交">
                 </div>
+            </c:if>
             </div>
         </c:if>
     </c:forEach>
