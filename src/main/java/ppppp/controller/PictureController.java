@@ -20,7 +20,6 @@ import java.text.ParseException;
 import java.util.*;
 
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
-import static ppppp.service.PictureService.*;
 
 /**
  * @author lppppp
@@ -51,29 +50,11 @@ public class PictureController {
         PictureExample pictureExample = new PictureExample();
         pictureExample.setOrderByClause("pcreatime");// 单月中照片升序显示  按月  照片逆序显示
         PictureExample.Criteria criteria = pictureExample.createCriteria();
-        criteria.andPcreatimeIsNotNull();
-
+        // criteria.andPcreatimeIsNotNull();
         List<Picture> pictures = mapper.selectByExample(pictureExample);
 
-        //将带时间的照片按月进行分组
-        TreeMap<String,ArrayList<Picture>> map = new TreeMap<>(new Comparator<String>() {
-            // 月份按照降序排列
-            @Override
-            public int compare(String o1, String o2) {
-                return -o1.compareTo(o2);
-            }
-        });
-        for (Picture picture : pictures) {
-            String month = picture.getPcreatime().substring(0, 7);
-            if(!map.containsKey(month)){
-                ArrayList<Picture> pictureArrayList = new ArrayList<>();
-                pictureArrayList.add(picture);
-                map.put(month,pictureArrayList);
-            }else {
-                ArrayList<Picture> pictureArrayList = map.get(month);
-                pictureArrayList.add(picture);
-            }
-        }
+        TreeMap<String,ArrayList<Picture>> map = pictureService.groupPictureByMonth(pictures);
+
 
         //将map 写进 MonthPic
         model.addAttribute("info", map);
@@ -92,29 +73,6 @@ public class PictureController {
         return "redirect:/picture/page";
     }
 
-    // 图片上传
-  /*  @RequestMapping(value = "/upload",method = RequestMethod.POST)
-    public String uploadImg(@RequestParam(value = "img",required = false) MultipartFile multipartFile,
-                      HttpServletRequest request) throws ParseException, IOException, ImageProcessingException {
-        String path = request.getSession().getServletContext().getRealPath("temp");
-
-        File temp = new File(path,multipartFile.getOriginalFilename());
-        // 若父文件夹不存在则创建
-        if(!temp.getParentFile().exists() || !temp.getParentFile().isDirectory()){
-            temp.getParentFile().mkdirs();
-        }
-        // 将上传的文件写入到 到文件夹
-        multipartFile.transferTo(temp);
-        String  descDir= request.getSession().getServletContext().getRealPath("img");
-        ArrayList<HashMap<String, Object>> successMapList = new ArrayList<>();
-        ArrayList<HashMap<String, Object>> failedMapList = new ArrayList<>();
-
-        pictureService.checkAndCreateImg(descDir, temp, successMapList, failedMapList);
-
-
-        return "forward:/demo.jsp";
-    }
-*/
 
     @RequestMapping("/uploadDir")
     public String uploadDir(HttpServletRequest request,
@@ -292,12 +250,13 @@ public class PictureController {
         ArrayList<HashMap<String, Object>> successMapList = (ArrayList<HashMap<String, Object>>) req.getSession().getAttribute("successMapList");
 
         ArrayList<String> errorInfoList = new ArrayList<>();
+        ArrayList<Picture> picturesList = new ArrayList<>();
         String successMsg = "";
         int i = 0;
         switch (handleMethod){
             case "saveBoth":
-                saveAllPicture(failedMapList,errorInfoList);
-                saveAllPicture(successMapList,errorInfoList);
+                saveAllPicture(failedMapList,errorInfoList,picturesList);
+                saveAllPicture(successMapList,errorInfoList,picturesList);
                 successMsg = "成功保存了本地和上传所有照片";
                 break;
             case "deleteBoth":
@@ -346,10 +305,15 @@ public class PictureController {
                     if(isDelete==false){
                         // 随便写一个吧
                         errorInfoList.add(absExistImgPath);
+                    }else {
+                        Picture uploadPicture = (Picture) hashMap.get("uploadPicture");
+                        String substring = uploadPicture.getPath().substring(uploadPicture.getPath().indexOf("img"));
+                        uploadPicture.setPath(substring);
+                        picturesList.add(uploadPicture);
                     }
                 }
 
-                saveAllPicture(successMapList,errorInfoList);
+                saveAllPicture(successMapList,errorInfoList, picturesList);
                 successMsg = "成功只保存所有上传照片";
                 break;
             default:
@@ -359,7 +323,17 @@ public class PictureController {
         // 清空session
         failedMapList.clear();
         successMapList.clear();
+        req.getSession().setAttribute("picturesList", picturesList);
         return new Gson().toJson(map);
+    }
+
+    @RequestMapping("/showUploadInfo")
+    public String showUploadInfo(Model model,HttpServletRequest req){
+        ArrayList<Picture> pictures = (ArrayList<Picture>) req.getSession().getAttribute("picturesList");
+        TreeMap<String,ArrayList<Picture>> map = pictureService.groupPictureByMonth(pictures);
+        //将map 写进 MonthPic
+        model.addAttribute("info", map);
+        return "picture";
     }
 
     private void deleteAllPicture(ArrayList<HashMap<String, Object>> MapList, ArrayList<String> errorInfoList) {
@@ -374,13 +348,18 @@ public class PictureController {
         }
     }
 
-    private void saveAllPicture(ArrayList<HashMap<String, Object>> MapList, ArrayList<String> errorInfoList) throws ParseException, ImageProcessingException, IOException {
+    private void saveAllPicture(ArrayList<HashMap<String, Object>> MapList, ArrayList<String> errorInfoList, ArrayList<Picture> picturesList) throws ParseException, ImageProcessingException, IOException {
         for (HashMap<String, Object> hashMap : MapList) {
             String uploadImgPath = ((Picture)hashMap.get("uploadPicture")).getPath();
             String absUploadImgPath = baseDir+"\\"+uploadImgPath;
             boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(absUploadImgPath);
             if(!moveSuccess){
                 errorInfoList.add(absUploadImgPath);
+            }else {
+                Picture uploadPicture = (Picture) hashMap.get("uploadPicture");
+                String substring = uploadPicture.getPath().substring(uploadPicture.getPath().indexOf("img"));
+                uploadPicture.setPath(substring);
+                picturesList.add(uploadPicture);
             }
         }
 

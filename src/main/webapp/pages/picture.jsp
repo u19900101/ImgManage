@@ -130,12 +130,6 @@ pdesc='还未设置'
             </div>
         </c:forEach>
     </div>
-    <%-- 此方法 默认第一个显示 其余的折叠  不知其所以然--%>
-   <%-- <script type="text/javascript">
-        $(function () {
-            $('.collapse').collapse('hidden');
-        });
-    </script>--%>
 </div>
 
 </div>

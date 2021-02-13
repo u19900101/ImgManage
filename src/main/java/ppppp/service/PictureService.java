@@ -322,4 +322,41 @@ public class PictureService {
         int insert = mapper.insert(picture);
         return insert;
     }
+
+    public TreeMap<String, ArrayList<Picture>> groupPictureByMonth(List<Picture> pictures) {
+        //将带时间的照片按月进行分组
+        TreeMap<String,ArrayList<Picture>> map = new TreeMap<>(new Comparator<String>() {
+            // 月份按照降序排列
+            @Override
+            public int compare(String o1, String o2) {
+                return -o1.compareTo(o2);
+            }
+        });
+
+        for (Picture picture : pictures) {
+            // 有拍摄时间 信息的就按月分组
+            if(picture.getPcreatime()!=null){
+                String month = picture.getPcreatime().substring(0, 7);
+                if(!map.containsKey(month)){
+                    ArrayList<Picture> pictureArrayList = new ArrayList<>();
+                    pictureArrayList.add(picture);
+                    map.put(month,pictureArrayList);
+                }else {
+                    ArrayList<Picture> pictureArrayList = map.get(month);
+                    pictureArrayList.add(picture);
+                }
+            }else {
+                if(!map.containsKey("神秘时间")){
+                    ArrayList<Picture> noneTimePicArrayList = new ArrayList<>();
+                    map.put("神秘时间", noneTimePicArrayList);
+                    noneTimePicArrayList.add(picture);
+                }else {
+                    ArrayList<Picture> noneTimePicArrayList = map.get("神秘时间");
+                    noneTimePicArrayList.add(picture);
+                }
+            }
+
+        }
+        return map;
+    }
 }

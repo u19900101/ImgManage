@@ -97,7 +97,7 @@
                     function(data) {
                         if(data.status == 'success'){
                             $("#"+divID).remove();
-                            success_prompt(data.msg,2500);
+                            success_prompt(data.msg,1500);
                         }else if(data.status == 'fail'){
                             fail_prompt(data.msg,2500);
                         }else {
@@ -118,8 +118,10 @@
                     data:{},
                     success:function(data) {
                         if(data.status == 'success'){
-                            $("#main").remove();
                             success_prompt(data.msg,2500);
+                            $("#main").remove();
+                            countDown(3);
+
                         }else if(data.status == 'fail'){
                             fail_prompt(data.msg,2500);
                         }else {
@@ -130,6 +132,14 @@
                 });
             });
         });
+
+        function countDown(secs){
+            if(--secs>0){
+                setTimeout("countDown("+secs+")",1000);
+            }else{
+                $(window).attr("location","picture/showUploadInfo");
+            }
+        }
 
 
     </script>
