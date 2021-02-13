@@ -21,9 +21,9 @@
              justify-content:center;
          }
 
-        .imgdiv img{
-            width:80%;
+        .imgdiv img {
             height:80%;
+            width:100%;
         }
 
         .zuiOut{
@@ -185,7 +185,8 @@
     图  像 ：<input type="file" name="img" value="pppp"/><br/>
     <input type="submit" value="上传">
 </form>--%>
-<div id = "main">
+<c:if test="${not empty successMapList or not empty failedMapList}">
+  <div id = "main">
     <span class="firstSpan"><input class="myselectAll" handleMethod ="saveBoth" type="button" value="保存全部" style="color:green;font-size: larger;width: 100%;"></span>
     <span class="firstSpan"><input class="myselectAll" handleMethod ="deleteBoth" type="button" value="删除全部" style="color:red;font-size: larger;width:100%;"></span>
     <span class="firstSpan" style="float: right;"><input class="myselectAll" handleMethod ="saveExistOnly" type="button" value="只保存全部本地" style="color:navy;font-size: larger;width: 100%;"></span>
@@ -195,7 +196,7 @@
     <c:if test="${not empty successMapList}">
         <c:forEach items="${successMapList}" var="picture">
             <c:if test="${not empty picture.successMsg}">
-            <div id = ${picture.uploadPicture.path.replace('\\', '').replace('_', '').replace('.', '')} style="border: 3px solid #39987c;width: 49%;height: 100%;float: left">
+            <div id = ${picture.uploadPicture.path.replace('\\', '').replace('_', '').replace('.', '')} class="zuiOut" >
                     <h1 style="color: red">${picture.successMsg}</h1>
                     <h3 style="color: red">本地照片:${picture.uploadPicture.path}</h3>
                     <h4 style="color: chocolate">图片尺寸： ${picture.uploadPicture.pwidth}*${picture.uploadPicture.pheight}</h4>
@@ -207,12 +208,12 @@
                         <input class="myselect" type="button" value="删除" style="font-size: larger;width: 100%;text-align:center"
                                handleMethod ="deleteSingle" uploadImgPath = ${picture.uploadPicture.path}></span>
                     <div class="imgdiv">
-                        <img src="${picture.uploadPicture.path}" width="600">
+                        <img src="${picture.uploadPicture.path}">
                     </div>
-                </div>
+            </div>
             </c:if>
         </c:forEach>
-</c:if>
+    </c:if>
 
     <%-- 显示疑似可能重复的照片信息 --%>
     <c:if test="${not empty failedMapList}">
@@ -259,7 +260,7 @@
     </c:forEach>
     </c:if>
 </div>
-
+</c:if>
 
 </body>
 </html>
