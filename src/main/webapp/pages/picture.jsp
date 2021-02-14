@@ -18,11 +18,10 @@
     <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <%--/*设置div属性*/--%>
     <style>
-
+        /* 单张图片框 */
         .c1{
             float: left;
             border: 1px solid red;
-
         }
         /*月份的大框*/
         .c2{
@@ -40,6 +39,13 @@
     <script type="text/javascript" src="static/script/jquery-1.7.2.js"></script>
     <script type="text/javascript">
         $(function() {
+            <%--删除button 的隐藏和显示--%>
+           /* $(".c1").mouseenter(function(){
+                $(this).prepend("<input id= \"kkk\" class=\"myselect\" type=\"button\" value=\"删除\" style=\"font-size: larger;width: 100%;text-align:center\" existImgPath = ${picture.path}/>");
+            });
+            $(".c1").mouseleave(function(){
+                $("#kkk").remove();
+            });*/
             $('.myselect').on('click', function () {
                 var existImgPath = $(this).attr('existImgPath');
                 // 要replaceAll  下面的则不需要 尬
@@ -61,6 +67,9 @@
                 );
             });
         });
+    </script>
+
+    <script type="text/javascript">
 
     </script>
     <%-- alter style--%>
@@ -250,8 +259,8 @@ pdesc='还未设置'
                                         <img src="${picture.path}" height="300px" >
                                     </a>
                                 </div>
-                                <input class="myselect" type="button" value="删除" style="font-size: larger;width: 100%;text-align:center"
-                                       existImgPath = ${picture.path}>
+                                  <input class="myselect" type="button" value="删除" style="font-size: larger;width: 100%;text-align:center"
+                               existImgPath = ${picture.path}>
 
                             </div>
                         </c:forEach>

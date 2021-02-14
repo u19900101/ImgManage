@@ -342,20 +342,17 @@ public class PictureController {
     // 对相同单个照片进行处理
     @ResponseBody
     @RequestMapping(value = "/ajaxDeletePic",method = RequestMethod.POST)
-    public String ajaxDeletePic(String existImgPath,HttpServletRequest req,Model model) throws ParseException, ImageProcessingException, IOException {
+    public String ajaxDeletePic(String existImgPath,HttpServletRequest req) throws ParseException, ImageProcessingException, IOException {
 
         HashMap<String,Object> map = new HashMap<>();
 
         String absExistImgPath = baseDir+"\\"+existImgPath;
-        String successMsg = "";
-        boolean isSucceed = false;
-
         System.out.println("deleteSingle");
         // 先删除 存在的文件 和 数据库中的内容
-        isSucceed = MyUtils.deleteFile(absExistImgPath);
+        boolean isSucceed = MyUtils.deleteFile(absExistImgPath);
         int i = pictureService.deletePicture(mapper,absExistImgPath.substring(absExistImgPath.indexOf("img")));
         isSucceed = isSucceed && i==1 ;
-        successMsg = "成功删除照片";
+        String successMsg  = "成功删除照片";
         MyUtils.insertMsg(map, isSucceed,successMsg);
 
         // 单张照片操作完毕后 要将 session中的list值进行更新,删除 list中的 uploadImgPath 和 existImgPath
@@ -366,7 +363,6 @@ public class PictureController {
                     mapp -> mapp.getPath().equals(existImgPath)
             );
         }
-
         return new Gson().toJson(map);
     }
 
