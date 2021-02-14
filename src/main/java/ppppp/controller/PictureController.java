@@ -40,7 +40,7 @@ public class PictureController {
 
     // 查询数据库中的图片信息  在页面中显示
     @RequestMapping("/page")
-    public String page(Model model,HttpServletRequest req){
+    public String page(HttpServletRequest req){
 
         //清空session
         req.getSession().invalidate();
@@ -52,7 +52,7 @@ public class PictureController {
 
         TreeMap<String,ArrayList<Picture>> map = pictureService.groupPictureByMonth(pictures);
         //将map 写进 MonthPic
-        model.addAttribute("monthsTreeMapListPic", map);
+        req.getSession().setAttribute("monthsTreeMapListPic", map);
         return "picture";
     }
     //修改图片信息
@@ -339,7 +339,36 @@ public class PictureController {
         return new Gson().toJson(map);
     }
 
+    // 对相同单个照片进行处理
+    @ResponseBody
+    @RequestMapping(value = "/ajaxDeletePic",method = RequestMethod.POST)
+    public String ajaxDeletePic(String existImgPath,HttpServletRequest req,Model model) throws ParseException, ImageProcessingException, IOException {
 
+        HashMap<String,Object> map = new HashMap<>();
+
+        String absExistImgPath = baseDir+"\\"+existImgPath;
+        String successMsg = "";
+        boolean isSucceed = false;
+
+        System.out.println("deleteSingle");
+        // 先删除 存在的文件 和 数据库中的内容
+        isSucceed = MyUtils.deleteFile(absExistImgPath);
+        int i = pictureService.deletePicture(mapper,absExistImgPath.substring(absExistImgPath.indexOf("img")));
+        isSucceed = isSucceed && i==1 ;
+        successMsg = "成功删除照片";
+        MyUtils.insertMsg(map, isSucceed,successMsg);
+
+        // 单张照片操作完毕后 要将 session中的list值进行更新,删除 list中的 uploadImgPath 和 existImgPath
+        TreeMap<String, ArrayList<Picture>> monthsTreeMapListPic = (TreeMap<String,ArrayList<Picture>>) req.getSession().getAttribute("monthsTreeMapListPic");
+        Set<String> lists = monthsTreeMapListPic.keySet();
+        for (String key : lists) {
+            monthsTreeMapListPic.get(key).removeIf(
+                    mapp -> mapp.getPath().equals(existImgPath)
+            );
+        }
+
+        return new Gson().toJson(map);
+    }
 
 
     private void deleteAllPicture(ArrayList<Picture> successPicturesList, ArrayList<String> errorInfoList) {

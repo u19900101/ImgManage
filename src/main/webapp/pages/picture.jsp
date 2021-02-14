@@ -38,7 +38,173 @@
     </style>
     <%--点击显示大图和标题--%>
     <script type="text/javascript" src="static/script/jquery-1.7.2.js"></script>
+    <script type="text/javascript">
+        $(function() {
+            $('.myselect').on('click', function () {
+                var existImgPath = $(this).attr('existImgPath');
+                // 要replaceAll  下面的则不需要 尬
+                var divID = $(this).attr('existImgPath').replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
+                $.post(
+                    "http://localhost:8080/pic/picture/ajaxDeletePic",
+                    "existImgPath=" + existImgPath,
+                    function (data) {
+                        if (data.status == 'success') {
+                            $("#" + divID).remove();
+                            success_prompt(data.msg, 1500);
+                        } else if (data.status == 'fail') {
+                            fail_prompt(data.msg, 2500);
+                        } else {
+                            warning_prompt("其他未知错误.....please enjoy debug", 2500);
+                        }
+                    },
+                    "json"
+                );
+            });
+        });
 
+    </script>
+    <%-- alter style--%>
+    <style>
+        .alert {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            min-width: 200px;
+            margin-left: -100px;
+            z-index: 99999;
+            padding: 15px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+            font-size: xx-large;
+        }
+
+        .alert-info {
+            color: #31708f;
+            background-color: #d9edf7;
+            border-color: #bce8f1;
+        }
+
+        .alert-warning {
+            color: #8a6d3b;
+            background-color: #fcf8e3;
+            border-color: #faebcc;
+            font-size: xx-large;
+        }
+
+        .alert-danger {
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
+            font-size: xx-large;
+        }
+    </style>
+    <script type="text/javascript">
+        $(function(){
+            $('.myselect').on('click', function(){
+                var handleMethod = $(this).attr('handleMethod');
+                var uploadImgPath = $(this).attr('uploadImgPath');
+                var existImgPath = $(this).attr('existImgPath');
+                // 要replaceAll  下面的则不需要 尬
+                var divID = $(this).attr('uploadImgPath').replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
+                $.post(
+                    "http://localhost:8080/pic/picture/ajaxHandleSamePic",
+                    "handleMethod="+handleMethod+"&uploadImgPath="+uploadImgPath+"&existImgPath="+existImgPath,
+                    function(data) {
+                        if(data.status == 'success'){
+                            $("#"+divID).remove();
+                            success_prompt(data.msg,1500);
+                        }else if(data.status == 'fail'){
+                            fail_prompt(data.msg,2500);
+                        }else {
+                            warning_prompt("其他未知错误.....please enjoy debug",2500);
+                        }
+                    },
+                    "json"
+                );
+            });
+
+            // 批量操作
+            $('.myselectAll').on('click', function(){
+                var handleMethod = $(this).attr('handleMethod');
+                $.ajax({
+                    type:'post',
+                    contentType : 'application/json;charset=utf-8',
+                    url:"http://localhost:8080/pic/picture/ajaxHandleSamePicAll?handleMethod="+handleMethod,
+                    data:{},
+                    success:function(data) {
+                        if(data.status == 'success'){
+                            success_prompt(data.msg,2500);
+                            $("#main").remove();
+                            countDown(3);
+
+                        }else if(data.status == 'fail'){
+                            fail_prompt(data.msg,2500);
+                        }else {
+                            warning_prompt("其他未知错误.....please enjoy debug",2500);
+                        }
+                    },
+                    dataType:"json"
+                });
+            });
+        });
+
+        function countDown(secs){
+            if(--secs>0){
+                setTimeout("countDown("+secs+")",1000);
+            }else{
+                alert(${not empty justUploadMsg});
+                if(${not empty justUploadMsg}){
+                    $(window).attr("location","picture/showUploadInfo?page=picture");
+                }else {
+                    $(window).attr("location","uploadDir.jsp");
+                }
+            }
+        }
+    </script>
+
+    <%--alert自动消失--%>
+    <script type="text/javascript">
+        var prompt = function (message, style, time)
+        {
+            style = (style === undefined) ? 'alert-success' : style;
+            time = (time === undefined) ? 1200 : time;
+            $('<div>')
+                .appendTo('body')
+                .addClass('alert ' + style)
+                .html(message)
+                .show()
+                .delay(time)
+                .fadeOut();
+        };
+        var success_prompt = function(message, time)
+        {
+            prompt(message, 'alert-success', time);
+        };
+
+        // 失败提示
+        var fail_prompt = function(message, time)
+        {
+            prompt(message, 'alert-danger', time);
+        };
+
+        // 提醒
+        var warning_prompt = function(message, time)
+        {
+            prompt(message, 'alert-warning', time);
+        }
+        // 信息提示
+        var info_prompt = function(message, time)
+        {
+            prompt(message, 'alert-info', time);
+        };
+    </script>
 </head>
 <body>
 
@@ -74,7 +240,7 @@ pdesc='还未设置'
                 <c:if test="${index.equals(1)}">
                     <div id="${item.key}" class="collapse in">
                         <c:forEach items="${item.value}" var="picture" >
-                            <div class="c1">
+                            <div class="c1" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
                                     <%--现实照片拍摄的时间--%>
                                 <c:if test="${not empty picture.pcreatime}">
                                     <h2 align="center" style="color: seagreen">${picture.pcreatime}</h2>　
@@ -84,6 +250,9 @@ pdesc='还未设置'
                                         <img src="${picture.path}" height="300px" >
                                     </a>
                                 </div>
+                                <input class="myselect" type="button" value="删除" style="font-size: larger;width: 100%;text-align:center"
+                                       existImgPath = ${picture.path}>
+
                             </div>
                         </c:forEach>
                     </div>
@@ -92,12 +261,17 @@ pdesc='还未设置'
                 <c:if test="${not index.equals(1)}">
                     <div id="${item.key}" class="collapse">
                         <c:forEach items="${item.value}" var="picture" >
-                            <div class="c1">
-                                    <%--现实照片拍摄的时间--%>
-                                <h2 align="center" style="color: seagreen">${picture.pcreatime}</h2><br/>　
-                                <a href="picture/before_edit_picture?pid=${picture.pid}">
-                                    <img src="${picture.path}" height="300px" >
-                                </a>
+                            <div class="c1" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
+                                <c:if test="${not empty picture.pcreatime}">
+                                    <h3 align="center" style="color: seagreen">${picture.pcreatime}</h3>　
+                                </c:if>
+                                <div class="imgDiv">
+                                    <a href="picture/before_edit_picture?pid=${picture.pid}">
+                                        <img src="${picture.path}" height="300px" >
+                                    </a>
+                                </div>
+                                <input class="myselect" type="button" value="删除" style="font-size: larger;width: 100%;text-align:center"
+                                       existImgPath = ${picture.path}>
                             </div>
                         </c:forEach>
                     </div>

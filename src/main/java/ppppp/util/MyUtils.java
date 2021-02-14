@@ -172,6 +172,7 @@ public class MyUtils {
             map.put("msg", successMsg);
         }else {
             map.put("status", "fail");
+            map.put("msg", "操作失败鸟");
         }
         return map;
     }
