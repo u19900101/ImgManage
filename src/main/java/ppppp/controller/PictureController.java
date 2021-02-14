@@ -218,9 +218,9 @@ public class PictureController {
     }
 
 
-    @RequestMapping("/before_edit_picture")
-    public String before_edit_picture(String pid,Model model){
-        Picture picture = mapper.selectByPrimaryKey(pid);
+    @RequestMapping(value = "/before_edit_picture",method = RequestMethod.POST)
+    public String before_edit_picture(String path,Model model){
+        Picture picture = mapper.selectByPrimaryKey(path);
 
         //不带后缀名显示
         String[] split = picture.getPname().split("\\.");
