@@ -40,27 +40,19 @@ public class PictureController {
 
     // 查询数据库中的图片信息  在页面中显示
     @RequestMapping("/page")
-    public String page(Model model,
-                       @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum){
+    public String page(Model model,HttpServletRequest req){
 
-        // PageHelper.startPage(pageNum, 10);
-        //紧跟着的第一条查询语句才有用  后面的无分页功能
-
+        //清空session
+        req.getSession().invalidate();
         // 查询时间不为空的图片
         PictureExample pictureExample = new PictureExample();
         pictureExample.setOrderByClause("pcreatime");// 单月中照片升序显示  按月  照片逆序显示
-        PictureExample.Criteria criteria = pictureExample.createCriteria();
-        // criteria.andPcreatimeIsNotNull();
+
         List<Picture> pictures = mapper.selectByExample(pictureExample);
 
         TreeMap<String,ArrayList<Picture>> map = pictureService.groupPictureByMonth(pictures);
-
-
         //将map 写进 MonthPic
-        model.addAttribute("info", map);
-        // PageInfo<Picture> info = new PageInfo<>(pictures, 5);
-        // // 带上当前的权限 路径  以便分页 区分跳转前缀
-        // model.addAttribute("url", "picture/page?");
+        model.addAttribute("monthsTreeMapListPic", map);
         return "picture";
     }
     //修改图片信息

@@ -74,7 +74,9 @@
             width: 24%;
             align:right;
         }
-
+    </style>
+    <%-- alter style--%>
+    <style>
         .alert {
             display: none;
             position: fixed;
@@ -112,9 +114,7 @@
             background-color: #f2dede;
             border-color: #ebccd1;
         }
-
     </style>
-
     <script type="text/javascript">
         $(function(){
             $('.myselect').on('click', function(){
@@ -258,7 +258,7 @@
                                         <span align="center" style="float: right;width: 25%;">
                                         <input class="myselect" type="button" value="删除" style="font-size: larger;width: 100%;text-align:center"
                                             handleMethod ="deleteSingle" uploadImgPath = ${picture.path}></span>
-                                        <div class="imgdiv2">
+                                        <div class="imgdiv">
                                             <a href="picture/before_edit_picture?pid=${picture.pid}">
                                             <img src="${picture.path}">
                                             </a>

@@ -22,17 +22,20 @@
         .c1{
             float: left;
             border: 1px solid red;
-        }
 
+        }
+        /*月份的大框*/
         .c2{
             /*float: left;*/
             border: 2px solid green;
         }
 
+        .imgDiv{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
     </style>
-
-
-
     <%--点击显示大图和标题--%>
     <script type="text/javascript" src="static/script/jquery-1.7.2.js"></script>
 
@@ -53,7 +56,8 @@ pdesc='还未设置'
 <c:if test="${not empty justUploadMsg}">
     <h1>${justUploadMsg}</h1>
 </c:if>
-<h1 href=""></h1>
+<h1 style="display : inline"><a href="picture/page" >  查看所有照片  </a> </h1>
+<h1 style="display : inline"><a href="uploadDir.jsp" >  继续上传照片  </a> </h1>
 <div style="width:100%;height:100%;overflow: scroll;">
     <div class="panel-group" id="accordion">
         <c:set var="index" value="0" />
@@ -72,12 +76,14 @@ pdesc='还未设置'
                         <c:forEach items="${item.value}" var="picture" >
                             <div class="c1">
                                     <%--现实照片拍摄的时间--%>
-                                <h2 align="center" style="color: seagreen">${picture.pcreatime}</h2>　
-
-                                <a href="picture/before_edit_picture?pid=${picture.pid}">
-                                    <img src="${picture.path}" height="300px" >
-                                </a>
-
+                                <c:if test="${not empty picture.pcreatime}">
+                                    <h2 align="center" style="color: seagreen">${picture.pcreatime}</h2>　
+                                </c:if>
+                                <div class="imgDiv">
+                                    <a href="picture/before_edit_picture?pid=${picture.pid}">
+                                        <img src="${picture.path}" height="300px" >
+                                    </a>
+                                </div>
                             </div>
                         </c:forEach>
                     </div>
@@ -88,12 +94,10 @@ pdesc='还未设置'
                         <c:forEach items="${item.value}" var="picture" >
                             <div class="c1">
                                     <%--现实照片拍摄的时间--%>
-                                <h2 align="center" style="color: seagreen">${picture.pcreatime}</h2>　
-
+                                <h2 align="center" style="color: seagreen">${picture.pcreatime}</h2><br/>　
                                 <a href="picture/before_edit_picture?pid=${picture.pid}">
                                     <img src="${picture.path}" height="300px" >
                                 </a>
-
                             </div>
                         </c:forEach>
                     </div>
