@@ -50,11 +50,14 @@ pdesc='还未设置'
 }
 --%>
 <%--完美解决 图片的页面显示问题--%>
-
+<c:if test="${not empty justUploadMsg}">
+    <h1>${justUploadMsg}</h1>
+</c:if>
+<h1 href=""></h1>
 <div style="width:100%;height:100%;overflow: scroll;">
     <div class="panel-group" id="accordion">
         <c:set var="index" value="0" />
-        <c:forEach var="item" items="${info}">
+        <c:forEach var="item" items="${monthsTreeMapListPic}">
             <%--月份的div框--%>
             <div class="c2">
                 <c:set var="index" value="${index+1}" />

@@ -12,8 +12,8 @@
 </head>
 <body>
 <form action="picture/uploadDir" enctype="multipart/form-data" method="post">
-    图  像 ：<input type="file" name="imgList" value="pppp" webkitdirectory/><br/>
-    <input type="submit" value="上传文件夹">
+    <h1>图  像 ：<input type="file" name="imgList" value="pppp" webkitdirectory/></h1><br/>
+    <h1><input type="submit" value="上传文件夹"></h1>
 </form>
 
 
