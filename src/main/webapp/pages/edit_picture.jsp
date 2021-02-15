@@ -113,18 +113,48 @@
         // 页面加载完成之后
         $(function () {
             // 使用ajax给用户名 实时 返回信息
+            // 不重名就直接进行修改
             $("#pname").bind("input propertychange",function(event){
-                var pname = this.value;
-                var picpath = $(this).attr('picpath');
-                var pictype = $(this).attr('pictype');
+                var pname = $("#pname").val();
+                var pictype = $("#pname").attr('pictype');
+                var picpath = $("#pname").attr('picpath');
                 $.post(
-                    "${basePath}picture/ajaxexistPname",
-                    "pname="+pname+"&picpath="+picpath+"&pictype="+pictype,
+                    "http://localhost:8080/pic/picture/ajaxUpdateInfo",
+                    "pname=" + pname+
+                    "&pictype=" + pictype+
+                    "&picpath=" + picpath,
                     function (data) {
-                        if(data.existpname){
+                        if (data.status == 'success') {
+                            success_prompt(data.msg, 1500);
+                            $("span.errorMsg").text("");
+                        } else if (data.status == 'fail') {
+                            fail_prompt(data.msg, 2500);
                             $("span.errorMsg").text("照片名称已存在，请重新输入");
-                        }else {
-                            $("span.errorMsg").text("照片名称可用");
+                        } else {
+                            warning_prompt("其他未知错误.....please enjoy debug", 2500);
+                        }
+                    },
+                    "json"
+                );
+            });
+            $("#pdesc").bind("input propertychange",function(event){
+                var pictype = $("#pname").attr('pictype');
+                var picpath = $("#pname").attr('picpath');
+                var pdesc = $("#pdesc").val();
+                $.post(
+                    "http://localhost:8080/pic/picture/ajaxUpdateInfo",
+                    "pictype=" + pictype+
+                    "&picpath=" + picpath+
+                    "&pdesc=" + pdesc,
+                    function (data) {
+                        if (data.status == 'success') {
+                            success_prompt(data.msg, 1500);
+                            $("span.errorMsg").text("");
+                        } else if (data.status == 'fail') {
+                            fail_prompt(data.msg, 2500);
+                            $("span.errorMsg").text("照片名称已存在，请重新输入");
+                        } else {
+                            warning_prompt("其他未知错误.....please enjoy debug", 2500);
                         }
                     },
                     "json"
@@ -151,33 +181,6 @@
                     "json"
                 );
             });
-            // 将修改变为ajax
-            $('#edit').on('click', function () {
-                var pname = $("#pname").val();
-                var pictype = $("#pname").attr('pictype');
-                var picpath = $("#pname").attr('picpath');
-                var pdesc = $("#pdesc").val();
-                alert(pdesc);
-                $.post(
-                    "http://localhost:8080/pic/picture/update",
-                    "pname=" + pname+
-                    "&pictype=" + pictype+
-                    "&picpath=" + picpath+
-                    "&pdesc=" + pdesc,
-                    function (data) {
-                        if (data.status == 'success') {
-                            success_prompt(data.msg, 1500);
-                        } else if (data.status == 'fail') {
-                            fail_prompt(data.msg, 2500);
-                        } else {
-                            warning_prompt("其他未知错误.....please enjoy debug", 2500);
-                        }
-                    },
-                    "json"
-                );
-            });
-
-
         });
     </script>
     <%--alert自动消失--%>

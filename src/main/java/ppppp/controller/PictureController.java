@@ -57,22 +57,43 @@ public class PictureController {
     }
     //修改图片信息
     @ResponseBody
-    @RequestMapping("/update")
+    @RequestMapping("/ajaxUpdateInfo")
     public String ajaxUpdateInfo(String pname,String pictype,String picpath,String pdesc){
         // 修改文件名  要解决重名问题
         HashMap map = new HashMap();
+        String status = "";
+        String msg = "";
+        int i = 0;
         Picture picture = new Picture();
-        picture.setPname(pname+pictype);
         picture.setPath(picpath);
-        picture.setPdesc(pdesc);
-        int i = mapper.updateByPrimaryKeySelective(picture);
-        if(i==1){
-            map.put("status", "success");
-            map.put("msg", "成功修改照片名称");
+        if(pname!=null){
+            boolean isNameExist = existPname(pname, picpath, pictype);
+            picture.setPname(pname+pictype);
+            if(!isNameExist){
+                i = mapper.updateByPrimaryKeySelective(picture);
+            }
+            if(1==i){
+                status = "success";
+                msg = "成功修改照片名称";
+            }else {
+                status = "fail";
+                msg = "照片重名，修改名称失败";
+            }
         }else {
-            map.put("status", "fail");
-            map.put("msg", "修改照片名称失败");
+            if(pdesc!=null){
+                picture.setPdesc(pdesc);
+            }
+            i = mapper.updateByPrimaryKeySelective(picture);
+            if(i==1){
+                status = "success";
+                msg = "成功修改照片描述";
+            }else {
+                status = "fail";
+                msg = "照片重名，修改照片描述失败";
+            }
         }
+        map.put("status", status);
+        map.put("msg", msg);
         return new Gson().toJson(map);
     }
 
@@ -243,18 +264,14 @@ public class PictureController {
 
 
     // 实时监测文件是否重名
-    @ResponseBody
-    @RequestMapping(value = "/ajaxexistPname",method = RequestMethod.POST)
-    public String ajaxexistPname(String pname,String picpath,String pictype){
+
+    public boolean existPname(String pname,String picpath,String pictype){
         // 修改本地文件名  要解决重名问题
         //1.查看是否 存在同名的pname，不存在则可用，存在 则查看path的上一层文件是否同名
         PictureExample pictureExample = new PictureExample();
         PictureExample.Criteria criteria = pictureExample.createCriteria();
         criteria.andPnameEqualTo(pname+pictype);
         List<Picture> pictures = mapper.selectByExample(pictureExample);
-        HashMap<String,Object> map = new HashMap<>();
-
-
         if(pictures.size()>0){
             // 存在同名的pname  查看path的父路径是否同名
             //获取修改图片的父路径
@@ -264,15 +281,11 @@ public class PictureController {
                 //获取父路径
                 String parentpath = picture.getPath().substring(0, picture.getPath().lastIndexOf("\\"));
                 if(o_parent.equalsIgnoreCase(parentpath)){
-                    map.put("existpname",true);
-                    break;
+                   return true;
                 }
             }
-        }else {
-            map.put("existpname",false);
         }
-
-        return new Gson().toJson(map);
+        return false;
     }
     
     // 对相同单个照片进行处理
