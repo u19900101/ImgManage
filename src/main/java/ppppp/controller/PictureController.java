@@ -2,6 +2,7 @@ package ppppp.controller;
 
 import com.drew.imaging.ImageProcessingException;
 import com.google.gson.Gson;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -55,6 +56,8 @@ public class PictureController {
         req.getSession().setAttribute("monthsTreeMapListPic", map);
         return "picture";
     }
+
+
     //修改图片信息
     @ResponseBody
     @RequestMapping("/ajaxUpdateInfo")
@@ -63,16 +66,26 @@ public class PictureController {
         HashMap map = new HashMap();
         String status = "";
         String msg = "";
-        int i = 0;
-        Picture picture = new Picture();
+        Picture picture = mapper.selectByPrimaryKey(picpath);
+        String originName = picture.getPname();
+        String newName = pname+pictype;
+        if(originName.equals(newName)){
+            map.put("status",  "unchange");
+            return new Gson().toJson(map);
+        }
         picture.setPath(picpath);
         if(pname!=null){
-            boolean isNameExist = existPname(pname, picpath, pictype);
+            int i = 0;boolean rename =false;
+            boolean isNameExist = existPname(picpath,newName);
             picture.setPname(pname+pictype);
             if(!isNameExist){
+                // 修改本地照片的名称
+                File file = new File(baseDir, picpath);
+                rename = file.renameTo(new File(file.getParent()+"\\"+ newName));
+                // 不修改主键
                 i = mapper.updateByPrimaryKeySelective(picture);
             }
-            if(1==i){
+            if(1==i&& rename){
                 status = "success";
                 msg = "成功修改照片名称";
             }else {
@@ -83,8 +96,7 @@ public class PictureController {
             if(pdesc!=null){
                 picture.setPdesc(pdesc);
             }
-            i = mapper.updateByPrimaryKeySelective(picture);
-            if(i==1){
+            if(mapper.updateByPrimaryKeySelective(picture)==1){
                 status = "success";
                 msg = "成功修改照片描述";
             }else {
@@ -265,12 +277,12 @@ public class PictureController {
 
     // 实时监测文件是否重名
 
-    public boolean existPname(String pname,String picpath,String pictype){
+    public boolean existPname(String picpath,String newName){
         // 修改本地文件名  要解决重名问题
         //1.查看是否 存在同名的pname，不存在则可用，存在 则查看path的上一层文件是否同名
         PictureExample pictureExample = new PictureExample();
         PictureExample.Criteria criteria = pictureExample.createCriteria();
-        criteria.andPnameEqualTo(pname+pictype);
+        criteria.andPnameEqualTo(newName);
         List<Picture> pictures = mapper.selectByExample(pictureExample);
         if(pictures.size()>0){
             // 存在同名的pname  查看path的父路径是否同名

@@ -114,7 +114,7 @@
         $(function () {
             // 使用ajax给用户名 实时 返回信息
             // 不重名就直接进行修改
-            $("#pname").bind("input propertychange",function(event){
+            $("#pname").on('blur',function(){
                 var pname = $("#pname").val();
                 var pictype = $("#pname").attr('pictype');
                 var picpath = $("#pname").attr('picpath');
@@ -130,6 +130,8 @@
                         } else if (data.status == 'fail') {
                             fail_prompt(data.msg, 2500);
                             $("span.errorMsg").text("照片名称已存在，请重新输入");
+                        } else if (data.status == 'unchange') {
+                        //  当名称没有变化时 不显示
                         } else {
                             warning_prompt("其他未知错误.....please enjoy debug", 2500);
                         }
