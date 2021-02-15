@@ -48,7 +48,46 @@
             height: 100%;
         }
     </style>
+    <%-- alter style--%>
+    <style>
+        .alert {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            min-width: 200px;
+            margin-left: -100px;
+            z-index: 99999;
+            padding: 15px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
 
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+            font-size: xx-large;
+        }
+
+        .alert-info {
+            color: #31708f;
+            background-color: #d9edf7;
+            border-color: #bce8f1;
+        }
+
+        .alert-warning {
+            color: #8a6d3b;
+            background-color: #fcf8e3;
+            border-color: #faebcc;
+        }
+
+        .alert-danger {
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
+        }
+    </style>
     <%--/* textarea 自适应父容器大小 */--%>
     <style>
 
@@ -90,20 +129,110 @@
                     },
                     "json"
                 );
-            })
+            });
+            $('.myselect').on('click', function () {
+                var existImgPath = $(this).attr('existImgPath');
+                // 要replaceAll  下面的则不需要 尬
+                var divID = $(this).attr('existImgPath').replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
+                $.post(
+                    "http://localhost:8080/pic/picture/ajaxDeletePic",
+                    "existImgPath=" + existImgPath,
+                    function (data) {
+                        if (data.status == 'success') {
+                            $("#" + divID).remove();
+                            success_prompt(data.msg, 1500);
+                            countDown(2);
+                        } else if (data.status == 'fail') {
+                            fail_prompt(data.msg, 2500);
+                        } else {
+                            warning_prompt("其他未知错误.....please enjoy debug", 2500);
+                        }
+                    },
+                    "json"
+                );
+            });
+            // 将修改变为ajax
+            $('#edit').on('click', function () {
+                var pname = $("#pname").val();
+                var pictype = $("#pname").attr('pictype');
+                var picpath = $("#pname").attr('picpath');
+                var pdesc = $("#pdesc").val();
+                alert(pdesc);
+                $.post(
+                    "http://localhost:8080/pic/picture/update",
+                    "pname=" + pname+
+                    "&pictype=" + pictype+
+                    "&picpath=" + picpath+
+                    "&pdesc=" + pdesc,
+                    function (data) {
+                        if (data.status == 'success') {
+                            success_prompt(data.msg, 1500);
+                        } else if (data.status == 'fail') {
+                            fail_prompt(data.msg, 2500);
+                        } else {
+                            warning_prompt("其他未知错误.....please enjoy debug", 2500);
+                        }
+                    },
+                    "json"
+                );
+            });
+
+
         });
+    </script>
+    <%--alert自动消失--%>
+    <script type="text/javascript">
+        var countDown = function (secs){
+            if(--secs>0){
+                setTimeout("countDown("+secs+")",1000);
+            }else{
+                $(window).attr("location","pages/picture.jsp");
+            }
+        };
+        var prompt = function (message, style, time)
+        {
+            style = (style === undefined) ? 'alert-success' : style;
+            time = (time === undefined) ? 1200 : time;
+            $('<div>')
+                .appendTo('body')
+                .addClass('alert ' + style)
+                .html(message)
+                .show()
+                .delay(time)
+                .fadeOut();
+        };
+        var success_prompt = function(message, time)
+        {
+            prompt(message, 'alert-success', time);
+        };
+
+        // 失败提示
+        var fail_prompt = function(message, time)
+        {
+            prompt(message, 'alert-danger', time);
+        };
+
+        // 提醒
+        var warning_prompt = function(message, time)
+        {
+            prompt(message, 'alert-warning', time);
+        }
+        // 信息提示
+        var info_prompt = function(message, time)
+        {
+            prompt(message, 'alert-info', time);
+        };
     </script>
 </head>
 <body>
 
 <%--显示大图--%>
-<div class="app">
-    <form action="picture/update">
+<div class="app" name = "div1">
         <%--显示 照片名称  拍摄时间 地点--%>
-        <div class="c1">
-            <span>照片名称：</span><input id="pname" name = "pname" value="${picture.pname}" picpath = ${picture.path} pictype=${type}>
-            <input id="pid" name = "pid" value="${picture.pid}" type="hidden">
-            <input id="pictype" name = "pictype" value="${type}" type="hidden">
+        <div class="c1" name = "div2">
+            <span>照片名称：</span>
+            <input id="pname" name = "pname" value="${picture.pname}" picpath = ${picture.path} pictype=${type}>
+
             <%--提示是否有重名的信息  错误信息  跟上面对应起来要写class--%>
             <span class="errorMsg" style="color: red;"></span>
 
@@ -124,14 +253,16 @@
                 <span style="color: green">${picture.gpsLatitude}</span>
             </c:if>
 
-
-            <input type="submit" value="提交">
-
+            <input id="edit" value="修改" type="button">
+            <%--显示照片--%>
+            <input class="myselect" type="button" value="删除" style="font-size: larger;width: 50%;text-align:center"
+                   handleMethod ="deleteSingle" existImgPath = ${picture.path}>
+            <div class="c2">
+                <img src="${picture.path}" width="800">
+            </div>
         </div>
-        <%--显示照片--%>
-        <div class="c2">
-            <img src="${picture.path}" width="800">
-        </div>
+
+
         <%--添加描述--%>
         <div class="c3" >
             <c:if test="${empty picture.pdesc}">
@@ -147,11 +278,8 @@
                             name = "pdesc"
                   >${picture.pdesc}</textarea>
             </c:if>
-
-
         </div>
 
-    </form>
 </div>
 
 </html>

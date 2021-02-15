@@ -56,13 +56,24 @@ public class PictureController {
         return "picture";
     }
     //修改图片信息
+    @ResponseBody
     @RequestMapping("/update")
-    public String updateInfo(Picture picture,String pictype){
+    public String ajaxUpdateInfo(String pname,String pictype,String picpath,String pdesc){
         // 修改文件名  要解决重名问题
-        picture.setPname(picture.getPname()+pictype);
+        HashMap map = new HashMap();
+        Picture picture = new Picture();
+        picture.setPname(pname+pictype);
+        picture.setPath(picpath);
+        picture.setPdesc(pdesc);
         int i = mapper.updateByPrimaryKeySelective(picture);
-        System.out.println(i);
-        return "redirect:/picture/page";
+        if(i==1){
+            map.put("status", "success");
+            map.put("msg", "成功修改照片名称");
+        }else {
+            map.put("status", "fail");
+            map.put("msg", "修改照片名称失败");
+        }
+        return new Gson().toJson(map);
     }
 
 

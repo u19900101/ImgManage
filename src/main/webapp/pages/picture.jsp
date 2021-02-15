@@ -278,11 +278,15 @@ pdesc='还未设置'
                                 <c:if test="${not empty picture.pcreatime}">
                                     <h3 align="center" style="color: seagreen">${picture.pcreatime}</h3>　
                                 </c:if>
-                                <div class="imgDiv">
-                                    <a href="picture/before_edit_picture?path=${picture.path}">
-                                        <img class = "img" src="${picture.path}" height="300px" >
-                                    </a>
-                                </div>
+                                <form action="picture/before_edit_picture" method="post" name="${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
+                                    <div class="imgDiv">
+                                        <input type="hidden" name="path" value="${picture.path}">
+
+                                        <a href="javascript:document.${picture.path.replace('\\', '').replace('_', '').replace('.', '')}.submit();">
+                                            <img src="${picture.path}" height="300px" >
+                                        </a>
+                                    </div>
+                                </form>
                                 <input class="myselect" type="button" value="删除" style="font-size: larger;width: 100%;text-align:center"
                                        existImgPath = ${picture.path}>
                             </div>
