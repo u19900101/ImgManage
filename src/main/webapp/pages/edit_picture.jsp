@@ -127,8 +127,7 @@
                         if (data.status == 'success') {
                             success_prompt(data.msg, 1500);
                             $("#myImg").attr("src",data.newPath);
-                            alert(data.newPath);
-                            $("span.errorMsg").text(data.newPath);
+                            $("span.errorMsg").text("");
                         } else if (data.status == 'fail') {
                             fail_prompt(data.msg, 2500);
                             $("span.errorMsg").text("照片名称已存在，请重新输入");
@@ -141,9 +140,9 @@
                     "json"
                 );
             });
-            $("#pdesc").bind("input propertychange",function(event){
+            $("#pdesc").on('blur',function(){
                 var pictype = $("#pname").attr('pictype');
-                var picpath = $("#pname").attr('picpath');
+                var picpath = $("#myImg").attr('src');
                 var pdesc = $("#pdesc").val();
                 $.post(
                     "http://localhost:8080/pic/picture/ajaxUpdateInfo",
@@ -232,7 +231,7 @@
     </script>
 </head>
 <body>
-
+<h1><a href="pages/picture.jsp">回到主页</a> </h1>
 <%--显示大图--%>
 <div class="app" name = "div1">
         <%--显示 照片名称  拍摄时间 地点--%>
@@ -260,7 +259,6 @@
                 <span style="color: green">${picture.gpsLatitude}</span>
             </c:if>
 
-            <input id="edit" value="修改" type="button">
             <%--显示照片--%>
             <input class="myselect" type="button" value="删除" style="font-size: larger;width: 50%;text-align:center"
                    handleMethod ="deleteSingle" existImgPath = ${picture.path}>

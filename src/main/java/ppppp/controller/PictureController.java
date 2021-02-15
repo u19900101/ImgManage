@@ -43,6 +43,9 @@ public class PictureController {
     @RequestMapping("/page")
     public String page(HttpServletRequest req){
 
+        if(req.getSession().getAttribute("monthsTreeMapListPic")!=null){
+            return "picture";
+        }
         //清空session
         req.getSession().invalidate();
         // 查询时间不为空的图片
@@ -61,16 +64,21 @@ public class PictureController {
     //修改图片信息
     @ResponseBody
     @RequestMapping("/ajaxUpdateInfo")
-    public String ajaxUpdateInfo(String pname,String pictype,String picpath,String pdesc){
+    public String ajaxUpdateInfo(String pname,String pictype,String picpath,String pdesc,HttpServletRequest req){
         // 修改文件名  要解决重名问题
         HashMap map = new HashMap();
         String status = "";
         String msg = "";
         Picture picture = mapper.selectByPrimaryKey(picpath);
         String originName = picture.getPname();
+        String originDesc = picture.getPdesc();
         String newName = pname+pictype;
         String newPath =null;
-        if(originName.equals(newName)){
+        boolean  descChange= false;
+        if(originDesc != null && pdesc !=null){
+            descChange = originDesc.equals(pdesc);
+        }
+        if(originName.equals(newName)|| descChange){
             map.put("status",  "unchange");
             return new Gson().toJson(map);
         }
@@ -91,6 +99,19 @@ public class PictureController {
                 status = "success";
                 msg = "成功修改照片名称";
                 map.put("newPath", newPath);
+
+                //要将 monthsTreeMapListPic中相应的字段进行修改
+                TreeMap<String,ArrayList<Picture>> monthsTreeMapListPic = (TreeMap<String, ArrayList<Picture>>) req.getSession().getAttribute("monthsTreeMapListPic");
+                Set<String> strings = monthsTreeMapListPic.keySet();
+                outterLoop: for (String key : strings) {
+                    ArrayList<Picture> pictures = monthsTreeMapListPic.get(key);
+                    for (Picture p  : pictures) {
+                        if(p.getPath().equals(picpath)){
+                            p.setPath(newPath);
+                            break outterLoop;
+                        }
+                    }
+                }
             }else {
                 status = "fail";
                 msg = "照片重名，修改名称失败";
