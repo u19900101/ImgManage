@@ -355,4 +355,19 @@
       plabel = #{plabel,jdbcType=VARCHAR}
     where path = #{path,jdbcType=VARCHAR}
   </update>
+  <update id="MyUpdateByPrimaryKey" parameterType="map">
+    update t_pic
+    set path = #{newPath,jdbcType=VARCHAR},
+    pid = #{record.pid,jdbcType=VARCHAR},
+    pname = #{record.pname,jdbcType=VARCHAR},
+    pcreatime = #{record.pcreatime,jdbcType=VARCHAR},
+    GPS_Longitude = #{record.gpsLongitude,jdbcType=VARCHAR},
+    GPS_Latitude = #{record.gpsLatitude,jdbcType=VARCHAR},
+    pwidth = #{record.pwidth,jdbcType=INTEGER},
+    pheight = #{record.pheight,jdbcType=INTEGER},
+    psize = #{record.psize,jdbcType=DOUBLE},
+    plabel = #{record.plabel,jdbcType=VARCHAR},
+    pdesc = #{record.pdesc,jdbcType=LONGVARCHAR}
+    where path = #{record.path,jdbcType=VARCHAR}
+  </update>
 </mapper>

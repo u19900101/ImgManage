@@ -69,6 +69,7 @@ public class PictureController {
         Picture picture = mapper.selectByPrimaryKey(picpath);
         String originName = picture.getPname();
         String newName = pname+pictype;
+        String newPath =null;
         if(originName.equals(newName)){
             map.put("status",  "unchange");
             return new Gson().toJson(map);
@@ -82,12 +83,14 @@ public class PictureController {
                 // 修改本地照片的名称
                 File file = new File(baseDir, picpath);
                 rename = file.renameTo(new File(file.getParent()+"\\"+ newName));
-                // 不修改主键
-                i = mapper.updateByPrimaryKeySelective(picture);
+                // 要改主键
+                newPath = picpath.substring(0,picpath.lastIndexOf("\\"))+"\\"+newName;
+                i = mapper.MyUpdateByPrimaryKey(newPath,picture);
             }
             if(1==i&& rename){
                 status = "success";
                 msg = "成功修改照片名称";
+                map.put("newPath", newPath);
             }else {
                 status = "fail";
                 msg = "照片重名，修改名称失败";

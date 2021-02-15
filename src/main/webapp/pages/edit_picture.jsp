@@ -117,7 +117,7 @@
             $("#pname").on('blur',function(){
                 var pname = $("#pname").val();
                 var pictype = $("#pname").attr('pictype');
-                var picpath = $("#pname").attr('picpath');
+                var picpath = $("#myImg").attr('src');
                 $.post(
                     "http://localhost:8080/pic/picture/ajaxUpdateInfo",
                     "pname=" + pname+
@@ -126,7 +126,9 @@
                     function (data) {
                         if (data.status == 'success') {
                             success_prompt(data.msg, 1500);
-                            $("span.errorMsg").text("");
+                            $("#myImg").attr("src",data.newPath);
+                            alert(data.newPath);
+                            $("span.errorMsg").text(data.newPath);
                         } else if (data.status == 'fail') {
                             fail_prompt(data.msg, 2500);
                             $("span.errorMsg").text("照片名称已存在，请重新输入");
@@ -236,7 +238,7 @@
         <%--显示 照片名称  拍摄时间 地点--%>
         <div class="c1" name = "div2">
             <span>照片名称：</span>
-            <input id="pname" name = "pname" value="${picture.pname}" picpath = ${picture.path} pictype=${type}>
+            <input id="pname" name = "pname" value="${picture.pname}" pictype=${type}>
 
             <%--提示是否有重名的信息  错误信息  跟上面对应起来要写class--%>
             <span class="errorMsg" style="color: red;"></span>
@@ -263,7 +265,7 @@
             <input class="myselect" type="button" value="删除" style="font-size: larger;width: 50%;text-align:center"
                    handleMethod ="deleteSingle" existImgPath = ${picture.path}>
             <div class="c2">
-                <img src="${picture.path}" width="800">
+                <img id = "myImg" src="${picture.path}" width="800">
             </div>
         </div>
 

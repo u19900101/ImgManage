@@ -29,8 +29,9 @@ public interface PictureMapper {
     int updateByExample(@Param("record") Picture record, @Param("example") PictureExample example);
 
     int updateByPrimaryKeySelective(Picture record);
-
+    int MyUpdateByPrimaryKey(@Param("newPath")String newPath,@Param("record")Picture record);
     int updateByPrimaryKeyWithBLOBs(Picture record);
 
     int updateByPrimaryKey(Picture record);
+
 }
