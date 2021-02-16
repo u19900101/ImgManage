@@ -231,7 +231,7 @@
     </script>
 </head>
 <body>
-<h1><a href="pages/picture.jsp">回到主页</a> </h1>
+<h1 style="display : inline"><a href="picture/page" >  查看所有照片  </a> </h1>
 <%--显示大图--%>
 <div class="app" name = "div1">
         <%--显示 照片名称  拍摄时间 地点--%>

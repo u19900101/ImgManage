@@ -2,6 +2,7 @@ package ppppp.service;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
+import org.junit.Test;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -35,6 +36,7 @@ public class PictureService {
     // 1.获取照片的时间 经度 纬度信息
     public static HashMap<String, String> getImgInfo(File file) throws ImageProcessingException, IOException, ParseException {
         HashMap<String,String>map = new HashMap<>();
+        map.put("size", String.valueOf(file.length()));
         //如果你对图片的格式有限制，可以直接使用对应格式的Reader如：JPEGImageReader
         ImageMetadataReader.readMetadata(file)
                 .getDirectories().forEach(v ->
@@ -43,23 +45,29 @@ public class PictureService {
                     switch (t.getTagName()) {
                         //                    经度
                         case "GPS Longitude":
-                            map.put("GPS_Longitude",t.getDescription());
+                            String lon = t.getDescription().replace(" ","").replace("\"","")
+                                    .replace("°","_").replace("'","_");
+                              map.put("GPS_Longitude", lon);
                             break;
                         //                        纬度
                         case "GPS Latitude":
-                            map.put("GPS_Latitude",t.getDescription());
+                            String lat = t.getDescription().replace(" ","").replace("\"","")
+                                    .replace("°","_").replace("'","_");
+                            map.put("GPS_Latitude", lat);
                             break;
                         //                        拍摄时间
                         // 解决有的照片中有两个 Date/Time Original 但是格式不一样
                         case "Date/Time Original":
                             if(map.get("create_time")==null){
                                 // 修改格式
+                                // 2021_01_04T19_26_40
                                 //2016:08:16 09:33:17  location: 100_33_11.27,36_33_34.23
                                 String time = t.getDescription();
                                 String[] s = time.split(" ");
-                                String replace = s[0].replace(":", "-");
+                                String replace = s[0].replace(":", "_");
+                                String replace2 = s[1].replace(":", "_");
 
-                                map.put("create_time",replace+" "+ s[1]);
+                                map.put("create_time",replace+"T"+ replace2);
                             }
                             break;
                         //    获取照片的尺寸 便于照片去重判断
@@ -71,25 +79,29 @@ public class PictureService {
                             // System.out.println(t.getDescription());
                             map.put("width",t.getDescription().split(" ")[0]);
                             break;
-                        /*   这个时间没有太多参考意义*/
-                        // case "Date/Time":
-                        //     if(map.get("date_time")==null){
-                        //         map.put("date_time",t.getDescription());
-                        //     }
                         default:
                             break;
                     }
                 })
         );
-
-        if(map.get("GPS_Longitude")!=null && map.get("GPS_Latitude")!=null){
-            String lon = map.get("GPS_Longitude").replace(" ","").replace("\"","")
-                    .replace("°","_").replace("'","_");
-            String lat = map.get("GPS_Latitude").replace(" ","").replace("\"","")
-                    .replace("°","_").replace("'","_");
-            map.put("GPS_Longitude", lon);
-            map.put("GPS_Latitude", lat);
+        String fileName = file.getName();
+        // 若照片名称中含有时间信息  则将其作为照片的拍摄时间
+        if(map.get("create_time")==null){
+            String create_time = MyUtils.nameToCreateTime(file.getName());
+            if(create_time != null){
+                map.put("create_time",create_time);
+                String oldName = file.getName();
+                String parentName = file.getParent();
+                fileName = create_time + oldName.substring(oldName.lastIndexOf("."));
+                // 重命名后移动到新的文件夹中
+                boolean b = file.renameTo(new File(parentName,fileName ));
+                if(b){
+                    map.put("reFileAbsName", parentName+"\\"+fileName);
+                }
+            }
         }
+        map.put("name", fileName);
+
         return map;
     }
 
@@ -153,8 +165,6 @@ public class PictureService {
         }
         return map;
     }
-
-
     public void checkAndCreateImg(String destDir, File uploadImgTemp,
                                   ArrayList<HashMap<String, Object>> successMapList,
                                   ArrayList<HashMap<String, Object>> failedMapList) throws ParseException, IOException, ImageProcessingException {
@@ -164,15 +174,15 @@ public class PictureService {
         MyUtils.getallpath(destDir,stringList);
 
         //判断图片在数据库中是否存在相似的照片
-        if(!MyUtils.isImgType(uploadImgTemp.getName())){
-            return;
-        }
         int [] imgA = MyUtils.aHash(uploadImgTemp.getAbsolutePath());
         // 查询库中所有的 图片
         List<Picture> pictures = mapper.selectByExample(new PictureExample());
         // 将上传的图片与 现有的所有id进行比对
         Picture uploadPicture = createImgFile(tempimgDir,uploadImgTemp);
         map.put("uploadPicture", uploadPicture);
+
+        //应对有可能的改变图片命名  产生的路径不存在问题
+        uploadImgTemp = new File(tempimgDir,uploadPicture.getPath());
         boolean isExist = isPictureExist(uploadImgTemp,pictures,map,imgA);
 
         //存在
@@ -202,6 +212,8 @@ public class PictureService {
         MyUtils.setMapInfo(map, uploadImgTemp,successMapList,failedMapList);
     }
 
+
+    //在整个数据库中对比是否存在相似的照片
     private boolean isPictureExist(File srcFile, List<Picture> pictures, HashMap<String, Object> map, int[] imgA) throws IOException {
         long l = System.currentTimeMillis();
         int count = 0;
@@ -243,7 +255,7 @@ public class PictureService {
         // 将照片移入日期类文件夹
         //照片包含时间信息的 移入照片创建的日期文件夹
         if(create_time!=null){
-            destDir = preDestDir+"\\"+create_time.split(" ")[0].replace("-","\\");
+            destDir = preDestDir+"\\"+create_time.split("T")[0].replace("_","\\");
         }
         //照片不包含时间信息的 移入导入时间的文件夹
         else {
@@ -251,15 +263,44 @@ public class PictureService {
         }
         // 创建文件夹
         MyUtils.creatDir(destDir);
-        String move_file = MyUtils.move_file(img.getAbsolutePath(), destDir);
+        String imgAbs = imgInfoMap.get("reFileAbsName")!=null?imgInfoMap.get("reFileAbsName"):img.getAbsolutePath();
+        String move_file = MyUtils.move_file(imgAbs, destDir);
         if(move_file!=null){
-            picture = fileToPicture(imgInfoMap,move_file);
+            picture = fileToPictureNEW(imgInfoMap,move_file);
         }
+
         return picture;
     }
 
-    public Picture fileToPicture(HashMap<String, String> map,String fileAbspath) throws ParseException, IOException, ImageProcessingException {
+    public Picture fileToPictureNEW(HashMap<String, String> map,String fileAbspath) throws ParseException, IOException, ImageProcessingException {
 
+        String picStrId = MyUtils.createPicIdByAbsPath(fileAbspath);
+
+        Picture pic = new Picture();
+
+
+        // 凑合解决一下 路径为空的 问题  照片名称包含 temp 也没关系
+        // 文件刚上传时 需要 将 转换  页面点击选择时 也需要转换
+        if(fileAbspath.contains("temp")){
+            pic.setPath(fileAbspath.substring(fileAbspath.indexOf("temp")));
+        }else {
+            pic.setPath(fileAbspath.substring(fileAbspath.indexOf("img")));
+        }
+        pic.setPid(picStrId);
+        pic.setPname(map.get("name"));
+        pic.setPcreatime(map.get("create_time"));
+
+        pic.setGpsLatitude(map.get("gpsLatitude"));
+        pic.setGpsLongitude(map.get("gpsLongitude"));
+        pic.setPheight(Integer.valueOf(map.get("height")));
+        pic.setPwidth(Integer.valueOf(map.get("width")));
+        // 四舍五入保留两位小数
+        pic.setPsize(Double.valueOf(new DecimalFormat("0.00").format(Double.valueOf(map.get("size"))/1024.0/1024.0)));
+        return pic;
+    }
+
+    public Picture fileToPicture(String fileAbspath) throws ParseException, IOException, ImageProcessingException {
+        HashMap<String, String> map = new HashMap<>();
         String picStrId = MyUtils.createPicIdByAbsPath(fileAbspath);
 
         Picture pic = new Picture();
@@ -274,11 +315,9 @@ public class PictureService {
 
         // 凑合解决一下 路径为空的 问题  照片名称包含 temp 也没关系
         // 文件刚上传时 需要 将 转换  页面点击选择时 也需要转换
-        if(fileAbspath.contains("temp")){
-            pic.setPath(fileAbspath.substring(fileAbspath.indexOf("temp")));
-        }else {
-            pic.setPath(fileAbspath.substring(fileAbspath.indexOf("img")));
-        }
+
+        pic.setPath(fileAbspath.substring(fileAbspath.indexOf("img")));
+
         pic.setPid(picStrId);
         pic.setPname(file.getName());
         pic.setPcreatime(map.get("create_time"));
@@ -292,18 +331,31 @@ public class PictureService {
         return pic;
     }
 
+    public boolean moveImgToDirByAbsPathAndInsert(Picture picture) throws ParseException, IOException, ImageProcessingException {
+        // 2.移动  //3.写入数据库
+        String absDestDir = baseDir + "\\" + picture.getPath();
+        absDestDir = absDestDir.substring(0, absDestDir.lastIndexOf("\\"));
+        MyUtils.creatDir(absDestDir);
+        String absimg = MyUtils.move_file(baseDir + "\\temp\\" + picture.getPath(),absDestDir);
+        if(absimg!=null && picture!=null){
+            // 此处有可能 重名后  对照片进行重命名了
+            picture.setPath(absimg.substring(absimg.indexOf("img")));
+            return insertPicture(picture)==1;
+        }
+
+        return false;
+    }
+
     public boolean moveImgToDirByAbsPathAndInsert(String absUploadImgPath) throws ParseException, IOException, ImageProcessingException {
         //1.获取信息 2.移动
         Picture picture = createImgFile(uploadimgDir,new File(absUploadImgPath));
 
         //3.写入数据库
         if(picture!=null){
-            return insertPicture(picture)==1;
+            return mapper.insert(picture)==1;
         }
         return false;
     }
-
-
     public int deletePicture(PictureMapper mapper, String ...imgPath) {
         int count = 0;
         for (String s : imgPath) {

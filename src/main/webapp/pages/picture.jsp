@@ -227,11 +227,12 @@ pdesc='还未设置'
 }
 --%>
 <%--完美解决 图片的页面显示问题--%>
-<c:if test="${not empty justUploadMsg}">
-    <h1>${justUploadMsg}</h1>
-</c:if>
+
 <h1 style="display : inline"><a href="picture/page" >  查看所有照片  </a> </h1>
 <h1 style="display : inline"><a href="uploadDir.jsp" >  继续上传照片  </a> </h1>
+<c:if test="${not empty justUploadMsg}">
+    <h1 style="color: magenta">${justUploadMsg}</h1>
+</c:if>
 <div style="width:100%;height:100%;overflow: scroll;">
     <div class="panel-group" id="accordion">
         <c:set var="index" value="0" />

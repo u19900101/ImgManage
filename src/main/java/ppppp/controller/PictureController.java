@@ -42,12 +42,13 @@ public class PictureController {
     // 查询数据库中的图片信息  在页面中显示
     @RequestMapping("/page")
     public String page(HttpServletRequest req){
+        // TreeMap<String,ArrayList<Picture>> monthsTreeMapListPic = (TreeMap<String, ArrayList<Picture>>) req.getSession().getAttribute("monthsTreeMapListPic");
+        // if(monthsTreeMapListPic!=null && monthsTreeMapListPic.size()>0){
+        //     return "picture";
+        // }
 
-        if(req.getSession().getAttribute("monthsTreeMapListPic")!=null){
-            return "picture";
-        }
         //清空session
-        req.getSession().invalidate();
+        req.getSession().removeAttribute("justUploadMsg");
         // 查询时间不为空的图片
         PictureExample pictureExample = new PictureExample();
         pictureExample.setOrderByClause("pcreatime");// 单月中照片升序显示  按月  照片逆序显示
@@ -164,10 +165,11 @@ public class PictureController {
             successPicturesList.add((Picture) map.get("uploadPicture"));
         }
         request.getSession().setAttribute("successPicturesList", successPicturesList);
-
         request.getSession().setAttribute("failedPicturesList", failedMapList);
-        return "redirect:/picture/showUploadInfo?page=p2";
-        // return "redirect:/demo.jsp";
+        TreeMap<String,ArrayList<Picture>> map = pictureService.groupPictureByMonth(successPicturesList);
+        //将map 写进 MonthPic
+        request.getSession().setAttribute("monthsTreeMapListPic", map);
+        return "redirect:/pages/afterUpload.jsp";
     }
     // 批量处理
     @ResponseBody
@@ -220,25 +222,18 @@ public class PictureController {
                 break;
             case "saveUploadOnly":
                 for (HashMap<String, Object> hashMap : failedMapList) {
-                    String uploadImgPath = ((Picture)hashMap.get("uploadPicture")).getPath();
                     String existImgPath = ((Picture)hashMap.get("existPicture")).getPath();
 
-                    String absUploadImgPath = baseDir+"\\"+uploadImgPath;
                     String absExistImgPath =baseDir+"\\"+existImgPath;
-
                     boolean isDelete = MyUtils.deleteFile(absExistImgPath);
                     i = pictureService.deletePicture(mapper,existImgPath);
 
-                    boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(absUploadImgPath);
-                    isDelete = isDelete && i==1 &&moveSuccess;
-                    if(isDelete==false){
-                        // 随便写一个吧
-                        errorInfoList.add(absExistImgPath);
+                    Picture picture = (Picture)hashMap.get("uploadPicture");
+                    boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(picture);
+                    if(!(isDelete && i==1 &&moveSuccess)){
+                        errorInfoList.add(picture.getPath());
                     }else {
-                        Picture uploadPicture = (Picture) hashMap.get("uploadPicture");
-                        String substring = uploadPicture.getPath().substring(uploadPicture.getPath().indexOf("img"));
-                        uploadPicture.setPath(substring);
-                        picturesList.add(uploadPicture);
+                        picturesList.add(picture);
                     }
                 }
 
@@ -252,9 +247,13 @@ public class PictureController {
         // 清空session
         failedMapList.clear();
         successPicturesList.clear();
-        req.getSession().setAttribute("successPicturesList", picturesList);
+        TreeMap<String,ArrayList<Picture>> resMap = pictureService.groupPictureByMonth(picturesList);
+        //将map 写进 MonthPic
+        req.getSession().setAttribute("monthsTreeMapListPic", resMap);
+
         if(handleMethod.equalsIgnoreCase("saveUploadOnly") || handleMethod.equalsIgnoreCase("saveBoth")){
             req.getSession().setAttribute("justUploadMsg", "本次上传预览");
+            map.put("justUploadMsg", "true");
         }
         return new Gson().toJson(map);
     }
@@ -265,8 +264,6 @@ public class PictureController {
         TreeMap<String,ArrayList<Picture>> map = pictureService.groupPictureByMonth(pictures);
         //将map 写进 MonthPic
         model.addAttribute("monthsTreeMapListPic", map);
-        // // return "p2";
-        // return "picture";
         return page;
     }
 
@@ -327,20 +324,24 @@ public class PictureController {
     // 对相同单个照片进行处理
     @ResponseBody
     @RequestMapping(value = "/ajaxHandleSamePic",method = RequestMethod.POST)
-    public String ajaxHandleSamePic(String handleMethod,String uploadImgPath,String existImgPath,HttpServletRequest req) throws ParseException, ImageProcessingException, IOException {
+    public String ajaxHandleSamePic(@RequestParam String handleMethod,
+                                    @RequestParam String uploadImgPath,
+                                    @RequestParam String existImgPath, HttpServletRequest req) throws ParseException, ImageProcessingException, IOException {
 
         HashMap<String,Object> map = new HashMap<>();
 
         String absUploadImgPath = baseDir+"\\"+uploadImgPath;
         String absExistImgPath = baseDir+"\\"+existImgPath;
         String successMsg = "";
+        Picture uploadPicture = null;
         boolean isSucceed = false;
         int i = 0;
         switch (handleMethod){
             case "saveBoth":
                 System.out.println("saveBoth");
                 successMsg = "成功保存两张照片";
-                isSucceed = pictureService.moveImgToDirByAbsPathAndInsert(absUploadImgPath);
+                uploadPicture = pictureService.fileToPicture(absUploadImgPath);
+                isSucceed = pictureService.moveImgToDirByAbsPathAndInsert(uploadPicture);
                 break;
             case "deleteBoth":
                 System.out.println("deleteBoth");
@@ -363,7 +364,8 @@ public class PictureController {
                 i = pictureService.deletePicture(mapper,absExistImgPath.substring(absExistImgPath.indexOf("img")));
                 // 将 上传的文件写入数据库中
                 // 1.移动数据到img文件夹下  2.写入到数据库中
-                boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(absUploadImgPath);
+                uploadPicture = pictureService.fileToPicture(absUploadImgPath);
+                boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(uploadPicture);
 
                 isSucceed = isSucceed && i==1 && moveSuccess;
                 successMsg = "成功保存上传的照片";
@@ -372,7 +374,8 @@ public class PictureController {
                 System.out.println("saveSingle");
                 // 将 上传的文件写入数据库中
                 // 1.移动数据到img文件夹下  2.写入到数据库中
-                isSucceed = pictureService.moveImgToDirByAbsPathAndInsert(absUploadImgPath);
+                uploadPicture = pictureService.fileToPicture(absUploadImgPath);
+                isSucceed = pictureService.moveImgToDirByAbsPathAndInsert(uploadPicture);
                 successMsg = "成功保存上传的照片";
                 break;
             case "deleteSingle":
@@ -458,14 +461,12 @@ public class PictureController {
 
     private void saveAllPicture(ArrayList<Picture> successPicturesList, ArrayList<String> errorInfoList, ArrayList<Picture> picturesList) throws ParseException, ImageProcessingException, IOException {
         for (Picture picture : successPicturesList) {
-            String uploadImgPath = picture.getPath();
-            String absUploadImgPath = baseDir+"\\"+uploadImgPath;
-            boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(absUploadImgPath);
+            // 设置所有的pic 路径均不带temp 以便后面统一处理
+            picture.setPath(picture.getPath().substring(picture.getPath().indexOf("img")));
+            boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(picture);
             if(!moveSuccess){
-                errorInfoList.add(absUploadImgPath);
+                errorInfoList.add(picture.getPath());
             }else {
-                String substring = picture.getPath().substring(picture.getPath().indexOf("img"));
-                picture.setPath(substring);
                 picturesList.add(picture);
             }
         }

@@ -1,6 +1,21 @@
+import com.drew.imaging.ImageProcessingException;
 import org.junit.Test;
+import ppppp.bean.Picture;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.text.ParseException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static ppppp.controller.PictureController.tempimgDir;
+import static ppppp.service.PictureService.getImgInfo;
 
 /**
  * @author lppppp
@@ -37,5 +52,40 @@ public class 对时间字符串按月进行分组 {
             System.out.println(string+"   "+map.get(string).size());
         }
 
+    }
+
+    @Test
+    public void T_将文件名中时间信息写进数据库() throws ParseException, IOException, ImageProcessingException {
+
+
+
+    }
+
+
+
+    public String nameToCreateTime(String name){
+        Pattern p = Pattern.compile("[0-9]{13}");
+        Matcher m = p.matcher(name);
+        if (m.find()) {
+            String match = m.group();
+            return longToDateStr(Long.valueOf(match)).split("\\.")[0];
+        }
+
+        Pattern p2 = Pattern.compile("(\\D*)([0-9]{4})([0-9]{2})([0-9]{2})(\\D*)([0-9]{2})([0-9]{2})([0-9]{2})(.*)");
+        Matcher m2 = p2.matcher(name);
+        if (m2.find()) {
+            String match2 = m2.group(2);
+            String match3 = m2.group(3);
+            String match4 = m2.group(4);
+            String match6 = m2.group(6);
+            String match7 = m2.group(7);
+            String match8= m2.group(8);
+            return match2+"-"+match3+"-"+match4+" "+match6+":"+match7+":"+match8;
+        }
+        return null;
+    }
+    public String longToDateStr(long timeStamp){
+        LocalDateTime localDateTime = Instant.ofEpochMilli(timeStamp).atZone(ZoneOffset.ofHours(8)).toLocalDateTime();
+        return localDateTime.toString().replace("T", " ");
     }
 }

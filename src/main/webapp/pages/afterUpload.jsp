@@ -121,12 +121,18 @@
                 var handleMethod = $(this).attr('handleMethod');
                 var uploadImgPath = $(this).attr('uploadImgPath');
                 var existImgPath = $(this).attr('existImgPath');
+                var uploadPicture = $(this).attr('uploadPicture');
                 // 要replaceAll  下面的则不需要 尬
                 var divID = $(this).attr('uploadImgPath').replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
-                $.post(
-                    "http://localhost:8080/pic/picture/ajaxHandleSamePic",
-                    "handleMethod="+handleMethod+"&uploadImgPath="+uploadImgPath+"&existImgPath="+existImgPath,
-                    function(data) {
+                $.ajax({
+                    type: 'post',
+                    dataType: 'json',
+                    url: "http://localhost:8080/pic/picture/ajaxHandleSamePic",
+                    data: {'handleMethod':handleMethod,
+                            'uploadImgPath':uploadImgPath,
+                            'existImgPath':existImgPath},
+                    contentType: 'application/x-www-form-urlencoded;charset=UTF-8',
+                    success:  function(data) {
                         if(data.status == 'success'){
                             $("#"+divID).remove();
                             success_prompt(data.msg,1500);
@@ -135,9 +141,8 @@
                         }else {
                             warning_prompt("其他未知错误.....please enjoy debug",2500);
                         }
-                    },
-                    "json"
-                );
+                    }
+                });
             });
 
             // 批量操作
@@ -152,8 +157,7 @@
                         if(data.status == 'success'){
                             success_prompt(data.msg,2500);
                             $("#main").remove();
-                            countDown(3);
-
+                            countDown(3,data.justUploadMsg);
                         }else if(data.status == 'fail'){
                             fail_prompt(data.msg,2500);
                         }else {
@@ -165,13 +169,12 @@
             });
         });
 
-        function countDown(secs){
+        var countDown = function (secs,msg){
             if(--secs>0){
                 setTimeout("countDown("+secs+")",1000);
             }else{
-                alert(${not empty justUploadMsg});
-                if(${not empty justUploadMsg}){
-                    $(window).attr("location","picture/showUploadInfo?page=picture");
+                if(msg === undefined){
+                    $(window).attr("location","pages/picture.jsp");
                 }else {
                     $(window).attr("location","uploadDir.jsp");
                 }
@@ -223,6 +226,7 @@
 
 <%--完美解决 图片的页面显示问题--%>
 <a href="uploadDir.jsp"><h1>回到文件夹上传</h1></a>
+<h1 style="display : inline"><a href="picture/page" >  查看所有照片  </a> </h1>
 <c:if test="${not empty monthsTreeMapListPic or not empty failedPicturesList}">
 <div id = "main">
     <span class="firstSpan"><input class="myselectAll" handleMethod ="saveBoth" type="button" value="保存全部" style="color:green;font-size: larger;width: 100%;"></span>
@@ -249,12 +253,12 @@
                         <div id="${monthTreeMapListPic.key}" class="collapse in">
                             <c:forEach items="${monthTreeMapListPic.value}" var="picture" >
                                 <div class="outdiv" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}" >
-                                        <h3 style="color: red">本地照片:${picture.path}</h3>
+                                        <h3 style="color: red">上传照片:${picture.path}</h3>
                                         <h4 style="color: chocolate">图片尺寸： ${picture.pwidth}*${picture.pheight}</h4>
                                         <h4 style="color: gray">图片大小： ${picture.psize} M</h4>
                                         <span align="center" style="float: left;width: 25%;">
                                         <input class="myselect" type="button" value="保存" style="font-size: larger;width: 100%;text-align:center"
-                                             handleMethod ="saveSingle" uploadImgPath = ${picture.path}></span>
+                                             handleMethod ="saveSingle" uploadImgPath = ${picture.path} uploadPicture=${picture} existImgPath=""></span>
                                         <span align="center" style="float: right;width: 25%;">
                                         <input class="myselect" type="button" value="删除" style="font-size: larger;width: 100%;text-align:center"
                                             handleMethod ="deleteSingle" uploadImgPath = ${picture.path}></span>
@@ -273,7 +277,7 @@
                             <c:forEach items="${monthTreeMapListPic.value}" var="picture" >
                                     <div id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}" class="zuiOut" >
                                         <div class="outdiv">
-                                            <h3 style="color: red">本地照片:${picture.path}</h3>
+                                            <h3 style="color: red">上传照片:${picture.path}</h3>
                                             <h4 style="color: chocolate">图片尺寸： ${picture.pwidth}*${picture.pheight}</h4>
                                             <h4 style="color: gray">图片大小： ${picture.psize} M</h4>
                                             <span align="center" style="float: left;width: 25%;">
@@ -326,7 +330,7 @@
                             <h4 style="color: gray">图片大小： ${picture.existPicture.psize} M</h4>
                             <span align="center" style="float: left">
                                 <input class="myselect" type="button" value="只保留我" style="font-size: larger;width: 100%;text-align:center"
-                                 handleMethod ="saveUploadOnly" uploadImgPath = ${picture.uploadPicture.path} existImgPath=${picture.existPicture.path}></span>
+                                 handleMethod ="saveExistOnly" uploadImgPath = ${picture.uploadPicture.path} existImgPath=${picture.existPicture.path}></span>
                                     <a href="picture/before_edit_picture?pid=${picture.pid}">
                             <div class="imgdiv">
                                 <img src="${picture.existPicture.path}">
@@ -341,7 +345,7 @@
                              <h4 style="color: gray">图片大小： ${picture.uploadPicture.psize} M</h4>
                              <span align="center" style="float: left">
                                 <input class="myselect" type="button" value="只保留我" style="font-size: larger;width: 100%;text-align:center"
-                                   handleMethod ="saveExistOnly" uploadImgPath = ${picture.uploadPicture.path} existImgPath=${picture.existPicture.path}></span>
+                                   handleMethod ="saveUploadOnly" uploadImgPath = ${picture.uploadPicture.path} existImgPath=${picture.existPicture.path}></span>
                          <a href="picture/before_edit_picture?pid=${picture.pid}">
                             <div class="imgdiv">
                                 <img src="${picture.uploadPicture.path}">

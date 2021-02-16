@@ -1,5 +1,6 @@
 package ppppp.util;
 
+import org.junit.Test;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
@@ -8,6 +9,9 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -190,7 +194,8 @@ public class MyUtils {
         File file = new File(absoulteSrcPath);
         String newFileName = file.getName();
         String[] list = new File(absoulteDestDir).list();
-        if(list.length > 0){
+
+        if(list!=null && list.length>0){
             ArrayList<String> fileList = new ArrayList<>();
             for (String s : list) {
                 fileList.add(s);
@@ -296,5 +301,35 @@ public class MyUtils {
 
     public static String createPicIdByAbsPath(String absImgPath) {
         return intsToStr(aHash(absImgPath));
+    }
+
+
+    //   将带有时间信息的照片名  作为照片的创建时间 写入数据库中
+    public static String nameToCreateTime(String name){
+    Pattern p = Pattern.compile("[0-9]{13}");
+    Matcher m = p.matcher(name);
+    if (m.find()) {
+        String match = m.group();
+        return longToDateStr(Long.valueOf(match)).split("\\.")[0];
+    }
+
+    Pattern p2 = Pattern.compile("(\\D*)([0-9]{4})(\\D*)([0-9]{2})(\\D*)" +
+            "([0-9]{2})(\\D*)([0-9]{2})(\\D*)([0-9]{2})(\\D*)([0-9]{2})(\\D*)");
+    Matcher m2 = p2.matcher(name);
+    if (m2.find()) {
+        String match2 = m2.group(2);
+        String match4 = m2.group(4);
+        String match6 = m2.group(6);
+        String match8= m2.group(8);
+        String match10 = m2.group(10);
+        String match12= m2.group(12);
+        return match2+"_"+match4+"_"+match6+"T"+match8+"_"+match10+"_"+match12;
+    }
+    return null;
+}
+
+    public static String longToDateStr(long timeStamp){
+        LocalDateTime localDateTime = Instant.ofEpochMilli(timeStamp).atZone(ZoneOffset.ofHours(8)).toLocalDateTime();
+        return localDateTime.toString().replace("-", "_").replace(":", "_");
     }
 }
