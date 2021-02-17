@@ -13,10 +13,7 @@
 <head>
     <title>Title</title>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
-    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <%--/*设置div属性*/--%>
+     <%--/*设置div属性*/--%>
     <style>
         .c1{
             float: left;
@@ -27,7 +24,6 @@
             border: 2px solid green;
         }
     </style>
-
     <style>
         .zuiOut{
             border: 1px solid yellow;
@@ -54,12 +50,7 @@
         }
 
         .imgdiv img {
-            height:80%;
-            width:100%;
-        }
-
-        .imgdiv2 img {
-            height:auto;
+            /*height:auto;*/
             width:100%;
         }
 
@@ -121,7 +112,6 @@
                 var handleMethod = $(this).attr('handleMethod');
                 var uploadImgPath = $(this).attr('uploadImgPath');
                 var existImgPath = $(this).attr('existImgPath');
-                var uploadPicture = $(this).attr('uploadPicture');
                 // 要replaceAll  下面的则不需要 尬
                 var divID = $(this).attr('uploadImgPath').replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
                 $.ajax({
@@ -252,16 +242,16 @@
                     <c:if test="${index.equals(1)}">
                         <div id="${monthTreeMapListPic.key}" class="collapse in">
                             <c:forEach items="${monthTreeMapListPic.value}" var="picture" >
-                                <div class="outdiv" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}" >
+                                <div class="outdiv" style="float: left" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}" >
                                         <h3 style="color: red">上传照片:${picture.path}</h3>
                                         <h4 style="color: chocolate">图片尺寸： ${picture.pwidth}*${picture.pheight}</h4>
                                         <h4 style="color: gray">图片大小： ${picture.psize} M</h4>
                                         <span align="center" style="float: left;width: 25%;">
                                         <input class="myselect" type="button" value="保存" style="font-size: larger;width: 100%;text-align:center"
-                                             handleMethod ="saveSingle" uploadImgPath = ${picture.path} uploadPicture=${picture} existImgPath=""></span>
+                                             handleMethod ="saveSingle" uploadImgPath = ${picture.path} existImgPath=""></span>
                                         <span align="center" style="float: right;width: 25%;">
                                         <input class="myselect" type="button" value="删除" style="font-size: larger;width: 100%;text-align:center"
-                                            handleMethod ="deleteSingle" uploadImgPath = ${picture.path}></span>
+                                            handleMethod ="deleteSingle" uploadImgPath = ${picture.path} existImgPath=""></span>
                                         <div class="imgdiv">
                                             <a href="picture/before_edit_picture?pid=${picture.pid}">
                                             <img src="${picture.path}">
@@ -275,7 +265,7 @@
                     <c:if test="${not index.equals(1)}">
                         <div id="${monthTreeMapListPic.key}" class="collapse in">
                             <c:forEach items="${monthTreeMapListPic.value}" var="picture" >
-                                    <div id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}" class="zuiOut" >
+                                    <div class = "zuiOut" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}" class="zuiOut" >
                                         <div class="outdiv">
                                             <h3 style="color: red">上传照片:${picture.path}</h3>
                                             <h4 style="color: chocolate">图片尺寸： ${picture.pwidth}*${picture.pheight}</h4>
@@ -286,7 +276,7 @@
                                             <span align="center" style="float: right;width: 25%;">
                                         <input class="myselect" type="button" value="删除" style="font-size: larger;width: 100%;text-align:center"
                                                handleMethod ="deleteSingle" uploadImgPath = ${picture.path}></span>
-                                            <div class="imgdiv2">
+                                            <div class="imgdiv">
                                                 <a href="picture/before_edit_picture?pid=${picture.pid}">
                                                     <img src="${picture.path}">
                                                 </a>

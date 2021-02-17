@@ -20,5 +20,17 @@
 
 <!--写base标签，永远固定相对路径跳转的结果-->
 <base href="<%=basePath%>">
-<%--<link type="text/css" rel="stylesheet" href="static/css/style.css" >--%>
-<script type="text/javascript" src="static/script/jquery-1.7.2.js"></script>
+<%--<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">--%>
+<%--<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>--%>
+<%--<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>--%>
+
+<%-- link 标签和 script 标签有重大差别 --%>
+<link rel="stylesheet" href="static/bootstrap-3.3.7/css/bootstrap.min.css">
+<script type="text/javascript" src="static/script/jquery-3.5.1.js"></script>
+<script src="static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+
+
+
+
+
+

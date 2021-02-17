@@ -229,6 +229,7 @@ public class PictureController {
                     i = pictureService.deletePicture(mapper,existImgPath);
 
                     Picture picture = (Picture)hashMap.get("uploadPicture");
+                    picture.setPath(picture.getPath().substring(picture.getPath().indexOf("img")));
                     boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(picture);
                     if(!(isDelete && i==1 &&moveSuccess)){
                         errorInfoList.add(picture.getPath());
@@ -392,13 +393,14 @@ public class PictureController {
         // 单张照片操作完毕后 要将 session中的list值进行更新,删除 list中的 uploadImgPath 和 existImgPath
         ArrayList<HashMap<String, Object>> failedMapList = (ArrayList<HashMap<String, Object>>) req.getSession().getAttribute("failedPicturesList");
         ArrayList<Picture> successMapList = (ArrayList<Picture>) req.getSession().getAttribute("successPicturesList");
-
         failedMapList.removeIf(
                 mapp -> ((Picture)mapp.get("uploadPicture")).getPath().equals(uploadImgPath)
         );
         successMapList.removeIf(
                 mapp -> mapp.getPath().equals(uploadImgPath)
         );
+        req.getSession().setAttribute("monthsTreeMapListPic",pictureService.groupPictureByMonth(successMapList));
+
         return new Gson().toJson(map);
     }
 

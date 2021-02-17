@@ -13,9 +13,6 @@
 <head>
     <title>Title</title>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
-    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <%--/*设置div属性*/--%>
     <style>
         /* 单张图片框 */
@@ -216,16 +213,6 @@
 </head>
 <body>
 
-<%--
-Picture{
-pid=14,
-path='D:\MyJava\mylifeImg\src\main\webapp\static\0E4A2352.jpg',
-pname='0E4A2352.jpg',
-pcreatime='2020:10:06 08:08:14',
-plocal='null', plabel='null',
-pdesc='还未设置'
-}
---%>
 <%--完美解决 图片的页面显示问题--%>
 
 <h1 style="display : inline"><a href="picture/page" >  查看所有照片  </a> </h1>
