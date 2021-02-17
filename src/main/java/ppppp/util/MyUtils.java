@@ -82,15 +82,7 @@ public class MyUtils {
         return gray;
     }
     public static void setMapInfo(HashMap<String, Object> map, File uploadImgTemp, ArrayList<HashMap<String, Object>> successMapList, ArrayList<HashMap<String, Object>> failedMapList){
-        if(map.get("successMsg")!=null){
-            map.put("successMsg","图片："+uploadImgTemp.getName()+ map.get("successMsg"));
-            successMapList.add(map);
-        }
 
-        if(map.get("failedMsg")!=null){
-            map.put("failedMsg","图片："+uploadImgTemp.getName()+ map.get("failedMsg"));
-            failedMapList.add(map);
-        }
     }
 
     // 判断两者之间的4个方向转换是否都不同，若有一个完全相同则说明两张图相似
@@ -225,6 +217,17 @@ public class MyUtils {
         }
         return temp;
     }
+    public static String createNewName(String[] fileList, String s) {
+        ArrayList<String> list = new ArrayList<>();
+        for (String fileName : fileList) {
+            if(fileName.contains(".")){
+                list.add(fileName);
+            }
+        }
+        String newName = createNewName(list, s);
+        return newName;
+    }
+
     public static void copyFileUsingFileStreams(String source, String dest) throws IOException {
         BufferedInputStream in = null;
         BufferedOutputStream out = null;
@@ -305,31 +308,44 @@ public class MyUtils {
 
 
     //   将带有时间信息的照片名  作为照片的创建时间 写入数据库中
+    //   有且仅有匹配3中格式
+    /*
+    1.mmexport1605932146267.jpg
+    2.Screenshot_20201209_152638_com.eg.android.AlipayGphone
+    3.wx_camera_1607081625719.jpg
+    4.hdImg_a8464b03b3d71c7dc5a843a0d33e53831604568858570.jpg
+    * */
+    @Test
+    public void T(){
+        // System.out.println(nameToCreateTime("1608039733660"));
+    }
     public static String nameToCreateTime(String name){
-    Pattern p = Pattern.compile("[0-9]{13}");
-    Matcher m = p.matcher(name);
-    if (m.find()) {
-        String match = m.group();
-        return longToDateStr(Long.valueOf(match)).split("\\.")[0];
-    }
+        Pattern p = Pattern.compile("[0-9]{13}");
+        Matcher m = p.matcher(name);
+        if (m.find()) {
+            String match = m.group();
+            Long timeStamp = Long.valueOf(match);
+            // 排除大于当前时间的字符
+            if(timeStamp>System.currentTimeMillis()){
+                return null;
+            }
+            return longToDateStr(timeStamp).split("\\.")[0];
+        }
 
-    Pattern p2 = Pattern.compile("(\\D*)([0-9]{4})(\\D*)([0-9]{2})(\\D*)" +
-            "([0-9]{2})(\\D*)([0-9]{2})(\\D*)([0-9]{2})(\\D*)([0-9]{2})(\\D*)");
-    Matcher m2 = p2.matcher(name);
-    if (m2.find()) {
-        String match2 = m2.group(2);
-        String match4 = m2.group(4);
-        String match6 = m2.group(6);
-        String match8= m2.group(8);
-        String match10 = m2.group(10);
-        String match12= m2.group(12);
-        return match2+"_"+match4+"_"+match6+"T"+match8+"_"+match10+"_"+match12;
-    }
-    return null;
+        Pattern p2 = Pattern.compile("[0-9]{8}_[0-9]{6}");
+        Matcher m2 = p2.matcher(name);
+        if (m2.find()) {
+            String s = m2.group().replace("_", "");
+            return s.substring(0,4)+"_"+s.substring(4,6)+"_"+s.substring(6,8)
+                    +"T"+s.substring(8,10)+"_"+s.substring(10,12)+"_"+s.substring(12,14);
+        }
+        return null;
 }
 
     public static String longToDateStr(long timeStamp){
+
         LocalDateTime localDateTime = Instant.ofEpochMilli(timeStamp).atZone(ZoneOffset.ofHours(8)).toLocalDateTime();
         return localDateTime.toString().replace("-", "_").replace(":", "_");
     }
+
 }

@@ -242,6 +242,7 @@
                     <c:if test="${index.equals(1)}">
                         <div id="${monthTreeMapListPic.key}" class="collapse in">
                             <c:forEach items="${monthTreeMapListPic.value}" var="picture" >
+                            <div class = "zuiOut" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}" >
                                 <div class="outdiv" style="float: left" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}" >
                                         <h3 style="color: red">上传照片:${picture.path}</h3>
                                         <h4 style="color: chocolate">图片尺寸： ${picture.pwidth}*${picture.pheight}</h4>
@@ -258,6 +259,7 @@
                                             </a>
                                         </div>
                                 </div>
+                            </div>
                             </c:forEach>
                         </div>
                     </c:if>
@@ -265,16 +267,16 @@
                     <c:if test="${not index.equals(1)}">
                         <div id="${monthTreeMapListPic.key}" class="collapse in">
                             <c:forEach items="${monthTreeMapListPic.value}" var="picture" >
-                                    <div class = "zuiOut" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}" class="zuiOut" >
+                                    <div class = "zuiOut" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}" >
                                         <div class="outdiv">
                                             <h3 style="color: red">上传照片:${picture.path}</h3>
                                             <h4 style="color: chocolate">图片尺寸： ${picture.pwidth}*${picture.pheight}</h4>
                                             <h4 style="color: gray">图片大小： ${picture.psize} M</h4>
                                             <span align="center" style="float: left;width: 25%;">
-                                        <input class="myselect" type="button" value="保存" style="font-size: larger;width: 100%;text-align:center"
-                                               handleMethod ="saveSingle" uploadImgPath = ${picture.path}></span>
-                                            <span align="center" style="float: right;width: 25%;">
-                                        <input class="myselect" type="button" value="删除" style="font-size: larger;width: 100%;text-align:center"
+                                            <input class="myselect" type="button" value="保存" style="font-size: larger;width: 100%;text-align:center"
+                                                   handleMethod ="saveSingle" uploadImgPath = ${picture.path}></span>
+                                                <span align="center" style="float: right;width: 25%;">
+                                            <input class="myselect" type="button" value="删除" style="font-size: larger;width: 100%;text-align:center"
                                                handleMethod ="deleteSingle" uploadImgPath = ${picture.path}></span>
                                             <div class="imgdiv">
                                                 <a href="picture/before_edit_picture?pid=${picture.pid}">

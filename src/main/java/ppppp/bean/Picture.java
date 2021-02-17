@@ -23,6 +23,23 @@ public class Picture {
 
     private String pdesc;
 
+    @Override
+    public String toString() {
+        return "Picture{" +
+                "path='" + path + '\'' +
+                ", pid='" + pid + '\'' +
+                ", pname='" + pname + '\'' +
+                ", pcreatime='" + pcreatime + '\'' +
+                ", gpsLongitude='" + gpsLongitude + '\'' +
+                ", gpsLatitude='" + gpsLatitude + '\'' +
+                ", pwidth=" + pwidth +
+                ", pheight=" + pheight +
+                ", psize=" + psize +
+                ", plabel='" + plabel + '\'' +
+                ", pdesc='" + pdesc + '\'' +
+                '}';
+    }
+
     public String getPath() {
         return path;
     }

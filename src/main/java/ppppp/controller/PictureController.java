@@ -341,7 +341,7 @@ public class PictureController {
             case "saveBoth":
                 System.out.println("saveBoth");
                 successMsg = "成功保存两张照片";
-                uploadPicture = pictureService.fileToPicture(absUploadImgPath);
+                uploadPicture = pictureService.getImgInfo(new File(absUploadImgPath));
                 isSucceed = pictureService.moveImgToDirByAbsPathAndInsert(uploadPicture);
                 break;
             case "deleteBoth":
