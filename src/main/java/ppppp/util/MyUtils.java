@@ -317,7 +317,7 @@ public class MyUtils {
     * */
     @Test
     public void T(){
-        // System.out.println(nameToCreateTime("1608039733660"));
+        System.out.println(nameToCreateTime("mmexport1606733975581"));
     }
     public static String nameToCreateTime(String name){
         Pattern p = Pattern.compile("[0-9]{13}");

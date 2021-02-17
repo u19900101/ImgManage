@@ -82,21 +82,6 @@ public class PictureService {
         // 若照片名称中含有时间信息  则将其作为照片的拍摄时间
         String destDir = null;
 
-        // 照片本身不包含时间信息
-        if(pic.getPcreatime()==null){
-            //照片不包含时间信息的 移入导入时间的文件夹
-            String create_time = LocalDateTime.now().toString().split("\\.")[0].replace("-", "_").replace(":", "_");
-            pic.setPcreatime(create_time);
-            destDir = tempimgDir+"\\"+LocalDateTime.now().toString().substring(0,7).replace("-","\\");
-        }
-        // 照片本身 已经 包含时间信息
-        else {
-            // 若照片名称中包含时间信息  则修改 照片名称与时间相关
-            // 重命名后移动到新的文件夹中
-            destDir = tempimgDir+"\\"+pic.getPcreatime().substring(0,7).replace("_","\\");
-        }
-        MyUtils.creatDir(destDir);
-
         // 只有当照片名称中包含时间信息时  才对照片重命名
         String isContainCreate_time = MyUtils.nameToCreateTime(file.getName());
         if(isContainCreate_time!=null){
@@ -118,6 +103,21 @@ public class PictureService {
                 fileName = file.getName();
             }
         }
+
+        // 照片本身不包含时间信息
+        if(pic.getPcreatime()==null){
+            //照片不包含时间信息的 移入导入时间的文件夹
+            String create_time = LocalDateTime.now().toString().split("\\.")[0].replace("-", "_").replace(":", "_");
+            pic.setPcreatime(create_time);
+            destDir = tempimgDir+"\\"+LocalDateTime.now().toString().substring(0,7).replace("-","\\");
+        }
+        // 照片本身 已经 包含时间信息
+        else {
+            // 若照片名称中包含时间信息  则修改 照片名称与时间相关
+            // 重命名后移动到新的文件夹中
+            destDir = tempimgDir+"\\"+pic.getPcreatime().substring(0,7).replace("_","\\");
+        }
+        MyUtils.creatDir(destDir);
         String afterMoveAbs = MyUtils.move_file(parentName + "\\" + fileName, destDir);
         if(afterMoveAbs!=null){
             fileName = new File(afterMoveAbs).getName();
