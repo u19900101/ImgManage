@@ -140,7 +140,7 @@ public class PictureController {
             @RequestParam(value = "imgList",required = false) MultipartFile[] multipartFiles) throws IOException, ImageProcessingException, ParseException   {
         // 遍历文件夹下所有文件路径
         // 若父文件夹不存在则创建
-        String path = request.getSession().getServletContext().getRealPath("temp//img");
+        String path = uploadimgDir;
         MyUtils.creatDir(path);
         // 将所有检测出 重复的照片 路径保存到 list中
         ArrayList<HashMap<String, Object>> successMapList = new ArrayList<>();
@@ -171,6 +171,88 @@ public class PictureController {
         request.getSession().setAttribute("monthsTreeMapListPic", map);
         return "redirect:/pages/afterUpload.jsp";
     }
+    // 对相同单个照片进行处理
+    @ResponseBody
+    @RequestMapping(value = "/ajaxHandleSamePic",method = RequestMethod.POST)
+    public String ajaxHandleSamePic(@RequestParam String handleMethod,
+                                    @RequestParam String uploadImgPath,
+                                    @RequestParam String existImgPath, HttpServletRequest req) throws ParseException, ImageProcessingException, IOException {
+
+        HashMap<String,Object> map = new HashMap<>();
+
+        String absUploadImgPath = baseDir+"\\"+uploadImgPath;
+        String absExistImgPath = baseDir+"\\"+existImgPath;
+        String successMsg = "";
+        Picture uploadPicture = null;
+        boolean isSucceed = false;
+        int i = 0;
+        switch (handleMethod){
+            case "saveBoth":
+                System.out.println("saveBoth");
+                successMsg = "成功保存两张照片";
+                uploadPicture = pictureService.getImgInfo(new File(absUploadImgPath));
+                isSucceed = pictureService.moveImgToDirByAbsPathAndInsert(uploadPicture);
+                break;
+            case "deleteBoth":
+                System.out.println("deleteBoth");
+                isSucceed = MyUtils.deleteFile(absUploadImgPath, absExistImgPath);
+                // 将数据库中的 保存文件也删除
+                i = pictureService.deletePicture(mapper,existImgPath);
+                isSucceed = isSucceed && i==1;
+                successMsg = "成功删除两张照片";
+                break;
+            case "saveExistOnly":
+                System.out.println("saveExistOnly");
+                // 不操作数据库
+                isSucceed = MyUtils.deleteFile(absUploadImgPath);
+                successMsg = "成功保存已存在的照片";
+                break;
+            case "saveUploadOnly":
+                System.out.println("saveUploadOnly");
+                // 先删除 存在的文件 和 数据库中的内容
+                isSucceed = MyUtils.deleteFile(absExistImgPath);
+                i = pictureService.deletePicture(mapper,absExistImgPath.substring(absExistImgPath.indexOf("img")));
+                // 将 上传的文件写入数据库中
+                // 1.移动数据到img文件夹下  2.写入到数据库中
+                uploadPicture = pictureService.getImgInfo(new File(absUploadImgPath));
+                boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(uploadPicture);
+
+                isSucceed = isSucceed && i==1 && moveSuccess;
+                successMsg = "成功保存上传的照片";
+                break;
+            case "saveSingle":
+                System.out.println("saveSingle");
+                // 将 上传的文件写入数据库中
+                // 1.移动数据到img文件夹下  2.写入到数据库中
+                uploadPicture = pictureService.getImgInfo(new File(absUploadImgPath));
+                isSucceed = pictureService.moveImgToDirByAbsPathAndInsert(uploadPicture);
+                successMsg = "成功保存上传的照片";
+                break;
+            case "deleteSingle":
+                System.out.println("deleteSingle");
+                // 先删除 存在的文件 和 数据库中的内容
+                isSucceed = MyUtils.deleteFile(absUploadImgPath);
+                successMsg = "成功删除照片";
+                break;
+            default:
+                map.put("status", "fail");
+        }
+        MyUtils.insertMsg(map, isSucceed,successMsg);
+
+        // 单张照片操作完毕后 要将 session中的list值进行更新,删除 list中的 uploadImgPath 和 existImgPath
+        ArrayList<HashMap<String, Object>> failedMapList = (ArrayList<HashMap<String, Object>>) req.getSession().getAttribute("failedPicturesList");
+        ArrayList<Picture> successMapList = (ArrayList<Picture>) req.getSession().getAttribute("successPicturesList");
+        failedMapList.removeIf(
+                mapp -> ((Picture)mapp.get("uploadPicture")).getPath().equals(uploadImgPath)
+        );
+        successMapList.removeIf(
+                mapp -> mapp.getPath().equals(uploadImgPath)
+        );
+        req.getSession().setAttribute("monthsTreeMapListPic",pictureService.groupPictureByMonth(successMapList));
+
+        return new Gson().toJson(map);
+    }
+
     // 批量处理
     @ResponseBody
     @RequestMapping(value = "/ajaxHandleSamePicAll",method = RequestMethod.POST)
@@ -188,7 +270,7 @@ public class PictureController {
             case "saveBoth":
                 saveAllFailedPicture(failedMapList,errorInfoList,picturesList);
                 saveAllPicture(successPicturesList,errorInfoList,picturesList);
-                successMsg = "成功保存了本地和上传所有照片";
+                successMsg = "成功保存所有照片";
                 break;
             case "deleteBoth":
                 for (HashMap<String, Object> hashMap : failedMapList) {
@@ -206,7 +288,7 @@ public class PictureController {
                     }
                 }
                 deleteAllPicture(successPicturesList,errorInfoList);
-                successMsg = "成功删除了本地和上传的所有照片";
+                successMsg = "成功删除所有照片";
                 break;
             case "saveExistOnly":
                 for (HashMap<String, Object> hashMap : failedMapList) {
@@ -229,7 +311,6 @@ public class PictureController {
                     i = pictureService.deletePicture(mapper,existImgPath);
 
                     Picture picture = (Picture)hashMap.get("uploadPicture");
-                    picture.setPath(picture.getPath().substring(picture.getPath().indexOf("img")));
                     boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(picture);
                     if(!(isDelete && i==1 &&moveSuccess)){
                         errorInfoList.add(picture.getPath());
@@ -322,89 +403,7 @@ public class PictureController {
         return false;
     }
     
-    // 对相同单个照片进行处理
-    @ResponseBody
-    @RequestMapping(value = "/ajaxHandleSamePic",method = RequestMethod.POST)
-    public String ajaxHandleSamePic(@RequestParam String handleMethod,
-                                    @RequestParam String uploadImgPath,
-                                    @RequestParam String existImgPath, HttpServletRequest req) throws ParseException, ImageProcessingException, IOException {
-
-        HashMap<String,Object> map = new HashMap<>();
-
-        String absUploadImgPath = baseDir+"\\"+uploadImgPath;
-        String absExistImgPath = baseDir+"\\"+existImgPath;
-        String successMsg = "";
-        Picture uploadPicture = null;
-        boolean isSucceed = false;
-        int i = 0;
-        switch (handleMethod){
-            case "saveBoth":
-                System.out.println("saveBoth");
-                successMsg = "成功保存两张照片";
-                uploadPicture = pictureService.getImgInfo(new File(absUploadImgPath));
-                isSucceed = pictureService.moveImgToDirByAbsPathAndInsert(uploadPicture);
-                break;
-            case "deleteBoth":
-                System.out.println("deleteBoth");
-                isSucceed = MyUtils.deleteFile(absUploadImgPath, absExistImgPath);
-                // 将数据库中的 保存文件也删除
-                i = pictureService.deletePicture(mapper,existImgPath);
-                isSucceed = isSucceed && i==1;
-                successMsg = "成功删除两张照片";
-                break;
-            case "saveExistOnly":
-                System.out.println("saveExistOnly");
-                // 不操作数据库
-                isSucceed = MyUtils.deleteFile(absUploadImgPath);
-                successMsg = "成功保存已存在的照片";
-                break;
-            case "saveUploadOnly":
-                System.out.println("saveUploadOnly");
-                // 先删除 存在的文件 和 数据库中的内容
-                isSucceed = MyUtils.deleteFile(absExistImgPath);
-                i = pictureService.deletePicture(mapper,absExistImgPath.substring(absExistImgPath.indexOf("img")));
-                // 将 上传的文件写入数据库中
-                // 1.移动数据到img文件夹下  2.写入到数据库中
-                uploadPicture = pictureService.fileToPicture(absUploadImgPath);
-                boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(uploadPicture);
-
-                isSucceed = isSucceed && i==1 && moveSuccess;
-                successMsg = "成功保存上传的照片";
-                break;
-            case "saveSingle":
-                System.out.println("saveSingle");
-                // 将 上传的文件写入数据库中
-                // 1.移动数据到img文件夹下  2.写入到数据库中
-                uploadPicture = pictureService.fileToPicture(absUploadImgPath);
-                isSucceed = pictureService.moveImgToDirByAbsPathAndInsert(uploadPicture);
-                successMsg = "成功保存上传的照片";
-                break;
-            case "deleteSingle":
-                System.out.println("deleteSingle");
-                // 先删除 存在的文件 和 数据库中的内容
-                isSucceed = MyUtils.deleteFile(absUploadImgPath);
-                successMsg = "成功删除照片";
-                break;
-            default:
-                map.put("status", "fail");
-        }
-        MyUtils.insertMsg(map, isSucceed,successMsg);
-
-        // 单张照片操作完毕后 要将 session中的list值进行更新,删除 list中的 uploadImgPath 和 existImgPath
-        ArrayList<HashMap<String, Object>> failedMapList = (ArrayList<HashMap<String, Object>>) req.getSession().getAttribute("failedPicturesList");
-        ArrayList<Picture> successMapList = (ArrayList<Picture>) req.getSession().getAttribute("successPicturesList");
-        failedMapList.removeIf(
-                mapp -> ((Picture)mapp.get("uploadPicture")).getPath().equals(uploadImgPath)
-        );
-        successMapList.removeIf(
-                mapp -> mapp.getPath().equals(uploadImgPath)
-        );
-        req.getSession().setAttribute("monthsTreeMapListPic",pictureService.groupPictureByMonth(successMapList));
-
-        return new Gson().toJson(map);
-    }
-
-    // 对相同单个照片进行处理
+      // 对相同单个照片进行处理
     @ResponseBody
     @RequestMapping(value = "/ajaxDeletePic",method = RequestMethod.POST)
     public String ajaxDeletePic(String existImgPath,HttpServletRequest req) throws ParseException, ImageProcessingException, IOException {
@@ -446,13 +445,13 @@ public class PictureController {
 
     private void saveAllFailedPicture(ArrayList<HashMap<String, Object>> MapList, ArrayList<String> errorInfoList, ArrayList<Picture> picturesList) throws ParseException, ImageProcessingException, IOException {
         for (HashMap<String, Object> hashMap : MapList) {
-            String uploadImgPath = ((Picture)hashMap.get("uploadPicture")).getPath();
+            Picture uploadPicture = (Picture)hashMap.get("uploadPicture");
+            String uploadImgPath = uploadPicture.getPath();
             String absUploadImgPath = baseDir+"\\"+uploadImgPath;
-            boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(absUploadImgPath);
+            boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(uploadPicture);
             if(!moveSuccess){
                 errorInfoList.add(absUploadImgPath);
             }else {
-                Picture uploadPicture = (Picture) hashMap.get("uploadPicture");
                 String substring = uploadPicture.getPath().substring(uploadPicture.getPath().indexOf("img"));
                 uploadPicture.setPath(substring);
                 picturesList.add(uploadPicture);
@@ -463,8 +462,6 @@ public class PictureController {
 
     private void saveAllPicture(ArrayList<Picture> successPicturesList, ArrayList<String> errorInfoList, ArrayList<Picture> picturesList) throws ParseException, ImageProcessingException, IOException {
         for (Picture picture : successPicturesList) {
-            // 设置所有的pic 路径均不带temp 以便后面统一处理
-            picture.setPath(picture.getPath().substring(picture.getPath().indexOf("img")));
             boolean moveSuccess = pictureService.moveImgToDirByAbsPathAndInsert(picture);
             if(!moveSuccess){
                 errorInfoList.add(picture.getPath());

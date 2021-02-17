@@ -241,9 +241,9 @@
                     <%--最近一个月份的照片不折叠--%>
                     <c:if test="${index.equals(1)}">
                         <div id="${monthTreeMapListPic.key}" class="collapse in">
+                            <div class = "zuiOut"  >
                             <c:forEach items="${monthTreeMapListPic.value}" var="picture" >
-                            <div class = "zuiOut" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}" >
-                                <div class="outdiv" style="float: left" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}" >
+                                <div class="outdiv" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
                                         <h3 style="color: red">上传照片:${picture.path}</h3>
                                         <h4 style="color: chocolate">图片尺寸： ${picture.pwidth}*${picture.pheight}</h4>
                                         <h4 style="color: gray">图片大小： ${picture.psize} M</h4>
@@ -259,8 +259,8 @@
                                             </a>
                                         </div>
                                 </div>
-                            </div>
                             </c:forEach>
+                            </div>
                         </div>
                     </c:if>
 

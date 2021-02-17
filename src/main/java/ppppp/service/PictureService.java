@@ -82,30 +82,6 @@ public class PictureService {
         // 若照片名称中含有时间信息  则将其作为照片的拍摄时间
         String destDir = null;
 
-        // 只有当照片名称中包含时间信息时  才对照片重命名
-        String isContainCreate_time = MyUtils.nameToCreateTime(file.getName());
-        if(isContainCreate_time!=null){
-            if(pic.getPcreatime() == null){
-                pic.setPcreatime(isContainCreate_time);
-                fileName = isContainCreate_time+fileName.substring(fileName.lastIndexOf("."));
-            }
-            // 照片名称中包含时间 信息  但是 照片本身也有时间信息  则以 照片本身的时间信息命名
-            else {
-                fileName = pic.getPcreatime()+fileName.substring(fileName.lastIndexOf("."));
-            }
-
-            // 现在temp 中rename  再移动到指定文件夹
-            // 保证fileName不重复
-            fileName = MyUtils.createNewName(file.getParentFile().list(), fileName);
-            boolean rename = file.renameTo(new File(parentName, fileName));
-            if(rename){
-                System.out.println("重命名照片成功:"+file.getName()+"---->>>"+fileName);
-            }else {
-                fileName = file.getName();
-            }
-        }
-        pic.setPname(fileName);
-
         // 照片本身不包含时间信息
         if(pic.getPcreatime()==null){
             //照片不包含时间信息的 移入导入时间的文件夹
@@ -119,13 +95,36 @@ public class PictureService {
             // 重命名后移动到新的文件夹中
             destDir = tempimgDir+"\\"+pic.getPcreatime().substring(0,7).replace("_","\\");
         }
-
         MyUtils.creatDir(destDir);
 
-        MyUtils.move_file(parentName+"\\"+fileName, destDir);
-
+        // 只有当照片名称中包含时间信息时  才对照片重命名
+        String isContainCreate_time = MyUtils.nameToCreateTime(file.getName());
+        if(isContainCreate_time!=null){
+            if(pic.getPcreatime() == null){
+                pic.setPcreatime(isContainCreate_time);
+                fileName = isContainCreate_time+fileName.substring(fileName.lastIndexOf("."));
+            }
+            // 照片名称中包含时间 信息  但是 照片本身也有时间信息  则以 照片本身的时间信息命名
+            else {
+                fileName = pic.getPcreatime()+fileName.substring(fileName.lastIndexOf("."));
+            }
+            // 现在temp 中rename  再移动到指定文件夹
+            // 保证fileName不重复
+            fileName = MyUtils.createNewName(file.getParentFile().list(), fileName);
+            boolean rename = file.renameTo(new File(parentName, fileName));
+            if(rename){
+                System.out.println("重命名照片成功:"+file.getName()+"---->>>"+fileName);
+            }else {
+                fileName = file.getName();
+            }
+        }
+        String afterMoveAbs = MyUtils.move_file(parentName + "\\" + fileName, destDir);
+        if(afterMoveAbs!=null){
+            fileName = new File(afterMoveAbs).getName();
+        }
+        pic.setPname(fileName);
         String fileAbspath = destDir + "\\" + fileName;
-        pic.setPath(fileAbspath.substring(fileAbspath.indexOf("img")));
+        pic.setPath(fileAbspath.substring(fileAbspath.indexOf("temp")));
         String picStrId = MyUtils.createPicIdByAbsPath(fileAbspath);
         pic.setPid(picStrId);
 
@@ -206,7 +205,6 @@ public class PictureService {
         List<Picture> pictures = mapper.selectByExample(new PictureExample());
         // 将上传的图片与 现有的所有id进行比对
         Picture uploadPicture = getImgInfo(uploadImgTemp);
-        uploadPicture.setPath("temp\\"+uploadPicture.getPath());
         map.put("uploadPicture", uploadPicture);
 
         //应对有可能的改变图片命名  产生的路径不存在问题
@@ -217,7 +215,7 @@ public class PictureService {
         if(isExist){
             System.out.println("  存在相同照片.....");
             // 判断 服务器中是否存在  不存在就移动  存在就不动
-            File existImg = new File(baseDir+"\\"+uploadPicture.getPath());
+            File existImg = new File(baseDir+"\\"+uploadPicture.getPath().substring(uploadPicture.getPath().indexOf("img")));
             if(!existImg.exists()){
                 MyUtils.copyFileUsingFileStreams(existImg.getAbsolutePath(), baseDir+"\\"+((Picture)map.get("existPicture")).getPath());
             }
@@ -268,21 +266,11 @@ public class PictureService {
     }
 
 
-    public Picture fileToPicture(String fileAbspath) throws ParseException, IOException, ImageProcessingException {
-        HashMap<String, String> map = new HashMap<>();
-        String picStrId = MyUtils.createPicIdByAbsPath(fileAbspath);
-
-        Picture pic = new Picture();
-        File file = new File(fileAbspath);
-        return getImgInfo(file);
-    }
-
-    public boolean moveImgToDirByAbsPathAndInsert(Picture picture) throws ParseException, IOException, ImageProcessingException {
+    public boolean moveImgToDirByAbsPathAndInsert(Picture picture) {
         // 2.移动  //3.写入数据库
-        String absDestDir = baseDir + "\\" + picture.getPath();
-        absDestDir = absDestDir.substring(0, absDestDir.lastIndexOf("\\"));
+        String absDestDir = baseDir + "\\" +new File(picture.getPath()).getParent().replace("temp", "");
         MyUtils.creatDir(absDestDir);
-        String absimg = MyUtils.move_file(baseDir + "\\temp\\" + picture.getPath(),absDestDir);
+        String absimg = MyUtils.move_file(baseDir + "\\" + picture.getPath(),absDestDir);
         if(absimg!=null && picture!=null){
             // 此处有可能 重名后  对照片进行重命名了
             picture.setPath(absimg.substring(absimg.indexOf("img")));
