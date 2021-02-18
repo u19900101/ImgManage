@@ -248,8 +248,6 @@
 
             <%--提示是否有重名的信息  错误信息  跟上面对应起来要写class--%>
             <span class="errorMsg" style="color: red;"></span>
-
-
             <c:if test="${empty picture.pcreatime}">
                 <span tyle="color: darksalmon">神秘时间</span>
             </c:if>
