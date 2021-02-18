@@ -61,16 +61,31 @@ public class PictureController {
         return "picture";
     }
 
-
     //修改图片信息
     @ResponseBody
     @RequestMapping("/ajaxUpdateInfo")
-    public String ajaxUpdateInfo(String pname,String pictype,String picpath,String pdesc,HttpServletRequest req){
+    public String ajaxUpdateInfo(String pname,String pictype,String picpath,String pdesc,String newCreateTime,HttpServletRequest req){
         // 修改文件名  要解决重名问题
         HashMap map = new HashMap();
         String status = "";
         String msg = "";
         Picture picture = mapper.selectByPrimaryKey(picpath);
+
+        // 对修改照片名称进行处理
+        if(newCreateTime!=null && picpath !=null){
+            //2020/12/04 15:00
+            newCreateTime = newCreateTime.replace("/", "-").replace(" ", "T")+":00";
+            picture.setPcreatime(newCreateTime);
+            int update = mapper.updateByPrimaryKeySelective(picture);
+            if(update == 1){
+                map.put("status",  "success");
+                map.put("msg", "成功修改照片拍摄时间");
+            }else {
+                map.put("status",  "fail");
+                map.put("msg", "修改照片拍摄时间失败");
+            }
+            return new Gson().toJson(map);
+        }
         String originName = picture.getPname();
         String originDesc = picture.getPdesc();
         String newName = pname+pictype;

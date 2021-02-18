@@ -15,7 +15,10 @@
 
         .c2{
             float: left;
-            border: 2px solid green;
+            overflow: auto;
+            height:100%;
+            width: 60%;;
+            /*border: 2px solid green;
             height:100%;
             width: 60%;;
             display: inline-block;
@@ -24,7 +27,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            margin: auto;
+            margin: auto;*/
             /* 设置div中的图片居中*/
             display:flex;
             align-items:center;
@@ -188,6 +191,8 @@
             });
         });
     </script>
+
+
     <%--alert自动消失--%>
     <script type="text/javascript">
         var countDown = function (secs){
@@ -238,23 +243,38 @@
 <div class="app" name = "div1">
         <%--显示 照片名称  拍摄时间 地点--%>
         <div class="c1" name = "div2">
-            <span>照片名称：</span>
-            <input id="pname" name = "pname" value="${picture.pname}" pictype=${type}>
+            <span style="width:300px;height:30px;font-size:25px;">照片名称：</span>
+            <input style="width:300px;height:30px;font-size:25px; line-height:40px;border: 1px solid #ffe57d" id="pname" name = "pname" value="${picture.pname}" pictype=${type} >
 
             <%--提示是否有重名的信息  错误信息  跟上面对应起来要写class--%>
             <span class="errorMsg" style="color: red;"></span>
 
-            <span>拍摄时间：</span>
+
             <c:if test="${empty picture.pcreatime}">
                 <span tyle="color: darksalmon">神秘时间</span>
             </c:if>
             <c:if test="${not empty picture.pcreatime}">
-                <span style="color: darksalmon">${picture.pcreatime}</span>
+                <div id='myTimeChangeDemo' style="float: right">
+                    <v-date-picker v-model="date" mode="dateTime" :timezone="timezone" is24hr :minute-increment="5">
+                        <template v-slot="{ inputValue, inputEvents }" >
+                            <span style="width:300px;height:30px;font-size:25px;">拍摄时间：</span>
+                            <input
+                                    class="bg-white border px-1 py-1 rounded"
+                                    :value="inputValue"
+                                    v-on="inputEvents"
+                                    id = "changeCreateTime"
+                                    style="width:300px;height:30px;font-size:25px; line-height:30px;border: 1px solid #ffe57d"
+                            />
+                        </template>
+                    </v-date-picker>
+                </div>
+                <input type="hidden" id="second" />
+                <%--<span style="color: darksalmon">${picture.pcreatime}</span>--%>
             </c:if>
 
-            <span>坐标：</span>
+            <span style="width:300px;height:30px;font-size:25px;">坐标：</span>
             <c:if test="${empty picture.gpsLongitude}">
-                <span style="color: green">神秘未知</span>
+                <span style="color: green;width:300px;height:30px;font-size:25px;">神秘未知</span>
             </c:if>
             <c:if test="${not empty picture.gpsLongitude}">
                 <span style="color: green">${picture.gpsLongitude}</span>
@@ -262,9 +282,10 @@
             </c:if>
 
             <%--显示照片--%>
-            <input class="myselect" type="button" value="删除" style="font-size: larger;width: 50%;text-align:center"
-                   handleMethod ="deleteSingle" existImgPath = ${picture.path}>
+
             <div class="c2">
+                <input class="myselect" type="button" value="删除" style="font-size: larger;width: 10%;text-align:center"
+                       handleMethod ="deleteSingle" existImgPath = ${picture.path}>
                 <img id = "myImg" src="${picture.path}" width="800">
             </div>
         </div>
@@ -288,5 +309,52 @@
         </div>
 
 </div>
+<%-- v-calender 控件--%>
+<script>
+    $(function () {
+        var old = $("#changeCreateTime").val();
+        var picpath = $("#myImg").attr("src");
+        $("#second").val(old);
+        myFunction(old,picpath);
 
+    });
+    function myFunction(old,picpath){
+        setInterval(function(){
+                var newCreateTime = $("#changeCreateTime").val();
+                if(old != newCreateTime){
+                    $.post(
+                        "http://localhost:8080/pic/picture/ajaxUpdateInfo",
+                        "newCreateTime=" + newCreateTime+
+                        "&picpath=" + picpath,
+                        function (data) {
+                            if (data.status == 'success') {
+                                success_prompt(data.msg, 1500);
+                            } else if (data.status == 'fail') {
+                                fail_prompt(data.msg, 2500);
+                            } else if (data.status == 'unchange') {
+                                //  当名称没有变化时 不显示
+                            } else {
+                                warning_prompt("其他未知错误.....please enjoy debug", 2500);
+                            }
+                        },
+                        "json"
+                    );
+                    // alert(vue);
+                    old = newCreateTime;
+                }
+                $("#second").val(newCreateTime);
+            }
+            ,2000);
+    }
+</script>
+<script>
+    new Vue({
+        el: '#myTimeChangeDemo',
+        data:{
+            timezone: '',
+            // date: '1983-01-21T07:30:00',
+            date:  '${picture.pcreatime}',
+        },
+    });
+</script>
 </html>

@@ -12,13 +12,14 @@
 </head>
 
 <div id='app1'>
-    <v-date-picker v-model="date" mode="dateTime" :timezone="timezone" is24hr :minute-increment="5">
-        <template v-slot="{ inputValue, inputEvents }">
+    <v-date-picker v-model="date" :model-config="modelConfig" mode="dateTime" :timezone="timezone" is24hr :minute-increment="5">
+        <template v-slot="{ inputValue, inputEvents }" >
             <input
-                    class="bg-white border px-2 py-1 rounded"
+                    <%--class="bg-white border px-1 py-1 rounded"--%>
                     :value="inputValue"
                     v-on="inputEvents"
                     id = "f1"
+                    style="width:125px;height:30px;font-size:10px; line-height:30px;border: 1px solid #ffe57d"
             />
         </template>
     </v-date-picker>
@@ -46,7 +47,7 @@
         setInterval(function(){
                 var vue = $("#f1").val();
                 if(old != vue){
-                    alert("值发生了改变");
+                    alert(vue);
                     old = vue;
                 }
                 $("#second").val(vue);
@@ -67,6 +68,13 @@
             timezone: '',
             // date: '1983-01-21T07:30:00',
             date:  '${time.split("T")[0].replace("_","-")}T${time.split("T")[1].replace("_",":")}',
+            modelConfig: {
+                type: 'string',
+                masks: {
+                    input: 'YYYY-MM-DD',
+                },
+                timeAdjust: '15:00:02',
+            },
         },
     });
 </script>

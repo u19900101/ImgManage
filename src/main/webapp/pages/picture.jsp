@@ -266,7 +266,8 @@
                         <c:forEach items="${item.value}" var="picture" >
                             <div class="c1" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
                                 <c:if test="${not empty picture.pcreatime}">
-                                    <h3 align="center" style="color: seagreen">${picture.pcreatime}</h3>　
+                                    <span align="center" style="font-size:18px">${picture.pcreatime}</span><br/>
+                                    <span align="center" style="color: seagreen;font-size:25px">${picture.pname.split("\\.")[0]}</span>
                                 </c:if>
                                 <form action="picture/before_edit_picture" method="post" name="${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
                                     <div class="imgDiv">

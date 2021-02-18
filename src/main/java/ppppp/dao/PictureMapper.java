@@ -32,6 +32,6 @@ public interface PictureMapper {
     int MyUpdateByPrimaryKey(@Param("newPath")String newPath,@Param("record")Picture record);
     int updateByPrimaryKeyWithBLOBs(Picture record);
 
-    int updateByPrimaryKey(Picture record);
+    int updateByPrimaryKey(String record);
 
 }
