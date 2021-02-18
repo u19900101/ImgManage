@@ -1,0 +1,92 @@
+<html>
+<head>
+    <meta charset='GBK'>
+    <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>
+    <meta http-equiv='x-ua-compatible' content='ie=edge'>
+    <script type="text/javascript" src="../static/script/jquery-3.5.1.js"></script>
+
+    <!-- IMPORTANT: No CSS link needed as of v1 - It's all inlined -->
+    <!-- Pre v1.0.0 versions need the minified css -->
+    <!-- <link rel='stylesheet' href='https://unpkg.com/v-calendar/lib/v-calendar.min.css'> -->
+
+</head>
+<body>
+
+<div id='app'>
+    <v-date-picker v-model='selectedDate' />
+   <!-- <v-calendar></v-calendar>-->
+    <!--<v-calendar title-position="left" ></v-calendar>-->
+    <v-date-picker
+            :rows="1"
+            :min-date="new Date()"
+            :attributes='attrs'
+            :value="null"
+            color="red"
+            is-range
+    />
+        <!--<v-calendar :/>-->
+    <!--整个页面的宽度-->
+   <!--<v-calendar is-expanded />-->
+    <!--<v-calendar :from-page="{ month: 1, year: 2019 }" :attributes="attrs2" />-->
+
+</div>
+
+<!-- 1. Link Vue Javascript -->
+<script src='https://unpkg.com/vue/dist/vue.js'></script>
+<!-- 2. Link VCalendar Javascript (Plugin automatically installed) -->
+<script src='https://unpkg.com/v-calendar'></script>
+<!--3. Create the Vue instance-->
+<script>
+    date = new Date();
+    year = date.getFullYear();
+    month = date.getMonth();
+    new Vue({
+        el: '#app',
+        data: {
+            selectedDate: new Date(1990,1-1,1),
+            attrs: [
+                {
+                    key: 'today',
+                    highlight: {
+                        color: 'purple',
+                        fillMode: 'solid',
+                        contentClass: 'italic',
+                    },
+                    dates: new Date(year, month, 12),
+                    // 点亮的日期上出现提示内容
+                    popover:{
+                        label:"么么哒",
+                    }
+                },
+                {
+                    highlight: {
+                        color: 'purple',
+                        fillMode: 'light',
+                    },
+                    dates: new Date(year, month, 13),
+                },
+                {
+                    highlight: {
+                        color: 'purple',
+                        fillMode: 'outline',
+                    },
+                    dates: new Date(year, month, 14),
+                },
+            ],
+            // 起始选择显示
+            attrs2: [
+                {
+                    highlight: {
+                        start: { fillMode: 'outline' },
+                        base: { fillMode: 'light' },
+                        end: { fillMode: 'outline' },
+                    },
+                    dates: { start: new Date(2019, 0, 14), end: new Date(2019, 0, 18) },
+                },
+            ],
+        }
+    });
+
+</script>
+</body>
+</html>

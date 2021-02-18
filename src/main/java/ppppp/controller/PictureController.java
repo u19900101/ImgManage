@@ -471,35 +471,4 @@ public class PictureController {
         }
 
     }
-    // 可以改写成为  对文件夹进行上传
-  /*  @RequestMapping("/init")
-    public String init(HttpServletRequest request){
-        // 遍历文件夹下所有文件路径
-        // 若父文件夹不存在则创建
-        MyUtils.creatDir(uploadimgDir);
-        String scrDir = "C:\\Users\\Administrator\\Desktop\\demo\\img";
-        List<String> stringList = new ArrayList<>();
-        ArrayList<HashMap<String, Object>> successMapList = new ArrayList<>();
-        ArrayList<HashMap<String, Object>> failedMapList = new ArrayList<>();
-        MyUtils.getallpath(scrDir,stringList);
-        if(stringList.size()>0){
-            for (String s : stringList) {
-                try {
-                    File src = new File(s);
-                    String copypath = request.getSession().getServletContext().getRealPath("temp")+"\\"+src.getName();
-                    MyUtils.copyFileUsingFileStreams(s,copypath);
-                    File temp = new File(copypath);
-                    pictureService.checkAndCreateImg(uploadimgDir, temp, successMapList, failedMapList);
-
-                    // 只要一存在 检测出的照片 相似 就进行转发 显示到页面
-                    request.getSession().setAttribute("failedMapList", failedMapList);
-                    request.getSession().setAttribute("successMapList", successMapList);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return "forward:/demo.jsp";
-    }*/
 }

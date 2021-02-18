@@ -208,9 +208,6 @@
             prompt(message, 'alert-info', time);
         };
     </script>
-    <%--点击显示大图和标题--%>
-    <script type="text/javascript" src="static/script/jquery-1.7.2.js"></script>
-
 </head>
 <body>
 

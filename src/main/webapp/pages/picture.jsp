@@ -239,7 +239,9 @@
                             <div class="c1" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
                                     <%--现实照片拍摄的时间--%>
                                 <c:if test="${not empty picture.pcreatime}">
-                                    <h2 align="center" style="color: seagreen">${picture.pcreatime}</h2>　
+                                    <span align="center" style="font-size:18px">${picture.pcreatime}</span><br/>
+                                    <span align="center" style="color: seagreen;font-size:25px">${picture.pname.split("\\.")[0]}</span>
+
                                 </c:if>
                                 <form action="picture/before_edit_picture" method="post" name="${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
                                     <div class="imgDiv">

@@ -309,15 +309,17 @@ public class MyUtils {
 
     //   将带有时间信息的照片名  作为照片的创建时间 写入数据库中
     //   有且仅有匹配3中格式
+    // 2016-08-16T09:33:17
     /*
     1.mmexport1605932146267.jpg
     2.Screenshot_20201209_152638_com.eg.android.AlipayGphone
     3.wx_camera_1607081625719.jpg
     4.hdImg_a8464b03b3d71c7dc5a843a0d33e53831604568858570.jpg
     * */
+
     @Test
     public void T(){
-        System.out.println(nameToCreateTime("mmexport1606733975581"));
+        System.out.println(nameToCreateTime("hdImg_a8464b03b3d71c7dc5a843a0d33e53831604568858570.eg.android.AlipayGphone"));
     }
     public static String nameToCreateTime(String name){
         Pattern p = Pattern.compile("[0-9]{13}");
@@ -336,16 +338,15 @@ public class MyUtils {
         Matcher m2 = p2.matcher(name);
         if (m2.find()) {
             String s = m2.group().replace("_", "");
-            return s.substring(0,4)+"_"+s.substring(4,6)+"_"+s.substring(6,8)
-                    +"T"+s.substring(8,10)+"_"+s.substring(10,12)+"_"+s.substring(12,14);
+            return s.substring(0,4)+"-"+s.substring(4,6)+"-"+s.substring(6,8)
+                    +"T"+s.substring(8,10)+":"+s.substring(10,12)+":"+s.substring(12,14);
         }
         return null;
 }
 
     public static String longToDateStr(long timeStamp){
-
         LocalDateTime localDateTime = Instant.ofEpochMilli(timeStamp).atZone(ZoneOffset.ofHours(8)).toLocalDateTime();
-        return localDateTime.toString().replace("-", "_").replace(":", "_");
+        return localDateTime.toString().split("\\.")[0];
     }
 
 }

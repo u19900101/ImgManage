@@ -58,14 +58,12 @@ public class PictureService {
                         case "Date/Time Original":
 
                             // 修改格式
-                            // 2021_01_04T19_26_40
+                            // 2016-08-16T09:33:17
                             //2016:08:16 09:33:17  location: 100_33_11.27,36_33_34.23
                             String time = t.getDescription();
                             String[] s = time.split(" ");
-                            String replace = s[0].replace(":", "_");
-                            String replace2 = s[1].replace(":", "_");
-                            pic.setPcreatime(replace+"T"+ replace2);
-
+                            String replace = s[0].replace(":", "-");
+                            pic.setPcreatime(replace+"T"+ s[1]);
                             break;
                         //    获取照片的尺寸 便于照片去重判断
                         case "Image Height":
@@ -87,11 +85,12 @@ public class PictureService {
         if(isContainCreate_time!=null){
             if(pic.getPcreatime() == null){
                 pic.setPcreatime(isContainCreate_time);
-                fileName = isContainCreate_time+fileName.substring(fileName.lastIndexOf("."));
+                //2016-08-16T09:33:17   2016_08_16T09_33_17
+                fileName = isContainCreate_time.replace("-", "_").replace(":", "_")+fileName.substring(fileName.lastIndexOf("."));
             }
             // 照片名称中包含时间 信息  但是 照片本身也有时间信息  则以 照片本身的时间信息命名
             else {
-                fileName = pic.getPcreatime()+fileName.substring(fileName.lastIndexOf("."));
+                fileName = pic.getPcreatime().replace("-", "_").replace(":", "_")+fileName.substring(fileName.lastIndexOf("."));
             }
             // 现在temp 中rename  再移动到指定文件夹
             // 保证fileName不重复
@@ -107,15 +106,16 @@ public class PictureService {
         // 照片本身不包含时间信息
         if(pic.getPcreatime()==null){
             //照片不包含时间信息的 移入导入时间的文件夹
-            String create_time = LocalDateTime.now().toString().split("\\.")[0].replace("-", "_").replace(":", "_");
+            String create_time = LocalDateTime.now().toString().split("\\.")[0];
             pic.setPcreatime(create_time);
+            // 月份文件夹
             destDir = tempimgDir+"\\"+LocalDateTime.now().toString().substring(0,7).replace("-","\\");
         }
         // 照片本身 已经 包含时间信息
         else {
             // 若照片名称中包含时间信息  则修改 照片名称与时间相关
             // 重命名后移动到新的文件夹中
-            destDir = tempimgDir+"\\"+pic.getPcreatime().substring(0,7).replace("_","\\");
+            destDir = tempimgDir+"\\"+pic.getPcreatime().substring(0,7).replace("-","\\");
         }
         MyUtils.creatDir(destDir);
         String afterMoveAbs = MyUtils.move_file(parentName + "\\" + fileName, destDir);
@@ -130,6 +130,7 @@ public class PictureService {
 
         return pic;
     }
+
 
     public static HashMap<String, String> getVideoInfo(String videoPath) {
         //ffmepg工具地址

@@ -156,7 +156,9 @@
                         } else if (data.status == 'fail') {
                             fail_prompt(data.msg, 2500);
                             $("span.errorMsg").text("照片名称已存在，请重新输入");
-                        } else {
+                        } else if (data.status == 'unchange') {
+
+                        } else{
                             warning_prompt("其他未知错误.....please enjoy debug", 2500);
                         }
                     },
