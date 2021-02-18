@@ -239,7 +239,7 @@
                             <div class="c1" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
                                     <%--现实照片拍摄的时间--%>
                                 <c:if test="${not empty picture.pcreatime}">
-                                    <span align="center" style="font-size:18px">${picture.pcreatime}</span><br/>
+                                    <span align="center" style="font-size:18px;color: purple;font-weight:bold">${picture.pcreatime}</span><br/>
                                     <span align="center" style="color: seagreen;font-size:25px">${picture.pname.split("\\.")[0]}</span>
 
                                 </c:if>

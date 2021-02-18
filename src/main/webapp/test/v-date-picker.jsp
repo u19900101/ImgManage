@@ -9,57 +9,40 @@
 <%@ include file="/pages/head.jsp"%>
 <html>
 <head>
+    <link rel="shortcut icon" href="#" />
 </head>
 
 <div id='app1'>
-    <v-date-picker v-model="date" :model-config="modelConfig" mode="dateTime" :timezone="timezone" is24hr :minute-increment="5">
+    <%--<v-date-picker v-model="date" :model-config="modelConfig" mode="dateTime" :timezone="timezone" is24hr :minute-increment="5">
         <template v-slot="{ inputValue, inputEvents }" >
             <input
-                    <%--class="bg-white border px-1 py-1 rounded"--%>
+                    &lt;%&ndash;class="bg-white border px-1 py-1 rounded"&ndash;%&gt;
                     :value="inputValue"
                     v-on="inputEvents"
                     id = "f1"
                     style="width:125px;height:30px;font-size:10px; line-height:30px;border: 1px solid #ffe57d"
             />
         </template>
-    </v-date-picker>
+    </v-date-picker>--%>
+        <template>
+            <v-date-picker class="inline-block h-full" v-model="date">
+                <template v-slot="{ inputValue, togglePopover }">
+                    <div class="flex items-center">
+                        <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
+                                @click="togglePopover({ placement: 'auto-start' })">
+                            <%--<i class="fi-home"></i>--%>
+                            <i class="fi-calendar"></i>
+                        </button>
+                        <input
+                                :value="inputValue"
+                                class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
+                                readonly
+                        />
+                    </div>
+                </template>
+            </v-date-picker>
+        </template>
 </div>
-<input type="text" id="second" />
-<div>
-    <button type="button" id="m1" style="width: 200px;height: 50px">取值</button>
-</div>
-
-<input type="text" id="input1" />
-<script>
-    $(function () {
-        var old = $("#f1").val();
-        $("#second").val(old);
-        myFunction(old);
-        $("#m1").on("click",function(){
-            var vue = $("#f1").val();
-            $("#second").val(vue);
-        });
-        $("#second").bind("input propertychange",function(event){
-            alert($("#f1").val());
-        });
-    });
-    function myFunction(old){
-        setInterval(function(){
-                var vue = $("#f1").val();
-                if(old != vue){
-                    alert(vue);
-                    old = vue;
-                }
-                $("#second").val(vue);
-            }
-            ,2000);
-    }
-</script>
-<%--2020_12_13T11_53_22--%>
-<% request.setAttribute("time", "2020_12_13T11_53_22");%>
- <%--后台传递的值： ${time.split("T")[0].replace("_","-")+"T"+time.split("T")[1].replace("_",":")}--%>
- 拆分1： ${time.split("T")[0].replace("_","-")}
- 拆分2： ${time.split("T")[1].replace("_",":")}
 
 <script>
     new Vue({
@@ -67,14 +50,7 @@
         data:{
             timezone: '',
             // date: '1983-01-21T07:30:00',
-            date:  '${time.split("T")[0].replace("_","-")}T${time.split("T")[1].replace("_",":")}',
-            modelConfig: {
-                type: 'string',
-                masks: {
-                    input: 'YYYY-MM-DD',
-                },
-                timeAdjust: '15:00:02',
-            },
+            date: new Date(),
         },
     });
 </script>

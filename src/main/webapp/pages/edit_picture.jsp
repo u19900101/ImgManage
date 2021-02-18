@@ -243,7 +243,7 @@
 <div class="app" name = "div1">
         <%--显示 照片名称  拍摄时间 地点--%>
         <div class="c1" name = "div2">
-            <span style="width:300px;height:30px;font-size:25px;">照片名称：</span>
+            <span style="width:300px;height:30px;font-size:25px;">名称：</span>
             <input style="width:300px;height:30px;font-size:25px; line-height:40px;border: 1px solid #ffe57d" id="pname" name = "pname" value="${picture.pname}" pictype=${type} >
 
             <%--提示是否有重名的信息  错误信息  跟上面对应起来要写class--%>
@@ -255,16 +255,24 @@
             </c:if>
             <c:if test="${not empty picture.pcreatime}">
                 <div id='myTimeChangeDemo' style="float: right">
-                    <v-date-picker v-model="date" mode="dateTime" :timezone="timezone" is24hr :minute-increment="5">
-                        <template v-slot="{ inputValue, inputEvents }" >
-                            <span style="width:300px;height:30px;font-size:25px;">拍摄时间：</span>
-                            <input
-                                    class="bg-white border px-1 py-1 rounded"
-                                    :value="inputValue"
-                                    v-on="inputEvents"
-                                    id = "changeCreateTime"
-                                    style="width:300px;height:30px;font-size:25px; line-height:30px;border: 1px solid #ffe57d"
-                            />
+                    <v-date-picker class="inline-block h-full" v-model="date" mode="dateTime" :timezone="timezone" is24hr :minute-increment="5" >
+                        <template v-slot="{ inputValue, togglePopover }">
+
+                            <div class="flex items-center">
+                                <%--<span style="width:300px;height:30px;font-size:25px;">拍摄时间：</span>--%>
+                                <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
+                                        @click="togglePopover({ placement: 'auto-start' })">
+                                        <%--<i class="fi-home"></i>--%>
+                                    <i class="fi-calendar"></i>
+                                </button>
+                                <input
+                                        :value="inputValue"
+                                        class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
+                                        id = "changeCreateTime"
+                                        style="width:300px;height:30px;font-size:25px; line-height:30px;border: 1px solid #ffe57d"
+                                        readonly
+                                />
+                            </div>
                         </template>
                     </v-date-picker>
                 </div>
