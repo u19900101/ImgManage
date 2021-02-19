@@ -27,8 +27,8 @@
 <%-- link 标签和 script 标签有重大差别 --%>
 <link rel="stylesheet" href="static/bootstrap-3.3.7/css/bootstrap.min.css">
 <script type="text/javascript" src="static/script/jquery-3.5.1.js"></script>
-<script type="text/javascript" src="test/2.6.12.vue.min.js"></script>
-<script type="text/javascript" src="test/v-calendar.js"></script>
+<script type="text/javascript" src="static/script/2.6.12.vue.min.js"></script>
+<script type="text/javascript" src="static/script/v-calendar.js"></script>
 
 <script src="static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
 

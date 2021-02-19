@@ -45,7 +45,8 @@
     </javaClientGenerator>
 
 	<!-- 指定要逆向分析哪些表：根据表要创建javaBean -->
-      <table tableName="t_pic" domainObjectName="Picture"></table>
+      <!--<table tableName="t_pic" domainObjectName="Picture"></table>-->
+      <table tableName="t_label" domainObjectName="Label"></table>
   </context>
 
 </generatorConfiguration>
