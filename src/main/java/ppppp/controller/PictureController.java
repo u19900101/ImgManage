@@ -71,7 +71,7 @@ public class PictureController {
         String msg = "";
         Picture picture = mapper.selectByPrimaryKey(picpath);
 
-        // 对修改照片名称进行处理
+        // 修改照片时间
         if(newCreateTime!=null && picpath !=null){
             //2020/12/04 15:00
             newCreateTime = newCreateTime.replace("/", "-").replace(" ", "T")+":00";
@@ -106,9 +106,10 @@ public class PictureController {
             if(!isNameExist){
                 // 修改本地照片的名称
                 File file = new File(baseDir, picpath);
-                rename = file.renameTo(new File(file.getParent()+"\\"+ newName));
+                // 文件路径和 本地文件名称中不能有空格
+                rename = file.renameTo(new File(file.getParent()+"\\"+ newName.replace(" ", "")));
                 // 要改主键
-                newPath = picpath.substring(0,picpath.lastIndexOf("\\"))+"\\"+newName;
+                newPath = picpath.substring(0,picpath.lastIndexOf("\\"))+"\\"+newName.replace(" ", "");
                 i = mapper.MyUpdateByPrimaryKey(newPath,picture);
             }
             if(1==i&& rename){

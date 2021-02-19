@@ -28,6 +28,7 @@
             <v-date-picker class="inline-block h-full" v-model="date">
                 <template v-slot="{ inputValue, togglePopover }">
                     <div class="flex items-center">
+                        <%--<button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"--%>
                         <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
                                 @click="togglePopover({ placement: 'auto-start' })">
                             <%--<i class="fi-home"></i>--%>
@@ -43,6 +44,9 @@
             </v-date-picker>
         </template>
 </div>
+<button onchange="myFunction()">
+    <input>
+</button>
 
 <script>
     new Vue({
@@ -53,6 +57,37 @@
             date: new Date(),
         },
     });
+    $(function () {
+
+       /* $('#kk').on('click', function(){
+            $.post(
+                "http://localhost:8080/pic/picture/ajaxUpdateInfo",
+                "newCreateTime=" + newCreateTime+
+                "&picpath=" + picpath,
+                function (data) {
+                    if (data.status == 'success') {
+                        success_prompt(data.msg, 1500);
+                    } else if (data.status == 'fail') {
+                        fail_prompt(data.msg, 2500);
+                    } else if (data.status == 'unchange') {
+                        //  当名称没有变化时 不显示
+                    } else {
+                        warning_prompt("其他未知错误.....please enjoy debug", 2500);
+                    }
+                },
+                "json"
+            );
+        });*/
+
+    });
+    function myFunc(){
+        alert("改变鸟！");
+    };
+    function myFunction()
+    {
+        alert("Hello World!");
+    };
 </script>
+
 </body>
 </html>

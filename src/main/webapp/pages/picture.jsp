@@ -32,42 +32,7 @@
             justify-content:center;
         }
     </style>
-    <%--点击显示大图和标题--%>
-    <script type="text/javascript">
-        $(function() {
-            <%--删除button 的隐藏和显示--%>
-           /* $(".c1").mouseenter(function(){
-                $(this).prepend("<input id= \"kkk\" class=\"myselect\" type=\"button\" value=\"删除\" style=\"font-size: larger;width: 100%;text-align:center\" existImgPath = />");
-            });
-            $(".c1").mouseleave(function(){
-                $("#kkk").remove();
-            });*/
-            $('.myselect').on('click', function () {
-                var existImgPath = $(this).attr('existImgPath');
-                // 要replaceAll  下面的则不需要 尬
-                var divID = $(this).attr('existImgPath').replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
-                $.post(
-                    "http://localhost:8080/pic/picture/ajaxDeletePic",
-                    "existImgPath=" + existImgPath,
-                    function (data) {
-                        if (data.status == 'success') {
-                            $("#" + divID).remove();
-                            success_prompt(data.msg, 1500);
-                        } else if (data.status == 'fail') {
-                            fail_prompt(data.msg, 2500);
-                        } else {
-                            warning_prompt("其他未知错误.....please enjoy debug", 2500);
-                        }
-                    },
-                    "json"
-                );
-            });
-        });
-    </script>
 
-    <script type="text/javascript">
-
-    </script>
     <%-- alter style--%>
     <style>
         .alert {
@@ -173,7 +138,6 @@
             }
         }
     </script>
-
     <%--alert自动消失--%>
     <script type="text/javascript">
         var prompt = function (message, style, time)
@@ -239,8 +203,34 @@
                             <div class="c1" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
                                     <%--现实照片拍摄的时间--%>
                                 <c:if test="${not empty picture.pcreatime}">
-                                    <span align="center" style="font-size:18px;color: purple;font-weight:bold">${picture.pcreatime}</span><br/>
-                                    <span align="center" style="color: seagreen;font-size:25px">${picture.pname.split("\\.")[0]}</span>
+                                    <div id='v_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}' style="float: right">
+                                        <v-date-picker class="inline-block h-full" v-model="date" mode="dateTime" :timezone="timezone" is24hr :minute-increment="5" >
+                                            <template v-slot="{ inputValue, togglePopover }">
+                                                <div class="flex items-center">
+                                                        <%--<span style="width:300px;height:30px;font-size:25px;">拍摄时间：</span>--%>
+                                                    <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
+                                                            @click="togglePopover({ placement: 'auto-start' })">
+                                                            <%--<i class="fi-home"></i>--%>
+                                                        <i class="fi-calendar"></i>
+                                                    </button>
+                                                    <input
+                                                            :value="inputValue"
+                                                            class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
+                                                            id = "changeTime_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}"
+                                                            style="font-weight: bold;width:125px;height:25px;font-size:15px; line-height:30px;border: 1px solid #ffe57d"
+                                                            readonly
+                                                    />
+                                                </div>
+                                            </template>
+                                        </v-date-picker>
+                                    </div>
+                                    <input type="hidden" id="second" />
+
+                                    <%--<span align="center" style="font-size:18px;color: purple;font-weight:bold">${picture.pcreatime}</span><br/>--%>
+                                    <%--名称--%>
+                                    <div class="imgDiv">
+                                        <span align="center" style="color: seagreen;font-size:25px">${picture.pname.split("\\.")[0]}</span>
+                                    </div>
 
                                 </c:if>
                                 <form action="picture/before_edit_picture" method="post" name="${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
@@ -248,7 +238,7 @@
                                         <input type="hidden" name="path" value="${picture.path}">
 
                                         <a href="javascript:document.${picture.path.replace('\\', '').replace('_', '').replace('.', '')}.submit();">
-                                            <img src="${picture.path}" height="300px" >
+                                            <img id = "myImg${picture.path.replace('\\', '').replace('_', '').replace('.', '')}" src="${picture.path}" height="300px" >
                                         </a>
                                     </div>
                                 </form>
@@ -284,36 +274,6 @@
                         </c:forEach>
                     </div>
                 </c:if>
-
-                <%--<div class="panel panel-default">
-                    &lt;%&ndash;折叠月份的标题&ndash;%&gt;
-                    <div class="panel-heading">
-                        <h4 class="panel-title">
-                            <a data-toggle="collapse" data-parent="#accordion"
-                               href="#${item.key}">
-                                &lt;%&ndash;拍摄时间&ndash;%&gt;
-                                <h2 style="color: chocolate">${item.key}</h2>
-                            </a>
-                        </h4>
-                    </div>
-                    &lt;%&ndash;折叠月度照片&ndash;%&gt;
-                    <div id="${item.key}" class="panel-collapse collapse">
-                        <div class="panel-body">
-
-                            <c:forEach items="${item.value}" var="picture" >
-                                <div class="c1">
-                                    &lt;%&ndash;现实照片拍摄的时间&ndash;%&gt;
-                                    <h2 align="center" style="color: seagreen">${picture.pcreatime}</h2>　
-
-                                        <a href="picture/before_edit_picture?pid=${picture.pid}">
-                                            <img src="${picture.path}" height="300px" >
-                                        </a>
-
-                                </div>
-                            </c:forEach>
-                        </div>
-                    </div>
-                </div>--%>
                 <%--清除div的格式 以便于每月的图片另起一行显示--%>
                 <div style="clear: both"></div>
             </div>
@@ -322,6 +282,65 @@
 </div>
 
 </div>
+<%-- v-calender 控件 有点冗余--%>
+<script>
+    $(function () {
+        <c:forEach var="item" items="${monthsTreeMapListPic}">
+            <c:forEach items="${item.value}" var="picture" >
+                new Vue({
+                    el: '#v_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}',
+                    data:{
+                        timezone: '',
+                        date:  '${picture.pcreatime}',
+                    },
+                });
+            </c:forEach>
+        </c:forEach>
+    });
+</script>
+<script>
+$(function () {
+    <c:forEach var="item" items="${monthsTreeMapListPic}">
+        <c:forEach items="${item.value}" var="picture" >
+            var old = $("#changeTime_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}").val();
+            var picpath = $("#myImg${picture.path.replace('\\', '').replace('_', '').replace('.', '')}").attr("src");
+            var newCreateTimeId = "#changeTime_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}";
+            $("#second").val(old);
+            myFunction(old,picpath,newCreateTimeId);
 
+        </c:forEach>
+    </c:forEach>
+    });
+
+    function myFunction(old,picpath,newCreateTimeId){
+        setInterval(function(){
+                var newCreateTime = $(newCreateTimeId).val();
+                if(old != newCreateTime){
+                    // alert(picpath+"---"+old +"---" + newCreateTime);
+                    $.post(
+                        "http://localhost:8080/pic/picture/ajaxUpdateInfo",
+                        "newCreateTime=" + newCreateTime+
+                        "&picpath=" + picpath,
+                        function (data) {
+                            if (data.status == 'success') {
+                                success_prompt(data.msg, 1500);
+                            } else if (data.status == 'fail') {
+                                fail_prompt(data.msg, 2500);
+                            } else if (data.status == 'unchange') {
+                                //  当名称没有变化时 不显示
+                            } else {
+                                warning_prompt("其他未知错误.....please enjoy debug", 2500);
+                            }
+                        },
+                        "json"
+                    );
+                    old = newCreateTime;
+                }
+                $("#second").val(newCreateTime);
+            }
+            ,2000);
+    };
+
+</script>
 </body>
 </html>

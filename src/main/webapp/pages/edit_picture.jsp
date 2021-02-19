@@ -255,7 +255,6 @@
                 <div id='myTimeChangeDemo' style="float: right">
                     <v-date-picker class="inline-block h-full" v-model="date" mode="dateTime" :timezone="timezone" is24hr :minute-increment="5" >
                         <template v-slot="{ inputValue, togglePopover }">
-
                             <div class="flex items-center">
                                 <%--<span style="width:300px;height:30px;font-size:25px;">拍摄时间：</span>--%>
                                 <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
