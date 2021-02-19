@@ -24,15 +24,16 @@ public class LabelController {
     LabelMapper labelMapper;
     //修改图片信息
     @ResponseBody
-    @RequestMapping("/isLabelExist")
-    public String ajaxUpdateInfo(String newLable) {
+    @RequestMapping("/insert")
+    public String ajaxInsertLabel(String newLable) {
         HashMap map = new HashMap();
-        LabelExample labelExample = new LabelExample();
-        LabelExample.Criteria criteria = labelExample.createCriteria();
-        criteria.andLabelNameLike(newLable);
-        List<Label> labelList = labelMapper.selectByExample(labelExample);
+        Label label= labelMapper.selectByPrimaryKey(newLable);
         // 标签不存在 进行添加到数据库中
-        if(labelList==null){
+        if(label!=null){
+            map.put("exist", true);
+            map.put("msg", "标签已存在");
+            map.put("label", label);
+        }else {
             map.put("exist", false);
             Label newLabel = new Label();
             newLabel.setLabelName(newLable);
@@ -43,12 +44,26 @@ public class LabelController {
             }else {
                 map.put("fail", "插入标签到数据库中失败");
             }
-        }else {
+        }
+        return new Gson().toJson(map);
+    }
+
+    //实时模糊匹配 输入的label
+    @ResponseBody
+    @RequestMapping("/isLabelExist")
+    public String ajaxIsLabelExist(String lable) {
+        HashMap map = new HashMap();
+        LabelExample labelExample = new LabelExample();
+        LabelExample.Criteria criteria = labelExample.createCriteria();
+        criteria.andLabelNameLike("%"+lable+"%");
+        List<Label> labelList = labelMapper.selectByExample(labelExample);
+        // 标签不存在 进行添加到数据库中
+        if(labelList!=null && labelList.size()>0){
             map.put("exist", true);
             map.put("msg", "存在类似标签");
             map.put("labelList", labelList);
         }
-
         return new Gson().toJson(map);
     }
+
 }
