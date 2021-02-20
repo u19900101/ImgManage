@@ -271,7 +271,8 @@
                                                     <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
                                                             @click="togglePopover({ placement: 'auto-start' })">
                                                             <%--<i class="fi-home"></i>--%>
-                                                        <i class="fi-calendar"></i>
+                                                        <%--<i class="fi-calendar"></i>--%>
+                                                        <span class="glyphicon glyphicon-calendar"></span>
                                                     </button>
                                                     <input
                                                             :value="inputValue"
@@ -321,8 +322,7 @@
                                                         <%--<span style="width:300px;height:30px;font-size:25px;">拍摄时间：</span>--%>
                                                     <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
                                                             @click="togglePopover({ placement: 'auto-start' })">
-                                                            <%--<i class="fi-home"></i>--%>
-                                                        <i class="fi-calendar"></i>
+                                                        <span class="glyphicon glyphicon-calendar" style="height: 20px"></span>
                                                     </button>
                                                     <input
                                                             :value="inputValue"
@@ -367,6 +367,7 @@
 </div>
 
 </div>
+<script src="https://apps.bdimg.com/libs/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
 </body>
 </html>

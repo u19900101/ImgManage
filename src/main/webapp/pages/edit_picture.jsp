@@ -253,14 +253,14 @@
             </c:if>
             <c:if test="${not empty picture.pcreatime}">
                 <div id='myTimeChangeDemo' style="float: right">
-                    <v-date-picker class="inline-block h-full" v-model="date" mode="dateTime" :timezone="timezone" is24hr :minute-increment="5" >
+                    <v-date-picker class="inline-block h-full" v-model="date" mode="dateTime" :timezone="timezone" is24hr :minute-increment="5" :model-config="modelConfig">
                         <template v-slot="{ inputValue, togglePopover }">
                             <div class="flex items-center">
                                 <%--<span style="width:300px;height:30px;font-size:25px;">拍摄时间：</span>--%>
                                 <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
                                         @click="togglePopover({ placement: 'auto-start' })">
-                                        <%--<i class="fi-home"></i>--%>
-                                    <i class="fi-calendar"></i>
+                                    <%--<i class="fi-calendar"></i>--%>
+                                        <span class="glyphicon glyphicon-calendar"></span>
                                 </button>
                                 <input
                                         :value="inputValue"
@@ -353,13 +353,42 @@
     }
 </script>
 <script>
-    new Vue({
+    var vm = new Vue({
         el: '#myTimeChangeDemo',
         data:{
             timezone: '',
             // date: '1983-01-21T07:30:00',
             date:  '${picture.pcreatime}',
+            modelConfig: {
+                type: 'string',
+                mask: 'YYYY-MM-DD HH:mm:ss', // Uses 'iso' if missing
+            },
         },
+    });
+    vm.$watch('date', function(newValue, oldValue) {
+        if(newValue !="" && oldValue!="" && newValue!=oldValue){
+            alert('old is ---' + oldValue + '--- new is ---' + newValue + '---!');
+            $.post(
+                "http://localhost:8080/pic/picture/ajaxUpdateInfo",
+                "newCreateTime=" + newCreateTime+
+                "&picpath=" + picpath,
+                function (data) {
+                    if (data.status == 'success') {
+                        success_prompt(data.msg, 1500);
+                    } else if (data.status == 'fail') {
+                        fail_prompt(data.msg, 2500);
+                    } else if (data.status == 'unchange') {
+                        //  当名称没有变化时 不显示
+                    } else {
+                        warning_prompt("其他未知错误.....please enjoy debug", 2500);
+                    }
+                },
+                "json"
+            );
+            // alert(vue);
+            old = newCreateTime;
+        }
+        $("#second").val(newCreateTime);
     });
 </script>
 </html>

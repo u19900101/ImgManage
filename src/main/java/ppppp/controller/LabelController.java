@@ -1,8 +1,10 @@
 package ppppp.controller;
 
 import com.google.gson.Gson;
+import com.sun.org.apache.xpath.internal.operations.Mod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ppppp.bean.Label;
@@ -22,6 +24,17 @@ import java.util.List;
 public class LabelController {
     @Autowired
     LabelMapper labelMapper;
+    // 展示所有的标签
+    @RequestMapping("/showAllLabel")
+    public String showRecentLabel(Model model) {
+        LabelExample labelExample = new LabelExample();
+        List<Label> allLabels= labelMapper.selectByExample(labelExample);
+        if(allLabels!=null && allLabels.size()>0){
+            model.addAttribute("labelList", allLabels);
+
+        }
+        return "label/drag";
+    }
     //修改图片信息
     @ResponseBody
     @RequestMapping("/insert")
