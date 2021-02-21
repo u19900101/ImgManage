@@ -238,7 +238,7 @@
 <body>
 <h1 style="display : inline"><a href="picture/page" >  查看所有照片  </a> </h1>
 <%--显示大图--%>
-<div class="app" name = "div1">
+<div id="app">
         <%--显示 照片名称  拍摄时间 地点--%>
         <div class="c1" name = "div2">
             <span style="width:300px;height:30px;font-size:25px;">名称：</span>
@@ -246,60 +246,54 @@
 
             <%--提示是否有重名的信息  错误信息  跟上面对应起来要写class--%>
             <span class="errorMsg" style="color: red;"></span>
-            <c:if test="${empty picture.pcreatime}">
-                <span tyle="color: darksalmon">神秘时间</span>
-            </c:if>
-            <c:if test="${not empty picture.pcreatime}">
-                <div id='myTimeChangeDemo' style="float: right;border: 1px solid rebeccapurple">
-                    <div id = "dateDiv" style="border: 1px solid palevioletred;float: left">
-                        <v-date-picker class="inline-block h-full" v-model="date" mode="date" :model-config="modelConfig" is-required>
-                            <template v-slot="{ inputValue, togglePopover }">
-                                <div class="flex items-center">
-                                        <%--<span style="width:300px;height:30px;font-size:25px;">拍摄时间：</span>--%>
-                                    <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
-                                            @click="togglePopover({ placement: 'auto-start' })">
-                                        <span class="glyphicon glyphicon-calendar" style="color:yellowgreen;font-size:15px;"></span>
-                                    </button>
-                                    <input
-                                            :value="inputValue"
-                                            class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
-                                            style="width:200px;font-size:25px;height:30px;border: 1px solid #ffe57d"
-                                            readonly
-                                    />
-                                </div>
-                            </template>
-                        </v-date-picker>
-                    </div>
+            <span v-if = "picture.pcreatetime==''" style="color: darksalmon">神秘时间</span>
 
-                    <div id = "timeDiv" style="border: 1px solid brown;float: right">
-                        <v-date-picker class="inline-block h-full" v-model="date" mode="time" is24hr :minute-increment="5"  :model-config="modelConfig" is-required>
-                            <template v-slot="{ inputValue, togglePopover }">
-                                <div class="flex items-center">
-                                    <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
-                                            @click="togglePopover({ placement: 'auto-start' })">
-                                        <span class="glyphicon glyphicon-time" style="color:blue;font-size:15px;"></span>
-                                    </button>
-                                    <input
-                                            :value="inputValue"
-                                            class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
-                                            style="width:100px;font-size:25px;height:30px;border: 1px solid #ffe57d"
-                                            readonly
-                                    />
-                                </div>
-                            </template>
-                        </v-date-picker>
-                    </div>
+            <div v-if = "picture.pcreatetime!=''" style="float: right;border: 1px solid rebeccapurple">
+                <div id = "dateDiv" style="border: 1px solid palevioletred;float: left">
+                    <v-date-picker class="inline-block h-full" v-model="date" mode="date" :model-config="modelConfig" is-required>
+                        <template v-slot="{ inputValue, togglePopover }">
+                            <div class="flex items-center">
+                                    <%--<span style="width:300px;height:30px;font-size:25px;">拍摄时间：</span>--%>
+                                <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
+                                        @click="togglePopover({ placement: 'auto-start' })">
+                                    <span class="glyphicon glyphicon-calendar" style="color:yellowgreen;font-size:15px;"></span>
+                                </button>
+                                <input
+                                        :value="inputValue"
+                                        class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
+                                        style="width:200px;font-size:25px;height:30px;border: 1px solid #ffe57d"
+                                        readonly
+                                />
+                            </div>
+                        </template>
+                    </v-date-picker>
                 </div>
-                <%--<span style="color: darksalmon">${picture.pcreatime}</span>--%>
-            </c:if>
+                <div id = "timeDiv" style="border: 1px solid brown;float: right">
+                    <v-date-picker class="inline-block h-full" v-model="date" mode="time" is24hr :minute-increment="5"  :model-config="modelConfig" is-required>
+                        <template v-slot="{ inputValue, togglePopover }">
+                            <div class="flex items-center">
+                                <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
+                                        @click="togglePopover({ placement: 'auto-start' })">
+                                    <span class="glyphicon glyphicon-time" style="color:blue;font-size:15px;"></span>
+                                </button>
+                                <input
+                                        :value="inputValue"
+                                        class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
+                                        style="width:100px;font-size:25px;height:30px;border: 1px solid #ffe57d"
+                                        readonly
+                                />
+                            </div>
+                        </template>
+                    </v-date-picker>
+                </div>
+            </div>
+
+
             <span style="width:300px;height:30px;font-size:25px;">坐标：</span>
-            <c:if test="${empty picture.gpsLongitude}">
-                <span style="color: green;width:300px;height:30px;font-size:25px;">神秘未知</span>
-            </c:if>
-            <c:if test="${not empty picture.gpsLongitude}">
-                <span style="color: green">${picture.gpsLongitude}</span>
-                <span style="color: green">${picture.gpsLatitude}</span>
-            </c:if>
+            <span v-if = "picture.gpsLongitude=='' || picture.gpsLongitude == '' " style="color: green;width:300px;height:30px;font-size:25px;">神秘未知</span>
+            <span v-else style="color: green">
+                ${picture.gpsLongitude},${picture.gpsLatitude}
+            </span>
 
             <%--显示照片--%>
 
@@ -331,10 +325,15 @@
 <%-- v-calender 控件--%>
 <script>
     var vm = new Vue({
-        el: '#myTimeChangeDemo',
+        el: '#app',
         data:{
             timezone: '',
-            date:  '${picture.pcreatime}',// date: '1983-01-21T07:30:00',
+            date:'${picture.pcreatime}',
+            picture:{
+                pcreatetime:'${picture.pcreatime}',
+                gpsLongitude:'${picture.gpsLongitude}',
+                gpsLatitude:'${picture.gpsLatitude}',
+            },
             modelConfig: {
                 type: 'string',
                 mask: 'YYYY-MM-DD HH:mm:ss', // Uses 'iso' if missing

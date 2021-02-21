@@ -185,6 +185,7 @@
 <c:if test="${not empty justUploadMsg}">
     <h1 style="color: magenta">${justUploadMsg}</h1>
 </c:if>
+<%--${monthsTreeMapListPic}--%>
 <div style="width:100%;height:100%;overflow: scroll;">
     <div class="panel-group" id="accordion">
         <c:set var="index" value="0" />
@@ -192,6 +193,7 @@
             <%--月份的div框--%>
             <div class="c2">
                 <c:set var="index" value="${index+1}" />
+                <%-- 每个月的按钮 --%>
                 <button type="button" class="btn btn-primary" data-toggle="collapse"
                         data-target="#${item.key}" style="background: #e3e3e3">
                     <h2 style="color: chocolate">${item.key}</h2>
@@ -202,46 +204,45 @@
                     <div id="${item.key}" class="collapse in">
                         <c:forEach items="${item.value}" var="picture" >
                             <div class="c1" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
-                                    <%--现实照片拍摄的时间--%>
                                 <c:if test="${not empty picture.pcreatime}">
                                     <div id='v_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}' style="float: right">
-                                        <div id = "timeDiv" style="border: 1px solid brown;float: right">
-                                            <v-date-picker class="inline-block h-full" v-model="date" mode="time" is24hr :minute-increment="5"  :model-config="modelConfig" is-required>
-                                                <template v-slot="{ inputValue, togglePopover }">
-                                                    <div class="flex items-center">
-                                                        <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
-                                                                @click="togglePopover({ placement: 'auto-start' })">
-                                                            <span class="glyphicon glyphicon-time" style="color:blue;font-size:10px;"></span>
-                                                        </button>
-                                                        <input
-                                                                :value="inputValue"
-                                                                class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
-                                                                style="font-size:15px; width:50px;border: 1px solid #ffe57d"
-                                                                readonly
-                                                        />
-                                                    </div>
-                                                </template>
-                                            </v-date-picker>
-                                        </div>
-                                        <div id = "dateDiv" style="border: 1px solid palevioletred;float: right">
-                                            <v-date-picker class="inline-block h-full" v-model="date" mode="date" :model-config="modelConfig" is-required>
-                                                <template v-slot="{ inputValue, togglePopover }">
-                                                    <div class="flex items-center">
-                                                        <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
-                                                                @click="togglePopover({ placement: 'auto-start' })">
-                                                            <span class="glyphicon glyphicon-calendar" style="color:yellowgreen;font-size:10px;"></span>
-                                                        </button>
-                                                        <input
-                                                                :value="inputValue"
-                                                                class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
-                                                                style="font-size:15px; width:80px;border: 1px solid #ffe57d"
-                                                                readonly
-                                                        />
-                                                    </div>
-                                                </template>
-                                            </v-date-picker>
-                                        </div>
-                                    <%--名称--%>
+                                            <%--    <div  style="border: 1px solid brown;float: right">
+                                                    <v-date-picker class="inline-block h-full" v-model="date" mode="time" is24hr :minute-increment="5"  :model-config="modelConfig" is-required>
+                                                        <template v-slot="{ inputValue, togglePopover }">
+                                                            <div class="flex items-center">
+                                                                <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
+                                                                        @click="togglePopover({ placement: 'auto-start' })">
+                                                                    <span class="glyphicon glyphicon-time" style="color:blue;font-size:10px;"></span>
+                                                                </button>
+                                                                <input
+                                                                        :value="inputValue"
+                                                                        class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
+                                                                        style="font-size:15px; width:50px;border: 1px solid #ffe57d"
+                                                                        readonly
+                                                                />
+                                                            </div>
+                                                        </template>
+                                                    </v-date-picker>
+                                                </div>
+                                                <div  style="border: 1px solid palevioletred;float: right">
+                                                    <v-date-picker class="inline-block h-full" v-model="date" mode="date" :model-config="modelConfig" is-required>
+                                                        <template v-slot="{ inputValue, togglePopover }">
+                                                            <div class="flex items-center">
+                                                                <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
+                                                                        @click="togglePopover({ placement: 'auto-start' })">
+                                                                    <span class="glyphicon glyphicon-calendar" style="color:yellowgreen;font-size:10px;"></span>
+                                                                </button>
+                                                                <input
+                                                                        :value="inputValue"
+                                                                        class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
+                                                                        style="font-size:15px; width:80px;border: 1px solid #ffe57d"
+                                                                        readonly
+                                                                />
+                                                            </div>
+                                                        </template>
+                                                    </v-date-picker>
+                                                </div>
+                                   --%>     </div>
                                     <div class="imgDiv">
                                         <span align="center" style="color: seagreen;font-size:25px">${picture.pname.split("\\.")[0]}</span>
                                     </div>
@@ -256,10 +257,8 @@
                                         </a>
                                     </div>
                                 </form>
-
-                                  <input class="myselect" type="button" value="删除" style="font-size: larger;width: 100%;text-align:center"
-                               existImgPath = ${picture.path}>
-
+                                <input class="myselect" type="button" value="删除" style="font-size: larger;width: 100%;text-align:center"
+                                       existImgPath = ${picture.path}>
                             </div>
                         </c:forEach>
                     </div>
@@ -271,7 +270,7 @@
                             <div class="c1" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
                                 <c:if test="${not empty picture.pcreatime}">
                                     <div id='v_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}' style="float: right">
-                                        <div  style="border: 1px solid brown;float: right">
+                                    <%--    <div  style="border: 1px solid brown;float: right">
                                             <v-date-picker class="inline-block h-full" v-model="date" mode="time" is24hr :minute-increment="5"  :model-config="modelConfig" is-required>
                                                 <template v-slot="{ inputValue, togglePopover }">
                                                     <div class="flex items-center">
@@ -307,7 +306,7 @@
                                                 </template>
                                             </v-date-picker>
                                         </div>
-                                    </div>
+                           --%>     </div>
                                     <div class="imgDiv">
                                         <span align="center" style="color: seagreen;font-size:25px">${picture.pname.split("\\.")[0]}</span>
                                     </div>
