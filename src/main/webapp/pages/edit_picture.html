@@ -1,8 +1,13 @@
+<!DOCTYPE html>
 <html>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ include file="/pages/head.jsp"%>
 <head>
+    <meta charset="GBK">
+    <link rel="stylesheet" href="../static/bootstrap-3.3.7/css/bootstrap.min.css">
+    <script type="text/javascript" src="../static/script/jquery-3.5.1.js"></script>
+    <script type="text/javascript" src="../static/script/2.6.12.vue.min.js"></script>
+    <script type="text/javascript" src="../static/script/v-calendar.js"></script>
+    <script src="../static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <!--<link rel="stylesheet" href="http://static.runoob.com/assets/foundation-icons/foundation-icons.css">-->
     <style>
         .app{
             width:100%;
@@ -28,11 +33,11 @@
             right: 0;
             bottom: 0;
             margin: auto;*/
-            /* è®¾ç½®divä¸­çš„å›¾ç‰‡å±…ä¸­*/
+            /* ÉèÖÃdivÖĞµÄÍ¼Æ¬¾ÓÖĞ*/
             display:flex;
             align-items:center;
             justify-content:center;
-            /*ä¸ºäº†æ•ˆæœæ˜æ˜¾ï¼Œå¯ä»¥å°†å¦‚ä¸‹è¾¹æ¡†æ‰“å¼€ï¼Œçœ‹ä¸€ä¸‹æ•ˆæœ*/
+            /*ÎªÁËĞ§¹ûÃ÷ÏÔ£¬¿ÉÒÔ½«ÈçÏÂ±ß¿ò´ò¿ª£¬¿´Ò»ÏÂĞ§¹û*/
             border:1px solid red;
         }
         .c2 img{
@@ -51,7 +56,6 @@
             height: 100%;
         }
     </style>
-    <%-- alter style--%>
     <style>
         .alert {
             display: none;
@@ -91,12 +95,11 @@
             border-color: #ebccd1;
         }
     </style>
-    <%--/* textarea è‡ªé€‚åº”çˆ¶å®¹å™¨å¤§å° */--%>
     <style>
 
         .comments {
-            width: 100%; /*è‡ªåŠ¨é€‚åº”çˆ¶å¸ƒå±€å®½åº¦*/
-            height: 100%; /*è‡ªåŠ¨é€‚åº”çˆ¶å¸ƒå±€å®½åº¦*/
+            width: 100%; /*×Ô¶¯ÊÊÓ¦¸¸²¼¾Ö¿í¶È*/
+            height: 100%; /*×Ô¶¯ÊÊÓ¦¸¸²¼¾Ö¿í¶È*/
             overflow: auto;
             word-break: break-all;
             /*background-color: yellow;*/
@@ -113,10 +116,10 @@
         }
     </style>
     <script type="text/javascript">
-        // é¡µé¢åŠ è½½å®Œæˆä¹‹å
+        // Ò³Ãæ¼ÓÔØÍê³ÉÖ®ºó
         $(function () {
-            // ä½¿ç”¨ajaxç»™ç”¨æˆ·å å®æ—¶ è¿”å›ä¿¡æ¯
-            // ä¸é‡åå°±ç›´æ¥è¿›è¡Œä¿®æ”¹
+            // Ê¹ÓÃajax¸øÓÃ»§Ãû ÊµÊ± ·µ»ØĞÅÏ¢
+            // ²»ÖØÃû¾ÍÖ±½Ó½øĞĞĞŞ¸Ä
             $("#pname").on('blur',function(){
                 var pname = $("#pname").val();
                 var pictype = $("#pname").attr('pictype');
@@ -133,11 +136,11 @@
                             $("span.errorMsg").text("");
                         } else if (data.status == 'fail') {
                             fail_prompt(data.msg, 2500);
-                            $("span.errorMsg").text("ç…§ç‰‡åç§°å·²å­˜åœ¨ï¼Œè¯·é‡æ–°è¾“å…¥");
+                            $("span.errorMsg").text("ÕÕÆ¬Ãû³ÆÒÑ´æÔÚ£¬ÇëÖØĞÂÊäÈë");
                         } else if (data.status == 'unchange') {
-                        //  å½“åç§°æ²¡æœ‰å˜åŒ–æ—¶ ä¸æ˜¾ç¤º
+                        //  µ±Ãû³ÆÃ»ÓĞ±ä»¯Ê± ²»ÏÔÊ¾
                         } else {
-                            warning_prompt("å…¶ä»–æœªçŸ¥é”™è¯¯.....please enjoy debug", 2500);
+                            warning_prompt("ÆäËûÎ´Öª´íÎó.....please enjoy debug", 2500);
                         }
                     },
                     "json"
@@ -158,11 +161,11 @@
                             $("span.errorMsg").text("");
                         } else if (data.status == 'fail') {
                             fail_prompt(data.msg, 2500);
-                            $("span.errorMsg").text("ç…§ç‰‡åç§°å·²å­˜åœ¨ï¼Œè¯·é‡æ–°è¾“å…¥");
+                            $("span.errorMsg").text("ÕÕÆ¬Ãû³ÆÒÑ´æÔÚ£¬ÇëÖØĞÂÊäÈë");
                         } else if (data.status == 'unchange') {
 
                         } else{
-                            warning_prompt("å…¶ä»–æœªçŸ¥é”™è¯¯.....please enjoy debug", 2500);
+                            warning_prompt("ÆäËûÎ´Öª´íÎó.....please enjoy debug", 2500);
                         }
                     },
                     "json"
@@ -170,7 +173,7 @@
             });
             $('.myselect').on('click', function () {
                 var existImgPath = $(this).attr('existImgPath');
-                // è¦replaceAll  ä¸‹é¢çš„åˆ™ä¸éœ€è¦ å°¬
+                // ÒªreplaceAll  ÏÂÃæµÄÔò²»ĞèÒª ŞÎ
                 var divID = $(this).attr('existImgPath').replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
                 $.post(
                     "http://localhost:8080/pic/picture/ajaxDeletePic",
@@ -183,7 +186,7 @@
                         } else if (data.status == 'fail') {
                             fail_prompt(data.msg, 2500);
                         } else {
-                            warning_prompt("å…¶ä»–æœªçŸ¥é”™è¯¯.....please enjoy debug", 2500);
+                            warning_prompt("ÆäËûÎ´Öª´íÎó.....please enjoy debug", 2500);
                         }
                     },
                     "json"
@@ -191,7 +194,7 @@
             });
         });
     </script>
-    <%--alertè‡ªåŠ¨æ¶ˆå¤±--%>
+
     <script type="text/javascript">
         var countDown = function (secs){
             if(--secs>0){
@@ -217,18 +220,18 @@
             prompt(message, 'alert-success', time);
         };
 
-        // å¤±è´¥æç¤º
+        // Ê§°ÜÌáÊ¾
         var fail_prompt = function(message, time)
         {
             prompt(message, 'alert-danger', time);
         };
 
-        // æé†’
+        // ÌáĞÑ
         var warning_prompt = function(message, time)
         {
             prompt(message, 'alert-warning', time);
         }
-        // ä¿¡æ¯æç¤º
+        // ĞÅÏ¢ÌáÊ¾
         var info_prompt = function(message, time)
         {
             prompt(message, 'alert-info', time);
@@ -236,103 +239,90 @@
     </script>
 </head>
 <body>
-<h1 style="display : inline"><a href="picture/page" >  æŸ¥çœ‹æ‰€æœ‰ç…§ç‰‡  </a> </h1>
-<%--æ˜¾ç¤ºå¤§å›¾--%>
-<div class="app" name = "div1">
-        <%--æ˜¾ç¤º ç…§ç‰‡åç§°  æ‹æ‘„æ—¶é—´ åœ°ç‚¹--%>
-        <div class="c1" name = "div2">
-            <span style="width:300px;height:30px;font-size:25px;">åç§°ï¼š</span>
-            <input style="width:300px;height:30px;font-size:25px; line-height:40px;border: 1px solid #ffe57d" id="pname" name = "pname" value="${picture.pname}" pictype=${type} >
+<!--<h1 style="display : inline"><a href="picture/page" >  ²é¿´ËùÓĞÕÕÆ¬  </a> </h1>-->
+<!--<div id = "myTimeChangeDemo">
+    <input v-model="picture.pname" pictype=${type}  style="width:300px;height:30px;font-size:25px; line-height:40px;border: 1px solid #ffe57d" >
+    <span v-if = "picture.pcreatetime" tyle="color: darksalmon">ÉñÃØÊ±¼ä</span>
+</div>-->
+<div class="c1" name = "div2" id = "myTimeChangeDemo">
+    <span style="width:300px;height:30px;font-size:25px;">Ãû³Æ£º</span>
+    <input style="width:300px;height:30px;font-size:25px; line-height:40px;border: 1px solid #ffe57d" id="pname" name = "pname" v-model="picture.pname" pictype=${type} >
 
-            <%--æç¤ºæ˜¯å¦æœ‰é‡åçš„ä¿¡æ¯  é”™è¯¯ä¿¡æ¯  è·Ÿä¸Šé¢å¯¹åº”èµ·æ¥è¦å†™class--%>
-            <span class="errorMsg" style="color: red;"></span>
-            <c:if test="${empty picture.pcreatime}">
-                <span tyle="color: darksalmon">ç¥ç§˜æ—¶é—´</span>
-            </c:if>
-            <c:if test="${not empty picture.pcreatime}">
-                <div id='myTimeChangeDemo' style="float: right;border: 1px solid rebeccapurple">
-                    <div id = "dateDiv" style="border: 1px solid palevioletred;float: left">
-                        <v-date-picker class="inline-block h-full" v-model="date" mode="date" :model-config="modelConfig" is-required>
-                            <template v-slot="{ inputValue, togglePopover }">
-                                <div class="flex items-center">
-                                        <%--<span style="width:300px;height:30px;font-size:25px;">æ‹æ‘„æ—¶é—´ï¼š</span>--%>
-                                    <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
-                                            @click="togglePopover({ placement: 'auto-start' })">
-                                        <span class="glyphicon glyphicon-calendar" style="color:yellowgreen;font-size:15px;"></span>
-                                    </button>
-                                    <input
-                                            :value="inputValue"
-                                            class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
-                                            style="width:200px;font-size:25px;height:30px;border: 1px solid #ffe57d"
-                                            readonly
-                                    />
-                                </div>
-                            </template>
-                        </v-date-picker>
-                    </div>
+    <span class="errorMsg" style="color: red;"></span>
+    <span style="width:300px;height:30px;font-size:25px;">Ê±¼ä£º{{picture.pcreatetime}}</span>
+    <span v-if = "picture.pcreatetime==''" style="color: darksalmon">ÉñÃØÊ±¼ä</span>
 
-                    <div id = "timeDiv" style="border: 1px solid brown;float: right">
-                        <v-date-picker class="inline-block h-full" v-model="date" mode="time" is24hr :minute-increment="5"  :model-config="modelConfig" is-required>
-                            <template v-slot="{ inputValue, togglePopover }">
-                                <div class="flex items-center">
-                                    <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
-                                            @click="togglePopover({ placement: 'auto-start' })">
-                                        <span class="glyphicon glyphicon-time" style="color:blue;font-size:15px;"></span>
-                                    </button>
-                                    <input
-                                            :value="inputValue"
-                                            class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
-                                            style="width:100px;font-size:25px;height:30px;border: 1px solid #ffe57d"
-                                            readonly
-                                    />
-                                </div>
-                            </template>
-                        </v-date-picker>
-                    </div>
+
+    <div style="float: right">
+        <v-date-picker class="inline-block h-full" v-model="picture.pcreatetime" mode="date" is24hr :minute-increment="5" :model-config="modelConfig" is-required>
+            <template v-slot="{ inputValue, togglePopover }">
+                <div class="flex items-center">
+                    <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
+                            @click="togglePopover({ placement: 'auto-start' })">
+                        ÈÕÆÚ£º
+                    </button>
+                    <input
+                            :value="inputValue"
+                            class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
+                            style="width:300px;height:30px;font-size:25px; line-height:30px;border: 1px solid #ffe57d"
+                            readonly
+                    />
                 </div>
-                <%--<span style="color: darksalmon">${picture.pcreatime}</span>--%>
-            </c:if>
-            <span style="width:300px;height:30px;font-size:25px;">åæ ‡ï¼š</span>
-            <c:if test="${empty picture.gpsLongitude}">
-                <span style="color: green;width:300px;height:30px;font-size:25px;">ç¥ç§˜æœªçŸ¥</span>
-            </c:if>
-            <c:if test="${not empty picture.gpsLongitude}">
-                <span style="color: green">${picture.gpsLongitude}</span>
-                <span style="color: green">${picture.gpsLatitude}</span>
-            </c:if>
+            </template>
+        </v-date-picker>
 
-            <%--æ˜¾ç¤ºç…§ç‰‡--%>
+        <v-date-picker class="inline-block h-full" v-model="picture.pcreatetime" mode="time" is24hr :minute-increment="5" :model-config="modelConfig" is-required>
+            <template v-slot="{ inputValue, togglePopover }">
+                <div class="flex items-center">
+                    <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
+                            @click="togglePopover({ placement: 'auto-start' })">
+                            Ê±¼ä£º
+                    </button>
+                    <input
+                            :value="inputValue"
+                            class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
+                            style="width:300px;height:30px;font-size:25px; line-height:30px;border: 1px solid #ffe57d"
+                            readonly
+                    />
+                </div>
+            </template>
+        </v-date-picker>
 
-            <div class="c2">
-                <input class="myselect" type="button" value="åˆ é™¤" style="font-size: larger;width: 10%;text-align:center"
-                       handleMethod ="deleteSingle" existImgPath = ${picture.path}>
-                <img id = "myImg" src="${picture.path}" width="800">
-            </div>
-        </div>
+    </div>
 
-        <%--æ·»åŠ æè¿°--%>
-        <div class="c3" >
-            <c:if test="${empty picture.pdesc}">
+    </c:if>
+    <span style="width:300px;height:30px;font-size:25px;">×ø±ê£º</span>
+    <span v-show = "picture.gpsLongitude=='' || picture.gpsLongitude=='' " style="color: darksalmon">ÉñÃØÎ´Öª</span>
+    <span style="color: green">{{picture.gpsLongitude}}</span>
+    <span style="color: green">{{picture.gpsLatitude}}</span>
+</div>
+
+<!--<div class="c3" >
+    <c:if test="${empty picture.pdesc}">
                   <textarea class="comments" rows="4" cols="50"
-                            placeholder="ä»æˆ‘è¿™é‡Œå¯ä»¥æ·»åŠ æè¿°é¸Ÿ..."
+                            placeholder="´ÓÎÒÕâÀï¿ÉÒÔÌí¼ÓÃèÊöÄñ..."
                             id = "pdesc"
                             name = "pdesc"
                   ></textarea>
-            </c:if>
-            <c:if test="${not empty picture.pdesc}">
+    </c:if>
+    <c:if test="${not empty picture.pdesc}">
                   <textarea class="comments" rows="4" cols="50"
                             id = "pdesc"
                             name = "pdesc"
                   >${picture.pdesc}</textarea>
-            </c:if>
-        </div>
+    </c:if>
+</div>-->
 
-</div>
-<%-- v-calender æ§ä»¶--%>
 <script>
     var vm = new Vue({
         el: '#myTimeChangeDemo',
         data:{
+            picture:{
+                pname : "kkk",
+                pcreatetime:"1992-10-27 07:30:00",
+                gpsLongitude:"122",
+                gpsLatitude:"123",
+            },
             timezone: '',
             date:  '${picture.pcreatime}',// date: '1983-01-21T07:30:00',
             modelConfig: {
@@ -341,28 +331,29 @@
             },
         },
     });
-    vm.$watch('date', function(newValue, oldValue) {
+    vm.$watch('picture.pcreatetime', function(newValue, oldValue) {
         if(newValue !="" && oldValue!="" && newValue!=oldValue){
             var picpath = $("#myImg").attr("src");
-            // alert('old is ---' + oldValue + '--- new is ---' + newValue + '---!'+"path is  --"+picpath);
-            $.post(
+            alert('old is ---' + oldValue + '--- new is ---' + newValue + '---!'+"path is  --"+picpath);
+            /*$.post(
                 "http://localhost:8080/pic/picture/ajaxUpdateInfo",
                 "newCreateTime=" + newValue+
                 "&picpath=" + picpath,
                 function (data) {
                     if (data.status == 'success') {
-                        success_prompt(data.msg, 1500);
+                        // success_prompt(data.msg, 1500);
                     } else if (data.status == 'fail') {
                         fail_prompt(data.msg, 2500);
                     } else if (data.status == 'unchange') {
-                        //  å½“åç§°æ²¡æœ‰å˜åŒ–æ—¶ ä¸æ˜¾ç¤º
+                        //  µ±Ãû³ÆÃ»ÓĞ±ä»¯Ê± ²»ÏÔÊ¾
                     } else {
-                        warning_prompt("å…¶ä»–æœªçŸ¥é”™è¯¯.....please enjoy debug", 2500);
+                        warning_prompt("ÆäËûÎ´Öª´íÎó.....please enjoy debug", 2500);
                     }
                 },
                 "json"
-            );
+            );*/
         }
     });
 </script>
+</body>
 </html>

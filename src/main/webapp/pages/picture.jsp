@@ -174,71 +174,12 @@
             prompt(message, 'alert-info', time);
         };
     </script>
-    <%-- v-calender 控件 有点冗余--%>
-    <script>
-        $(function () {
-            <c:forEach var="item" items="${monthsTreeMapListPic}">
-            <c:forEach items="${item.value}" var="picture" >
-            new Vue({
-                el: '#v_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}',
-                data:{
-                    timezone: '',
-                    date:  '${picture.pcreatime}',
-                },
-            });
-            </c:forEach>
-            </c:forEach>
-        });
-    </script>
 
-    <script>
-        $(function () {
-            <c:forEach var="item" items="${monthsTreeMapListPic}">
-            <c:forEach items="${item.value}" var="picture" >
-            var old = $("#changeTime_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}").val();
-            var picpath = $("#myImg${picture.path.replace('\\', '').replace('_', '').replace('.', '')}").attr("src");
-            var newCreateTimeId = "#changeTime_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}";
-            $("#second").val(old);
-            myFunction(old,picpath,newCreateTimeId);
-            </c:forEach>
-            </c:forEach>
-        });
-
-        function myFunction(old,picpath,newCreateTimeId){
-            setInterval(function(){
-                    var newCreateTime = $(newCreateTimeId).val();
-                    if(old != newCreateTime){
-                        // alert(picpath+"---"+old +"---" + newCreateTime);
-                        $.post(
-                            "http://localhost:8080/pic/picture/ajaxUpdateInfo",
-                            "newCreateTime=" + newCreateTime+
-                            "&picpath=" + picpath,
-                            function (data) {
-                                if (data.status == 'success') {
-                                    success_prompt(data.msg, 1500);
-                                } else if (data.status == 'fail') {
-                                    fail_prompt(data.msg, 2500);
-                                } else if (data.status == 'unchange') {
-                                    //  当名称没有变化时 不显示
-                                } else {
-                                    warning_prompt("其他未知错误.....please enjoy debug", 2500);
-                                }
-                            },
-                            "json"
-                        );
-                        old = newCreateTime;
-                    }
-                    $("#second").val(newCreateTime);
-                }
-                ,2000);
-        };
-
-    </script>
 </head>
 <body>
 
+<%--${monthsTreeMapListPic}--%>
 <%--完美解决 图片的页面显示问题--%>
-
 <h1 style="display : inline"><a href="picture/page" >  查看所有照片  </a> </h1>
 <h1 style="display : inline"><a href="uploadDir.jsp" >  继续上传照片  </a> </h1>
 <c:if test="${not empty justUploadMsg}">
@@ -264,28 +205,42 @@
                                     <%--现实照片拍摄的时间--%>
                                 <c:if test="${not empty picture.pcreatime}">
                                     <div id='v_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}' style="float: right">
-                                        <v-date-picker class="inline-block h-full" v-model="date" mode="dateTime" :timezone="timezone" is24hr :minute-increment="5" >
-                                            <template v-slot="{ inputValue, togglePopover }">
-                                                <div class="flex items-center">
-                                                        <%--<span style="width:300px;height:30px;font-size:25px;">拍摄时间：</span>--%>
-                                                    <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
-                                                            @click="togglePopover({ placement: 'auto-start' })">
-                                                            <%--<i class="fi-home"></i>--%>
-                                                        <%--<i class="fi-calendar"></i>--%>
-                                                        <span class="glyphicon glyphicon-calendar"></span>
-                                                    </button>
-                                                    <input
-                                                            :value="inputValue"
-                                                            class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
-                                                            id = "changeTime_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}"
-                                                            style="font-weight: bold;width:125px;height:25px;font-size:15px; line-height:30px;border: 1px solid #ffe57d"
-                                                            readonly
-                                                    />
-                                                </div>
-                                            </template>
-                                        </v-date-picker>
-                                    </div>
-                                    <input type="hidden" id="second" />
+                                        <div id = "timeDiv" style="border: 1px solid brown;float: right">
+                                            <v-date-picker class="inline-block h-full" v-model="date" mode="time" is24hr :minute-increment="5"  :model-config="modelConfig" is-required>
+                                                <template v-slot="{ inputValue, togglePopover }">
+                                                    <div class="flex items-center">
+                                                        <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
+                                                                @click="togglePopover({ placement: 'auto-start' })">
+                                                            <span class="glyphicon glyphicon-time" style="color:blue;font-size:10px;"></span>
+                                                        </button>
+                                                        <input
+                                                                :value="inputValue"
+                                                                class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
+                                                                style="font-size:15px; width:50px;border: 1px solid #ffe57d"
+                                                                readonly
+                                                        />
+                                                    </div>
+                                                </template>
+                                            </v-date-picker>
+                                        </div>
+                                        <div id = "dateDiv" style="border: 1px solid palevioletred;float: right">
+                                            <v-date-picker class="inline-block h-full" v-model="date" mode="date" :model-config="modelConfig" is-required>
+                                                <template v-slot="{ inputValue, togglePopover }">
+                                                    <div class="flex items-center">
+                                                        <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
+                                                                @click="togglePopover({ placement: 'auto-start' })">
+                                                            <span class="glyphicon glyphicon-calendar" style="color:yellowgreen;font-size:10px;"></span>
+                                                        </button>
+                                                        <input
+                                                                :value="inputValue"
+                                                                class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
+                                                                style="font-size:15px; width:80px;border: 1px solid #ffe57d"
+                                                                readonly
+                                                        />
+                                                    </div>
+                                                </template>
+                                            </v-date-picker>
+                                        </div>
                                     <%--名称--%>
                                     <div class="imgDiv">
                                         <span align="center" style="color: seagreen;font-size:25px">${picture.pname.split("\\.")[0]}</span>
@@ -316,29 +271,43 @@
                             <div class="c1" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
                                 <c:if test="${not empty picture.pcreatime}">
                                     <div id='v_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}' style="float: right">
-                                        <v-date-picker class="inline-block h-full" v-model="date" mode="dateTime" :timezone="timezone" is24hr :minute-increment="5" >
-                                            <template v-slot="{ inputValue, togglePopover }">
-                                                <div class="flex items-center">
-                                                        <%--<span style="width:300px;height:30px;font-size:25px;">拍摄时间：</span>--%>
-                                                    <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
-                                                            @click="togglePopover({ placement: 'auto-start' })">
-                                                        <span class="glyphicon glyphicon-calendar" style="height: 20px"></span>
-                                                    </button>
-                                                    <input
-                                                            :value="inputValue"
-                                                            class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
-                                                            id = "changeTime_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}"
-                                                            style="font-weight: bold;width:125px;height:25px;font-size:15px; line-height:30px;border: 1px solid #ffe57d"
-                                                            readonly
-                                                    />
-                                                </div>
-                                            </template>
-                                        </v-date-picker>
+                                        <div  style="border: 1px solid brown;float: right">
+                                            <v-date-picker class="inline-block h-full" v-model="date" mode="time" is24hr :minute-increment="5"  :model-config="modelConfig" is-required>
+                                                <template v-slot="{ inputValue, togglePopover }">
+                                                    <div class="flex items-center">
+                                                        <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
+                                                                @click="togglePopover({ placement: 'auto-start' })">
+                                                            <span class="glyphicon glyphicon-time" style="color:blue;font-size:10px;"></span>
+                                                        </button>
+                                                        <input
+                                                                :value="inputValue"
+                                                                class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
+                                                                style="font-size:15px; width:50px;border: 1px solid #ffe57d"
+                                                                readonly
+                                                        />
+                                                    </div>
+                                                </template>
+                                            </v-date-picker>
+                                        </div>
+                                        <div  style="border: 1px solid palevioletred;float: right">
+                                            <v-date-picker class="inline-block h-full" v-model="date" mode="date" :model-config="modelConfig" is-required>
+                                                <template v-slot="{ inputValue, togglePopover }">
+                                                    <div class="flex items-center">
+                                                        <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
+                                                                @click="togglePopover({ placement: 'auto-start' })">
+                                                            <span class="glyphicon glyphicon-calendar" style="color:yellowgreen;font-size:10px;"></span>
+                                                        </button>
+                                                        <input
+                                                                :value="inputValue"
+                                                                class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
+                                                                style="font-size:15px; width:80px;border: 1px solid #ffe57d"
+                                                                readonly
+                                                        />
+                                                    </div>
+                                                </template>
+                                            </v-date-picker>
+                                        </div>
                                     </div>
-                                    <input type="hidden" id="second" />
-
-                                    <%--<span align="center" style="font-size:18px;color: purple;font-weight:bold">${picture.pcreatime}</span><br/>--%>
-                                    <%--名称--%>
                                     <div class="imgDiv">
                                         <span align="center" style="color: seagreen;font-size:25px">${picture.pname.split("\\.")[0]}</span>
                                     </div>
@@ -349,7 +318,7 @@
                                         <input type="hidden" name="path" value="${picture.path}">
 
                                         <a href="javascript:document.${picture.path.replace('\\', '').replace('_', '').replace('.', '')}.submit();">
-                                            <img src="${picture.path}" height="300px" >
+                                            <img id = "myImg${picture.path.replace('\\', '').replace('_', '').replace('.', '')}" src="${picture.path}" height="300px" >
                                         </a>
                                     </div>
                                 </form>
@@ -366,8 +335,49 @@
     </div>
 </div>
 
-</div>
 <script src="https://apps.bdimg.com/libs/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-
+<%-- v-calender 控件 有点冗余--%>
+<script>
+    $(function () {
+        <c:forEach var="item" items="${monthsTreeMapListPic}">
+            <c:forEach items="${item.value}" var="picture" >
+                var vm = new Vue({
+                    el: '#v_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}',
+                    data:{
+                        timezone: '',
+                        date:  '${picture.pcreatime}',
+                        modelConfig: {
+                            type: 'string',
+                            mask: 'YYYY-MM-DD HH:mm:ss', // Uses 'iso' if missing
+                        },
+                    },
+                });
+                vm.$watch('date', function(newValue, oldValue) {
+                    if(newValue !="" && oldValue!="" && newValue!=oldValue){
+                        var picpath = $("#myImg${picture.path.replace('\\', '').replace('_', '').replace('.', '')}").attr("src");
+                        // alert('old is ---' + oldValue + '--- new is ---' + newValue + '---!'+"path is  --"+picpath);
+                        $.post(
+                            "http://localhost:8080/pic/picture/ajaxUpdateInfo",
+                            "newCreateTime=" + newValue+
+                            "&picpath=" + picpath,
+                            function (data) {
+                                if (data.status == 'success') {
+                                    success_prompt(data.msg, 1500);
+                                } else if (data.status == 'fail') {
+                                    fail_prompt(data.msg, 2500);
+                                } else if (data.status == 'unchange') {
+                                    //  当名称没有变化时 不显示
+                                } else {
+                                    warning_prompt("其他未知错误.....please enjoy debug", 2500);
+                                }
+                            },
+                            "json"
+                        );
+                    }
+                });
+            </c:forEach>
+        </c:forEach>
+    });
+</script>
 </body>
 </html>

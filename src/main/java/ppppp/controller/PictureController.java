@@ -74,7 +74,7 @@ public class PictureController {
         // 修改照片时间
         if(newCreateTime!=null && picpath !=null){
             //2020/12/04 15:00
-            newCreateTime = newCreateTime.replace("/", "-").replace(" ", "T")+":00";
+            // newCreateTime = newCreateTime.replace("/", "-").replace(" ", "T")+":00";
             picture.setPcreatime(newCreateTime);
             int update = mapper.updateByPrimaryKeySelective(picture);
             if(update == 1){
