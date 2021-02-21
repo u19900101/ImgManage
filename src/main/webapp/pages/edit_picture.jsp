@@ -112,85 +112,7 @@
             font-family: Verdana, Arial, Helvetica, sans-serif;
         }
     </style>
-    <script type="text/javascript">
-        // 页面加载完成之后
-        $(function () {
-            // 使用ajax给用户名 实时 返回信息
-            // 不重名就直接进行修改
-            $("#pname").on('blur',function(){
-                var pname = $("#pname").val();
-                var pictype = $("#pname").attr('pictype');
-                var picpath = $("#myImg").attr('src');
-                $.post(
-                    "http://localhost:8080/pic/picture/ajaxUpdateInfo",
-                    "pname=" + pname+
-                    "&pictype=" + pictype+
-                    "&picpath=" + picpath,
-                    function (data) {
-                        if (data.status == 'success') {
-                            success_prompt(data.msg, 1500);
-                            $("#myImg").attr("src",data.newPath);
-                            $("span.errorMsg").text("");
-                        } else if (data.status == 'fail') {
-                            fail_prompt(data.msg, 2500);
-                            $("span.errorMsg").text("照片名称已存在，请重新输入");
-                        } else if (data.status == 'unchange') {
-                        //  当名称没有变化时 不显示
-                        } else {
-                            warning_prompt("其他未知错误.....please enjoy debug", 2500);
-                        }
-                    },
-                    "json"
-                );
-            });
-            $("#pdesc").on('blur',function(){
-                var pictype = $("#pname").attr('pictype');
-                var picpath = $("#myImg").attr('src');
-                var pdesc = $("#pdesc").val();
-                $.post(
-                    "http://localhost:8080/pic/picture/ajaxUpdateInfo",
-                    "pictype=" + pictype+
-                    "&picpath=" + picpath+
-                    "&pdesc=" + pdesc,
-                    function (data) {
-                        if (data.status == 'success') {
-                            success_prompt(data.msg, 1500);
-                            $("span.errorMsg").text("");
-                        } else if (data.status == 'fail') {
-                            fail_prompt(data.msg, 2500);
-                            $("span.errorMsg").text("照片名称已存在，请重新输入");
-                        } else if (data.status == 'unchange') {
 
-                        } else{
-                            warning_prompt("其他未知错误.....please enjoy debug", 2500);
-                        }
-                    },
-                    "json"
-                );
-            });
-            $('.myselect').on('click', function () {
-                var existImgPath = $(this).attr('existImgPath');
-                // 要replaceAll  下面的则不需要 尬
-                var divID = $(this).attr('existImgPath').replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
-                $.post(
-                    "http://localhost:8080/pic/picture/ajaxDeletePic",
-                    "existImgPath=" + existImgPath,
-                    function (data) {
-                        if (data.status == 'success') {
-                            $("#" + divID).remove();
-                            success_prompt(data.msg, 1500);
-                            countDown(2);
-                        } else if (data.status == 'fail') {
-                            fail_prompt(data.msg, 2500);
-                        } else {
-                            warning_prompt("其他未知错误.....please enjoy debug", 2500);
-                        }
-                    },
-                    "json"
-                );
-            });
-        });
-    </script>
     <%--alert自动消失--%>
     <script type="text/javascript">
         var countDown = function (secs){
@@ -234,6 +156,40 @@
             prompt(message, 'alert-info', time);
         };
     </script>
+
+    <%--ajax--%>
+    <script type="text/javascript">
+        // 页面加载完成之后
+        $(function () {
+            // 使用ajax给用户名 实时 返回信息
+            // 不重名就直接进行修改
+            $("#pdesc").on('blur',function(){
+
+            });
+            $('.myselect').on('click', function () {
+                var existImgPath = $(this).attr('existImgPath');
+                // 要replaceAll  下面的则不需要 尬
+                var divID = $(this).attr('existImgPath').replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
+                $.post(
+                    "http://localhost:8080/pic/picture/ajaxDeletePic",
+                    "existImgPath=" + existImgPath,
+                    function (data) {
+                        if (data.status == 'success') {
+                            $("#" + divID).remove();
+                            success_prompt(data.msg, 1500);
+                            countDown(2);
+                        } else if (data.status == 'fail') {
+                            fail_prompt(data.msg, 2500);
+                        } else {
+                            warning_prompt("其他未知错误.....please enjoy debug", 2500);
+                        }
+                    },
+                    "json"
+                );
+            });
+
+        });
+    </script>
 </head>
 <body>
 <h1 style="display : inline"><a href="picture/page" >  查看所有照片  </a> </h1>
@@ -242,18 +198,18 @@
         <%--显示 照片名称  拍摄时间 地点--%>
         <div class="c1" name = "div2">
             <span style="width:300px;height:30px;font-size:25px;">名称：</span>
-            <input style="width:300px;height:30px;font-size:25px; line-height:40px;border: 1px solid #ffe57d" id="pname" name = "pname" value="${picture.pname}" pictype=${type} >
+            <%-- 对input框双重监控 失去焦点 和 按下enter 都可触发修改事件 --%>
+            <input @keyup.enter="changeName()" @blur = "changeName()" style=" border-radius: 8px;width:300px;height:30px;font-size:25px; line-height:40px;border: 1px solid #ffe57d" id="pname" name = "pname" value="${picture.pname}" pictype=${type} >
 
             <%--提示是否有重名的信息  错误信息  跟上面对应起来要写class--%>
             <span class="errorMsg" style="color: red;"></span>
             <span v-if = "picture.pcreatetime==''" style="color: darksalmon">神秘时间</span>
 
             <div v-if = "picture.pcreatetime!=''" style="float: right;border: 1px solid rebeccapurple">
-                <div id = "dateDiv" style="border: 1px solid palevioletred;float: left">
+                <div id = "dateDiv" style="border: 1px solid palevioletred;float: left;height:30px;">
                     <v-date-picker class="inline-block h-full" v-model="date" mode="date" :model-config="modelConfig" is-required>
                         <template v-slot="{ inputValue, togglePopover }">
                             <div class="flex items-center">
-                                    <%--<span style="width:300px;height:30px;font-size:25px;">拍摄时间：</span>--%>
                                 <button class="p-2 bg-blue-100 border border-blue-200 hover:bg-blue-200 text-blue-600 rounded-l focus:bg-blue-500 focus:text-white focus:border-blue-500 focus:outline-none"
                                         @click="togglePopover({ placement: 'auto-start' })">
                                     <span class="glyphicon glyphicon-calendar" style="color:yellowgreen;font-size:15px;"></span>
@@ -268,7 +224,7 @@
                         </template>
                     </v-date-picker>
                 </div>
-                <div id = "timeDiv" style="border: 1px solid brown;float: right">
+                <div id = "timeDiv" style="border: 1px solid brown;float: right;height:30px;">
                     <v-date-picker class="inline-block h-full" v-model="date" mode="time" is24hr :minute-increment="5"  :model-config="modelConfig" is-required>
                         <template v-slot="{ inputValue, togglePopover }">
                             <div class="flex items-center">
@@ -306,19 +262,20 @@
 
         <%--添加描述--%>
         <div class="c3" >
-            <c:if test="${empty picture.pdesc}">
-                  <textarea class="comments" rows="4" cols="50"
-                            placeholder="从我这里可以添加描述鸟..."
-                            id = "pdesc"
-                            name = "pdesc"
-                  ></textarea>
-            </c:if>
-            <c:if test="${not empty picture.pdesc}">
-                  <textarea class="comments" rows="4" cols="50"
-                            id = "pdesc"
-                            name = "pdesc"
-                  >${picture.pdesc}</textarea>
-            </c:if>
+
+              <textarea v-if = "picture.pdesc == '' "
+                        @keyup.enter="changeDesc()" @blur = "changeDesc()"
+                        class="comments" rows="4" cols="50"
+                        placeholder="从我这里可以添加描述鸟..."
+                        id = "pdesc"
+                        name = "pdesc"
+              ></textarea>
+              <textarea v-else class="comments" rows="4" cols="50"
+                        @keyup.enter="changeDesc()" @blur = "changeDesc()"
+                        id = "pdesc"
+                        name = "pdesc"
+              >${picture.pdesc}</textarea>
+
         </div>
 
 </div>
@@ -333,12 +290,66 @@
                 pcreatetime:'${picture.pcreatime}',
                 gpsLongitude:'${picture.gpsLongitude}',
                 gpsLatitude:'${picture.gpsLatitude}',
+                pdesc : '${picture.pdesc}',
             },
             modelConfig: {
                 type: 'string',
                 mask: 'YYYY-MM-DD HH:mm:ss', // Uses 'iso' if missing
             },
         },
+        methods: {
+            changeName: function () {
+                var pname = $("#pname").val();
+                var pictype = $("#pname").attr('pictype');
+                var picpath = $("#myImg").attr('src');
+                $.post(
+                    "http://localhost:8080/pic/picture/ajaxUpdateInfo",
+                    "pname=" + pname+
+                    "&pictype=" + pictype+
+                    "&picpath=" + picpath,
+                    function (data) {
+                        if (data.status == 'success') {
+                            success_prompt(data.msg, 1500);
+                            $("#myImg").attr("src",data.newPath);
+                            $("span.errorMsg").text("");
+                        } else if (data.status == 'fail') {
+                            fail_prompt(data.msg, 2500);
+                            $("span.errorMsg").text("照片名称已存在，请重新输入");
+                        } else if (data.status == 'unchange') {
+                            //  当名称没有变化时 不显示
+                        } else {
+                            warning_prompt("其他未知错误.....please enjoy debug", 2500);
+                        }
+                    },
+                    "json"
+                );
+            },
+            changeDesc: function () {
+                var pictype = $("#pname").attr('pictype');
+                var picpath = $("#myImg").attr('src');
+                var pdesc = $("#pdesc").val();
+                $.post(
+                    "http://localhost:8080/pic/picture/ajaxUpdateInfo",
+                    "pictype=" + pictype+
+                    "&picpath=" + picpath+
+                    "&pdesc=" + pdesc,
+                    function (data) {
+                        if (data.status == 'success') {
+                            success_prompt(data.msg, 1500);
+                            $("span.errorMsg").text("");
+                        } else if (data.status == 'fail') {
+                            fail_prompt(data.msg, 2500);
+                            $("span.errorMsg").text("照片名称已存在，请重新输入");
+                        } else if (data.status == 'unchange') {
+
+                        } else{
+                            warning_prompt("其他未知错误.....please enjoy debug", 2500);
+                        }
+                    },
+                    "json"
+                );
+            },
+        }
     });
     vm.$watch('date', function(newValue, oldValue) {
         if(newValue !="" && oldValue!="" && newValue!=oldValue){
