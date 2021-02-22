@@ -15,19 +15,9 @@
 
         .c2{
             float: left;
-            overflow: auto;
-            height:100%;
-            width: 60%;;
-            /*border: 2px solid green;
-            height:100%;
-            width: 60%;;
-            display: inline-block;
+            width: 60%;
+            height: 600px;
 
-            top: 10px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            margin: auto;*/
             /* 设置div中的图片居中*/
             display:flex;
             align-items:center;
@@ -35,20 +25,13 @@
             /*为了效果明显，可以将如下边框打开，看一下效果*/
             border:1px solid red;
         }
-        .c2 img{
-            width:auto;
-            height:100%;
-          /*  width:100%;
-            height:auto;*/
-        }
-
 
         .c3{
             float: right;
             border: 1px solid gold;
             display: inline-block;
             width:39%;
-            height: 100%;
+            height: 600px;
         }
     </style>
     <%-- alter style--%>
@@ -157,39 +140,6 @@
         };
     </script>
 
-    <%--ajax--%>
-    <script type="text/javascript">
-        // 页面加载完成之后
-        $(function () {
-            // 使用ajax给用户名 实时 返回信息
-            // 不重名就直接进行修改
-            $("#pdesc").on('blur',function(){
-
-            });
-            $('.myselect').on('click', function () {
-                var existImgPath = $(this).attr('existImgPath');
-                // 要replaceAll  下面的则不需要 尬
-                var divID = $(this).attr('existImgPath').replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
-                $.post(
-                    "http://localhost:8080/pic/picture/ajaxDeletePic",
-                    "existImgPath=" + existImgPath,
-                    function (data) {
-                        if (data.status == 'success') {
-                            $("#" + divID).remove();
-                            success_prompt(data.msg, 1500);
-                            countDown(2);
-                        } else if (data.status == 'fail') {
-                            fail_prompt(data.msg, 2500);
-                        } else {
-                            warning_prompt("其他未知错误.....please enjoy debug", 2500);
-                        }
-                    },
-                    "json"
-                );
-            });
-
-        });
-    </script>
 </head>
 <body>
 <h1 style="display : inline"><a href="picture/page" >  查看所有照片  </a> </h1>
@@ -251,17 +201,22 @@
                 ${picture.gpsLongitude},${picture.gpsLatitude}
             </span>
 
-            <%--显示照片--%>
-
-            <div class="c2">
-                <input class="myselect" type="button" value="删除" style="font-size: larger;width: 10%;text-align:center"
-                       handleMethod ="deleteSingle" existImgPath = ${picture.path}>
-                <img id = "myImg" src="${picture.path}" width="800">
+            <div class="c2" @mouseenter="enter()" @mouseleave="left()">
+                <%--显示照片--%>
+                <img id = "myImg"
+                     src="${picture.path}"
+                     style="height: 100%;width: auto;position:relative;border: 1px solid yellow">
+                <button v-show = "buttonShow" @click = "deletePicture()" type="button" class="btn btn-default  btn-sm"
+                        style="position:absolute; left: 50%"
+                        data-placement="top"
+                        data-toggle="tooltip"
+                        title="点击删除照片">
+                    <span class="glyphicon glyphicon-trash" style="font-size:15px;"></span>
+                </button>
             </div>
-        </div>
 
-        <%--添加描述--%>
-        <div class="c3" >
+            <%--添加描述--%>
+            <div class="c3" >
 
               <textarea v-if = "picture.pdesc == '' "
                         @keyup.enter="changeDesc()" @blur = "changeDesc()"
@@ -270,17 +225,22 @@
                         id = "pdesc"
                         name = "pdesc"
               ></textarea>
-              <textarea v-else class="comments" rows="4" cols="50"
-                        @keyup.enter="changeDesc()" @blur = "changeDesc()"
-                        id = "pdesc"
-                        name = "pdesc"
-              >${picture.pdesc}</textarea>
+                <textarea v-else class="comments" rows="4" cols="50"
+                          @keyup.enter="changeDesc()" @blur = "changeDesc()"
+                          id = "pdesc"
+                          name = "pdesc"
+                >${picture.pdesc}</textarea>
+
+            </div>
 
         </div>
+
+
 
 </div>
 <%-- v-calender 控件--%>
 <script>
+    $(function () { $("[data-toggle='tooltip']").tooltip(); });
     var vm = new Vue({
         el: '#app',
         data:{
@@ -296,6 +256,7 @@
                 type: 'string',
                 mask: 'YYYY-MM-DD HH:mm:ss', // Uses 'iso' if missing
             },
+            buttonShow : false,
         },
         methods: {
             changeName: function () {
@@ -348,6 +309,34 @@
                     },
                     "json"
                 );
+            },
+            deletePicture: function () {
+                // 函数传递 特殊字符有bug 故  更换获取方式
+                var existImgPath = $("#myImg").attr('src');
+                // 要replaceAll  下面的则不需要 尬
+                var divID = existImgPath.replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
+                $.post(
+                    "http://localhost:8080/pic/picture/ajaxDeletePic",
+                    "existImgPath=" + existImgPath,
+                    function (data) {
+                        if (data.status == 'success') {
+                            $("#" + divID).remove();
+                            success_prompt(data.msg, 1500);
+                            countDown(2);
+                        } else if (data.status == 'fail') {
+                            fail_prompt(data.msg, 2500);
+                        } else {
+                            warning_prompt("其他未知错误.....please enjoy debug", 2500);
+                        }
+                    },
+                    "json"
+                );
+            },
+            enter: function () {
+                this.buttonShow = true;
+            },
+            left: function () {
+                this.buttonShow = false;
             },
         }
     });
