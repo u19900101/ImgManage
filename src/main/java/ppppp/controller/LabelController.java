@@ -79,4 +79,39 @@ public class LabelController {
         return new Gson().toJson(map);
     }
 
+
+
+    @ResponseBody
+    @RequestMapping("/getAllLabels")
+    public String getAllLabels() {
+        HashMap map = new HashMap();
+        LabelExample labelExample = new LabelExample();
+        LabelExample.Criteria criteria = labelExample.createCriteria();
+        criteria.andParentNameIsNull();
+        // 获取所有以及节点
+        List<Label> firstLevelLabels= labelMapper.selectByExample(labelExample);
+        // 标签不存在 进行添加到数据库中
+        getAllLabelMaps(firstLevelLabels,map);
+        return new Gson().toJson(map);
+    }
+
+
+    public void getAllLabelMaps( List<Label> father,HashMap map){
+        for (Label label : father) {
+            if(label.getChildName()!=null){
+                LabelExample labelExample = new LabelExample();
+                LabelExample.Criteria criteria = labelExample.createCriteria();
+                criteria.andParentNameEqualTo(label.getLabelName());
+                List<Label> son= labelMapper.selectByExample(labelExample);
+
+                // 标签不存在 进行添加到数据库中
+                getAllLabelMaps(son,map);
+            }else {
+                map.put(label.getLabelName(), label);
+            }
+
+
+        }
+
+    }
 }
