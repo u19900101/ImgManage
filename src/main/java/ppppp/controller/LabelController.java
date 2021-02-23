@@ -1,17 +1,19 @@
 package ppppp.controller;
 
 import com.google.gson.Gson;
-import com.sun.org.apache.xpath.internal.operations.Mod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import ppppp.bean.nodes;
 import ppppp.bean.Label;
 import ppppp.bean.LabelExample;
 import ppppp.dao.LabelMapper;
 
-import javax.servlet.http.HttpServletRequest;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -50,7 +52,7 @@ public class LabelController {
             map.put("exist", false);
             Label newLabel = new Label();
             newLabel.setLabelName(newLable);
-            newLabel.setTimes(0);
+            newLabel.setTags(0);
             int insert = labelMapper.insert(newLabel);
             if(insert == 1){
                 map.put("success", "成功添加标签");
@@ -81,37 +83,45 @@ public class LabelController {
 
 
 
-    @ResponseBody
+
     @RequestMapping("/getAllLabels")
-    public String getAllLabels() {
+    public String getAllLabels(Model model) {
         HashMap map = new HashMap();
         LabelExample labelExample = new LabelExample();
         LabelExample.Criteria criteria = labelExample.createCriteria();
         criteria.andParentNameIsNull();
         // 获取所有以及节点
         List<Label> firstLevelLabels= labelMapper.selectByExample(labelExample);
+
+        ArrayList list = getChildLabel(firstLevelLabels);
+        String json = new Gson().toJson(list);
+        model.addAttribute("labels", json);
+
+        return "label/treeDemo";
+    }
+
+
+    public ArrayList getChildLabel( List<Label> father){
         // 标签不存在 进行添加到数据库中
-        getAllLabelMaps(firstLevelLabels,map);
-        return new Gson().toJson(map);
-    }
-
-
-    public void getAllLabelMaps( List<Label> father,HashMap map){
+        ArrayList list = new ArrayList();
         for (Label label : father) {
-            if(label.getChildName()!=null){
-                LabelExample labelExample = new LabelExample();
-                LabelExample.Criteria criteria = labelExample.createCriteria();
-                criteria.andParentNameEqualTo(label.getLabelName());
-                List<Label> son= labelMapper.selectByExample(labelExample);
-
-                // 标签不存在 进行添加到数据库中
-                getAllLabelMaps(son,map);
-            }else {
-                map.put(label.getLabelName(), label);
+            // 为父标签
+            LabelExample cExample = new LabelExample();
+            LabelExample.Criteria ccriteria = cExample.createCriteria();
+            ccriteria.andParentNameEqualTo(label.getLabelName());
+            List<Label> sonLabels= labelMapper.selectByExample(cExample);
+            ArrayList<String> times = new ArrayList<>();
+            times.add(String.valueOf(label.getTags()));
+            if(sonLabels!=null && sonLabels.size()>0){
+                ArrayList sonList = getChildLabel(sonLabels);
+                list.add(new nodes(label.getLabelName(),"hrft-"+label.getLabelName(), times, sonList));
             }
-
-
+            // 为叶子标签
+            else {
+                list.add(new nodes(label.getLabelName(), "hrft-"+label.getLabelName(), times));
+            }
         }
-
+        return list;
     }
+
 }

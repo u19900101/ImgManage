@@ -4,8 +4,9 @@
   <resultMap id="BaseResultMap" type="ppppp.bean.Label">
     <id column="label_name" jdbcType="VARCHAR" property="labelName" />
     <result column="parent_name" jdbcType="VARCHAR" property="parentName" />
-    <result column="child_name" jdbcType="VARCHAR" property="childName" />
-    <result column="times" jdbcType="INTEGER" property="times" />
+    <result column="tags" jdbcType="INTEGER" property="tags" />
+    <result column="href" jdbcType="VARCHAR" property="href" />
+    <result column="icon" jdbcType="VARCHAR" property="icon" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <where>
@@ -66,7 +67,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    label_name, parent_name, child_name, times
+    label_name, parent_name, tags, href, icon
   </sql>
   <select id="selectByExample" parameterType="ppppp.bean.LabelExample" resultMap="BaseResultMap">
     select
@@ -99,10 +100,10 @@
     </if>
   </delete>
   <insert id="insert" parameterType="ppppp.bean.Label">
-    insert into t_label (label_name, parent_name, child_name, 
-      times)
-    values (#{labelName,jdbcType=VARCHAR}, #{parentName,jdbcType=VARCHAR}, #{childName,jdbcType=VARCHAR}, 
-      #{times,jdbcType=INTEGER})
+    insert into t_label (label_name, parent_name, tags, 
+      href, icon)
+    values (#{labelName,jdbcType=VARCHAR}, #{parentName,jdbcType=VARCHAR}, #{tags,jdbcType=INTEGER}, 
+      #{href,jdbcType=VARCHAR}, #{icon,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="ppppp.bean.Label">
     insert into t_label
@@ -113,11 +114,14 @@
       <if test="parentName != null">
         parent_name,
       </if>
-      <if test="childName != null">
-        child_name,
+      <if test="tags != null">
+        tags,
       </if>
-      <if test="times != null">
-        times,
+      <if test="href != null">
+        href,
+      </if>
+      <if test="icon != null">
+        icon,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -127,11 +131,14 @@
       <if test="parentName != null">
         #{parentName,jdbcType=VARCHAR},
       </if>
-      <if test="childName != null">
-        #{childName,jdbcType=VARCHAR},
+      <if test="tags != null">
+        #{tags,jdbcType=INTEGER},
       </if>
-      <if test="times != null">
-        #{times,jdbcType=INTEGER},
+      <if test="href != null">
+        #{href,jdbcType=VARCHAR},
+      </if>
+      <if test="icon != null">
+        #{icon,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -150,11 +157,14 @@
       <if test="record.parentName != null">
         parent_name = #{record.parentName,jdbcType=VARCHAR},
       </if>
-      <if test="record.childName != null">
-        child_name = #{record.childName,jdbcType=VARCHAR},
+      <if test="record.tags != null">
+        tags = #{record.tags,jdbcType=INTEGER},
       </if>
-      <if test="record.times != null">
-        times = #{record.times,jdbcType=INTEGER},
+      <if test="record.href != null">
+        href = #{record.href,jdbcType=VARCHAR},
+      </if>
+      <if test="record.icon != null">
+        icon = #{record.icon,jdbcType=VARCHAR},
       </if>
     </set>
     <if test="_parameter != null">
@@ -165,8 +175,9 @@
     update t_label
     set label_name = #{record.labelName,jdbcType=VARCHAR},
       parent_name = #{record.parentName,jdbcType=VARCHAR},
-      child_name = #{record.childName,jdbcType=VARCHAR},
-      times = #{record.times,jdbcType=INTEGER}
+      tags = #{record.tags,jdbcType=INTEGER},
+      href = #{record.href,jdbcType=VARCHAR},
+      icon = #{record.icon,jdbcType=VARCHAR}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -177,11 +188,14 @@
       <if test="parentName != null">
         parent_name = #{parentName,jdbcType=VARCHAR},
       </if>
-      <if test="childName != null">
-        child_name = #{childName,jdbcType=VARCHAR},
+      <if test="tags != null">
+        tags = #{tags,jdbcType=INTEGER},
       </if>
-      <if test="times != null">
-        times = #{times,jdbcType=INTEGER},
+      <if test="href != null">
+        href = #{href,jdbcType=VARCHAR},
+      </if>
+      <if test="icon != null">
+        icon = #{icon,jdbcType=VARCHAR},
       </if>
     </set>
     where label_name = #{labelName,jdbcType=VARCHAR}
@@ -189,8 +203,9 @@
   <update id="updateByPrimaryKey" parameterType="ppppp.bean.Label">
     update t_label
     set parent_name = #{parentName,jdbcType=VARCHAR},
-      child_name = #{childName,jdbcType=VARCHAR},
-      times = #{times,jdbcType=INTEGER}
+      tags = #{tags,jdbcType=INTEGER},
+      href = #{href,jdbcType=VARCHAR},
+      icon = #{icon,jdbcType=VARCHAR}
     where label_name = #{labelName,jdbcType=VARCHAR}
   </update>
 </mapper>

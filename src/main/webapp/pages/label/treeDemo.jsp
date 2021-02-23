@@ -12,95 +12,47 @@
 		<div id="treeview6" class=""></div>
 	</div>
 
-	<div class="col-sm-3">
-		<h2>Custom Icons</h2>
-		<div id="treeview7" class=""></div>
-	</div>
+	<%--<div class="col-sm-3">--%>
+		<%--<h2>Custom Icons</h2>--%>
+		<%--<div id="treeview7" class=""></div>--%>
+	<%--</div>--%>
 
 	<script type="text/javascript">
 
     $(function() {
-
-        var defaultData = [
-          {
-			  nodes: [
-				  {
-					  text: 'Child 1',
-					  href: '#',
-					  tags: ['2344'],
-					  nodes: [
-						  {
-							  id : "kk",
-							  text: 'Grandchild 1',
-							  href: 'https://google.com',
-							  icon:  "glyphicon glyphicon-chevron-right",
-							  tags: ['100000']
-						  },
-						  {
-							  text: 'Grandchild 2',
-							  href: '#grandchild2',
-							  tags: ['0']
-						  }
-					  ]
-				  },
-				  {
-					  text: 'Child 2',
-					  href: '#child2',
-					  tags: ['0']
-				  }
-			  ],
-            text: 'Parent 11111',
-            href: '#',
-            tags: ['4'],
-
-          },
-          {
-            text: 'Parent 2',
-            href: '#parent2',
-            tags: ['0'], nodes: [
-				  {
-					  text: 'Child 1',
-					  href: '#',
-					  tags: ['2'],
-					  nodes: [
-						  {
-							  id : "kk",
-							  text: 'Grandchild 1',
-							  href: 'https://google.com',
-							  icon:  "glyphicon glyphicon-chevron-right",
-							  tags: ['100000']
-						  },
-						  {
-							  text: 'Grandchild 2',
-							  href: '#grandchild2',
-							  tags: ['0']
-						  }
-					  ]
-				  },
-				  {
-					  text: 'Child 2',
-					  href: '#child2',
-					  tags: ['0']
-				  }
-			  ]
-          },
-          {
-            text: 'Parent 3',
-            href: '#parent3',
-             tags: ['0']
-          },
-          {
-            text: 'Parent 4',
-            href: '#parent4',
-            tags: ['0']
-          },
-          {
-            text: 'Parent 5',
-            href: '#parent5'  ,
-            tags: ['0']
-          }
-        ];
-
+		var defaultData = ${labels};
+		/*var defaultData = [
+			{
+				nodes: [
+					{
+						text: 'Child 1',
+						href: '#',
+						tags: ['2344'],
+						nodes: [
+							{
+								id : "kk",
+								text: 'Grandchild 1',
+								href: 'https://google.com',
+								icon:  "glyphicon glyphicon-user",
+								tags: ['100000']
+							},
+							{
+								text: 'Grandchild 2',
+								href: '#grandchild2',
+								tags: ['0']
+							}
+						]
+					},
+					{
+						text: 'Child 2',
+						href: '#child2',
+						tags: ['0']
+					}
+				],
+				text: 'Parent 11111',
+				href: '#',
+				tags: ['4'],
+			}];*/
 		$('#treeview6').treeview({
 			// color: "#428bca",
 			color: "#000000",

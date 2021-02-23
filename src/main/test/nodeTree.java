@@ -52,4 +52,75 @@ public class nodeTree {
 
         System.out.println(new Gson().toJson(node));
     }
+
+
+
+    @Test
+    public void T2(){
+        ArrayList list = new ArrayList();
+        for (int i = 0; i < 3; i++) {
+            list.add(new nodes("text-"+i, "hrft-"+i, i));
+            ArrayList clist = new ArrayList();
+            for (int j = 10; j < 12; j++) {
+                clist.add(new nodes("ctext-"+j, "chrft-"+j, j));
+            }
+            list.add(new nodes("f-"+i, "h-"+i, i, clist));
+        }
+        System.out.println(new Gson().toJson(list));
+    }
+}
+class nodes{
+    String text;
+    String herf;
+    String tags;
+    ArrayList<nodes> nodes;
+
+
+    public ArrayList<nodes> getNodes() {
+        return nodes;
+    }
+
+    public void setNodes(ArrayList<nodes> nodes) {
+        this.nodes = nodes;
+    }
+
+    public nodes(String text, String herf, int tags) {
+        this.text = text;
+        this.herf = herf;
+        this.tags = "['"+tags+"']";
+    }
+
+    public nodes(String text, String herf, int tags, ArrayList<nodes> nodes) {
+        this.text = text;
+        this.herf = herf;
+        this.tags = "['"+tags+"']";
+        this.nodes = nodes;
+    }
+
+    public nodes() {
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public String getHerf() {
+        return herf;
+    }
+
+    public void setHerf(String herf) {
+        this.herf = herf;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(int tags) {
+        this.tags = "['"+tags+"']";
+    }
 }

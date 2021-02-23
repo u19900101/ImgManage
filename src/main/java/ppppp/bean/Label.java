@@ -5,9 +5,11 @@ public class Label {
 
     private String parentName;
 
-    private String childName;
+    private Integer tags;
 
-    private Integer times;
+    private String href;
+
+    private String icon;
 
     public String getLabelName() {
         return labelName;
@@ -25,19 +27,27 @@ public class Label {
         this.parentName = parentName == null ? null : parentName.trim();
     }
 
-    public String getChildName() {
-        return childName;
+    public Integer getTags() {
+        return tags;
     }
 
-    public void setChildName(String childName) {
-        this.childName = childName == null ? null : childName.trim();
+    public void setTags(Integer tags) {
+        this.tags = tags;
     }
 
-    public Integer getTimes() {
-        return times;
+    public String getHref() {
+        return href;
     }
 
-    public void setTimes(Integer times) {
-        this.times = times;
+    public void setHref(String href) {
+        this.href = href == null ? null : href.trim();
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon == null ? null : icon.trim();
     }
 }
