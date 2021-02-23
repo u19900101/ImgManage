@@ -12,10 +12,10 @@
 		<div id="treeview6" class=""></div>
 	</div>
 
-	<%--<div class="col-sm-3">--%>
-		<%--<h2>Custom Icons</h2>--%>
-		<%--<div id="treeview7" class=""></div>--%>
-	<%--</div>--%>
+
+	<div class="col-sm-8">
+        <iframe src="pages/picture.jsp" name='main' id="iframepage" frameborder="0" width="100%" scrolling="no" marginheight="0" marginwidth="0" ></iframe>
+	</div> 
 
 	<script type="text/javascript">
 
@@ -26,12 +26,12 @@
 				nodes: [
 					{
 						text: 'Child 1',
-						href: '#',
+						href: 'https://google.com',
 						tags: ['2344'],
 						nodes: [
 							{
-								id : "kk",
-								text: 'Grandchild 1',
+								nodeId:"kkk",
+								text: '我是kkk',
 								href: 'https://google.com',
 								icon:  "glyphicon glyphicon-user",
 								tags: ['100000']
@@ -54,10 +54,9 @@
 				tags: ['4'],
 			}];*/
 		$('#treeview6').treeview({
-			// color: "#428bca",
 			color: "#000000",
 			backColor: "#FFFFFF",
-			enableLinks: true,
+			// enableLinks: true,
 			expandIcon: "glyphicon glyphicon-chevron-right",
 			collapseIcon: "glyphicon glyphicon-chevron-down",
 			nodeIcon: "glyphicon glyphicon-bookmark",
@@ -66,7 +65,7 @@
 
 		});
 		//设置页面初始化时展开的节点
-		$('#treeview6').treeview('expandNode',
+		/*$('#treeview6').treeview('expandNode',
 				[0, {
 			levels: 3,
 			silent: true
@@ -74,10 +73,24 @@
 				[1, {
 			levels: 3,
 			silent: true
-		}]);
-		$('#treeview6').on('nodeSelected',function(event,data){   //插件中的方法
+		}]);*/
+		//全部折叠起来 collapseAll
+		// $('#treeview6').treeview('collapseAll', {data:defaultData});
+
+		// //全部展开 expandAll
+		$('#treeview6').treeview('expandAll', {data:defaultData});
+
+		$('#treeview6').on('nodeSelected', function(event, data) {
+			// clickNode(event, data)
+			/*alert(JSON.stringify(data));
+			alert(data.text);
+			alert(data.nodeId);*/
+			// 点击后  访问后台的路径  后台处理完数据后直接渲染 到指定的页面去
+			document.getElementById("iframepage").src="/pic/" + data.href;
+		});
+		/*$('#treeview6').on('nodeSelected',function(event,data){   //插件中的方法
 			alert(data.nodeId);
-			switch(data.nodeId){
+			/!*switch(data.nodeId){
 				case 0:break;
 				case 1:
 					testGrandfather(); //当点击结点id为1的那个结点时，调用该函数实现跳转等效果
@@ -86,8 +99,8 @@
 					testGrandfather();
 					break;
 
-			}
-		});
+			}*!/
+		});*/
 
 		function testGrandfather(){
 			//window.location.href="跳转地址";   //界面跳转
@@ -108,7 +121,6 @@
 
 			});*/
 		}
-
 
 		// 首先要明确：树结构数据、初始化选中数据:
 		// 以本文为例，从接口获取的数据分别为：menuTreeArr, selectedArr([1,2,3,4...])

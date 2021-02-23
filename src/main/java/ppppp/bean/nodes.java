@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class nodes {
 
         String text;
-        String herf;
+        String href;
         ArrayList<String> tags;
         ArrayList<nodes> nodes;
 
@@ -17,7 +17,7 @@ public class nodes {
         public String toString() {
             return "nodes{" +
                     "text='" + text + '\'' +
-                    ", herf='" + herf + '\'' +
+                    ", href='" + href + '\'' +
                     ", tags=" + tags +
                     ", nodes=" + nodes +
                     '}';
@@ -31,12 +31,12 @@ public class nodes {
             this.text = text;
         }
 
-        public String getHerf() {
-            return herf;
+        public String gethref() {
+            return href;
         }
 
-        public void setHerf(String herf) {
-            this.herf = herf;
+        public void sethref(String href) {
+            this.href = href;
         }
 
         public ArrayList<String> getTags() {
@@ -55,16 +55,16 @@ public class nodes {
             this.nodes = nodes;
         }
 
-        public nodes(String text, String herf, ArrayList<String> tags, ArrayList<ppppp.bean.nodes> nodes) {
+        public nodes(String text, String href, ArrayList<String> tags, ArrayList<ppppp.bean.nodes> nodes) {
             this.text = text;
-            this.herf = herf;
+            this.href = href;
             this.tags = tags;
             this.nodes = nodes;
         }
 
-        public nodes(String text, String herf, ArrayList<String> tags) {
+        public nodes(String text, String href, ArrayList<String> tags) {
             this.text = text;
-            this.herf = herf;
+            this.href = href;
             this.tags = tags;
         }
 

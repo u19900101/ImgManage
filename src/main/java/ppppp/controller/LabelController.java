@@ -7,15 +7,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import ppppp.bean.nodes;
-import ppppp.bean.Label;
-import ppppp.bean.LabelExample;
+import ppppp.bean.*;
 import ppppp.dao.LabelMapper;
+import ppppp.dao.PictureMapper;
 
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 /**
  * @author lppppp
@@ -26,6 +27,8 @@ import java.util.List;
 public class LabelController {
     @Autowired
     LabelMapper labelMapper;
+    @Autowired
+    PictureMapper pictureMapper;
     // 展示所有的标签
     @RequestMapping("/showAllLabel")
     public String showRecentLabel(Model model) {
@@ -81,12 +84,45 @@ public class LabelController {
         return new Gson().toJson(map);
     }
 
+    // @ResponseBody
+    @RequestMapping("/selectByLabel")
+    public String selectByLabel(String labelName, HttpServletRequest req) {
+        HashMap<String,List<Picture>> listHashMap = new HashMap<>();
+        LabelExample labelExample = new LabelExample();
+        LabelExample.Criteria criteria = labelExample.createCriteria();
+        criteria.andLabelNameEqualTo(labelName);
+        // 获取所有 节点 label
+        List<Label> firstLevelLabels= labelMapper.selectByExample(labelExample);
+        ArrayList list = getChildLabel(firstLevelLabels);
+        nodes nodes = (nodes) list.get(0);
+        ArrayList<ppppp.bean.nodes> nodesArrayList = nodes.getNodes();
+        if(nodesArrayList != null){
+            for (ppppp.bean.nodes sonNode : nodesArrayList) {
+                String sonLabelName = sonNode.getText();
+                PictureExample pexample = new PictureExample();
+                PictureExample.Criteria pexampleCriteria = pexample.createCriteria();
+                pexampleCriteria.andPlabelEqualTo(sonLabelName);
+                List<Picture> labelPictures = pictureMapper.selectByExample(pexample);
+                listHashMap.put(sonLabelName, labelPictures);
+            }
+        }else {
+            String sonLabelName = labelName;
+            PictureExample pexample = new PictureExample();
+            PictureExample.Criteria pexampleCriteria = pexample.createCriteria();
+            pexampleCriteria.andPlabelEqualTo(sonLabelName);
+            List<Picture> labelPictures = pictureMapper.selectByExample(pexample);
+            listHashMap.put(sonLabelName, labelPictures);
+        }
 
+        //将map 写进 MonthPic
+        req.getSession().setAttribute("monthsTreeMapListPic", listHashMap);
+        // return new Gson().toJson(listHashMap);
+        return "picture";
+    }
 
 
     @RequestMapping("/getAllLabels")
     public String getAllLabels(Model model) {
-        HashMap map = new HashMap();
         LabelExample labelExample = new LabelExample();
         LabelExample.Criteria criteria = labelExample.createCriteria();
         criteria.andParentNameIsNull();
@@ -96,7 +132,6 @@ public class LabelController {
         ArrayList list = getChildLabel(firstLevelLabels);
         String json = new Gson().toJson(list);
         model.addAttribute("labels", json);
-
         return "label/treeDemo";
     }
 
@@ -114,11 +149,11 @@ public class LabelController {
             times.add(String.valueOf(label.getTags()));
             if(sonLabels!=null && sonLabels.size()>0){
                 ArrayList sonList = getChildLabel(sonLabels);
-                list.add(new nodes(label.getLabelName(),"hrft-"+label.getLabelName(), times, sonList));
+                list.add(new nodes(label.getLabelName(),"label/selectByLabel?labelName="+label.getLabelName(), times, sonList));
             }
             // 为叶子标签
             else {
-                list.add(new nodes(label.getLabelName(), "hrft-"+label.getLabelName(), times));
+                list.add(new nodes(label.getLabelName(), "label/selectByLabel?labelName="+label.getLabelName(), times));
             }
         }
         return list;
