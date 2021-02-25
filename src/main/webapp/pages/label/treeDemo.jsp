@@ -7,14 +7,14 @@
 </head>
 <body>
 
-	<div class="col-sm-4">
-		<h2>Custom Icons</h2>
+	<div  style="width: 20%;float: left">
+		<h2>标签</h2>
 		<div id="treeview6" class=""></div>
 	</div>
 
 
-	<div class="col-sm-8">
-        <iframe src="pages/picture.jsp" name='main' id="iframepage" frameborder="0" width="100%" scrolling="no" marginheight="0" marginwidth="0" ></iframe>
+	<div style="width: 80%;float: right" >
+        <iframe src="pages/picture.jsp" name='main' id="iframepage" frameborder="0" width="100%" height="100%" scrolling="no" marginheight="0" marginwidth="0" ></iframe>
 	</div> 
 
 	<script type="text/javascript">

@@ -113,6 +113,16 @@
 			getDisabled: $.proxy(this.getDisabled, this),
 			getEnabled: $.proxy(this.getEnabled, this),
 
+
+
+			// Tree manipulation methods
+			addNode: $.proxy(this.addNode, this),
+			addNodeAfter: $.proxy(this.addNodeAfter, this),
+			addNodeBefore: $.proxy(this.addNodeBefore, this),
+			removeNode: $.proxy(this.removeNode, this),
+			updateNode: $.proxy(this.updateNode, this),
+
+
 			// Select methods
 			selectNode: $.proxy(this.selectNode, this),
 			unselectNode: $.proxy(this.unselectNode, this),
@@ -795,6 +805,153 @@
 		return this.findNodes('false', 'g', 'state.disabled');
 	};
 
+	/**
+	 Add nodes to the tree.
+	 @param {Array} nodes  - An array of nodes to add
+	 @param {optional Object} parentNode  - The node to which nodes will be added as children
+	 @param {optional number} index  - Zero based insert index
+	 @param {optional Object} options
+	 */
+	Tree.prototype.addNode = function (nodes, parentNode, index, options) {
+		if (!(nodes instanceof Array)) {
+			nodes = [nodes];
+		}
+
+		if (parentNode instanceof Array) {
+			parentNode = parentNode[0];
+		}
+
+		options = $.extend({}, _default.options, options);
+
+		// identify target nodes; either the tree's root or a parent's child nodes
+		var targetNodes;
+		if (parentNode && parentNode.nodes) {
+			targetNodes = parentNode.nodes;
+		} else if (parentNode) {
+			targetNodes = parentNode.nodes = [];
+		} else {
+			targetNodes = this._tree;
+		}
+
+		// inserting nodes at specified positions
+		$.each(nodes, $.proxy(function (i, node) {
+			var insertIndex = (typeof(index) === 'number') ? (index + i) : (targetNodes.length + 1);
+			targetNodes.splice(insertIndex, 0, node);
+		}, this));
+
+		// initialize new state and render changes
+		this._setInitialStates({nodes: this._tree}, 0)
+			.done($.proxy(function () {
+				if (parentNode && !parentNode.state.expanded) {
+					this._setExpanded(parentNode, true, options);
+				}
+				this._render();
+			}, this));
+	}
+
+	/**
+	 Add nodes to the tree after given node.
+	 @param {Array} nodes  - An array of nodes to add
+	 @param {Object} node  - The node to which nodes will be added after
+	 @param {optional Object} options
+	 */
+	Tree.prototype.addNodeAfter = function (nodes, node, options) {
+		if (!(nodes instanceof Array)) {
+			nodes = [nodes];
+		}
+
+		if (node instanceof Array) {
+			node = node[0];
+		}
+
+		options = $.extend({}, _default.options, options);
+
+		this.addNode(nodes, this.getParents(node)[0], (node.index + 1), options);
+	}
+
+	/**
+	 Add nodes to the tree before given node.
+	 @param {Array} nodes  - An array of nodes to add
+	 @param {Object} node  - The node to which nodes will be added before
+	 @param {optional Object} options
+	 */
+	Tree.prototype.addNodeBefore = function (nodes, node, options) {
+		if (!(nodes instanceof Array)) {
+			nodes = [nodes];
+		}
+
+		if (node instanceof Array) {
+			node = node[0];
+		}
+
+		options = $.extend({}, _default.options, options);
+
+		this.addNode(nodes, this.getParents(node)[0], node.index, options);
+	}
+
+	/**
+	 Removes given nodes from the tree.
+	 @param {Array} nodes  - An array of nodes to remove
+	 @param {optional Object} options
+	 */
+	Tree.prototype.removeNode = function (nodes, options) {
+		if (!(nodes instanceof Array)) {
+			nodes = [nodes];
+		}
+
+		options = $.extend({}, _default.options, options);
+
+		var targetNodes, parentNode;
+		$.each(nodes, $.proxy(function (index, node) {
+
+			// remove nodes from tree
+			parentNode = this._nodes[node.parentId];
+			if (parentNode) {
+				targetNodes = parentNode.nodes;
+			} else {
+				targetNodes = this._tree;
+			}
+			targetNodes.splice(node.index, 1);
+
+			// remove node from DOM
+			this._removeNodeEl(node);
+		}, this));
+
+		// initialize new state and render changes
+		this._setInitialStates({nodes: this._tree}, 0)
+			.done(this._render.bind(this));
+	};
+
+	/**
+	 Updates / replaces a given tree node
+	 @param {Object} node  - A single node to be replaced
+	 @param {Object} newNode  - THe replacement node
+	 @param {optional Object} options
+	 */
+	Tree.prototype.updateNode = function (node, newNode, options) {
+		if (node instanceof Array) {
+			node = node[0];
+		}
+
+		options = $.extend({}, _default.options, options);
+
+		// insert new node
+		var targetNodes;
+		var parentNode = this._nodes[node.parentId];
+		if (parentNode) {
+			targetNodes = parentNode.nodes;
+		} else {
+			targetNodes = this._tree;
+		}
+		targetNodes.splice(node.index, 1, newNode);
+
+		// remove old node from DOM
+		this._removeNodeEl(node);
+
+		// initialize new state and render changes
+		this._setInitialStates({nodes: this._tree}, 0)
+			.done(this._render.bind(this));
+	};
 
 	/**
 		Set a node state to selected

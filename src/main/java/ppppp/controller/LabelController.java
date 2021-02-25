@@ -87,7 +87,17 @@ public class LabelController {
     // @ResponseBody
     @RequestMapping("/selectByLabel")
     public String selectByLabel(String labelName, HttpServletRequest req) {
-        HashMap<String,List<Picture>> listHashMap = new HashMap<>();
+        TreeMap<String,ArrayList<Picture>> listHashMap = new TreeMap<>();
+        // 添加标签本身的照片
+        PictureExample fexample = new PictureExample();
+        PictureExample.Criteria fexampleCriteria = fexample.createCriteria();
+        fexampleCriteria.andPlabelEqualTo(labelName);
+        ArrayList<Picture> flabelPictures = (ArrayList<Picture>) pictureMapper.selectByExample(fexample);
+        if(flabelPictures!=null){
+            listHashMap.put(labelName, flabelPictures);
+        }
+
+
         LabelExample labelExample = new LabelExample();
         LabelExample.Criteria criteria = labelExample.createCriteria();
         criteria.andLabelNameEqualTo(labelName);
@@ -102,7 +112,7 @@ public class LabelController {
                 PictureExample pexample = new PictureExample();
                 PictureExample.Criteria pexampleCriteria = pexample.createCriteria();
                 pexampleCriteria.andPlabelEqualTo(sonLabelName);
-                List<Picture> labelPictures = pictureMapper.selectByExample(pexample);
+                ArrayList<Picture> labelPictures = (ArrayList<Picture>) pictureMapper.selectByExample(pexample);
                 listHashMap.put(sonLabelName, labelPictures);
             }
         }else {
@@ -111,7 +121,7 @@ public class LabelController {
             PictureExample.Criteria pexampleCriteria = pexample.createCriteria();
             pexampleCriteria.andPlabelEqualTo(sonLabelName);
             List<Picture> labelPictures = pictureMapper.selectByExample(pexample);
-            listHashMap.put(sonLabelName, labelPictures);
+            listHashMap.put(sonLabelName, (ArrayList<Picture>) labelPictures);
         }
 
         //将map 写进 MonthPic
