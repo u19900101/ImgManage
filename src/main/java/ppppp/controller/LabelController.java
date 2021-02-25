@@ -73,13 +73,11 @@ public class LabelController {
         HashMap map = new HashMap();
         LabelExample labelExample = new LabelExample();
         LabelExample.Criteria criteria = labelExample.createCriteria();
-        criteria.andLabelNameLike("%"+lable+"%");
+        criteria.andLabelNameLike(lable);
         List<Label> labelList = labelMapper.selectByExample(labelExample);
         // 标签不存在 进行添加到数据库中
         if(labelList!=null && labelList.size()>0){
             map.put("exist", true);
-            map.put("msg", "存在类似标签");
-            map.put("labelList", labelList);
         }
         return new Gson().toJson(map);
     }
@@ -131,7 +129,7 @@ public class LabelController {
     }
 
 
-    @RequestMapping("/getAllLabels")
+    @RequestMapping("/getLabelTree")
     public String getAllLabels(Model model) {
         LabelExample labelExample = new LabelExample();
         LabelExample.Criteria criteria = labelExample.createCriteria();
@@ -141,8 +139,9 @@ public class LabelController {
 
         ArrayList list = getChildLabel(firstLevelLabels);
         String json = new Gson().toJson(list);
-        model.addAttribute("labels", json);
-        return "label/treeDemo";
+        model.addAttribute("labelTree", json);
+        // return "label/treeDemo";
+        return "forward:/demo/d2.jsp";
     }
 
 

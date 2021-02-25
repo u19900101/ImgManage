@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     String basePath = request.getScheme()
@@ -27,6 +28,7 @@
 
     </style>
     <script type="text/javascript">
+
         $(function(){
             onLoad();
 
@@ -34,20 +36,58 @@
             function onLoad() {
                 //渲染树
                 $('#left-tree').treeview({
-                    data: getTree(),
-                    levels: 1,
+                    data: ${labelTree},
+                    levels:2,
+                    color: "#000000",
+                    backColor: "#FFFFFF",
+                    // enableLinks: true,
+                    expandIcon: "glyphicon glyphicon-chevron-right",
+                    collapseIcon: "glyphicon glyphicon-chevron-down",
+                    nodeIcon: "glyphicon glyphicon-bookmark",
+                    showTags: true,
                     onNodeSelected:function(event, node){
                         $('#updateName').val(node.text);
                         if($("#isAddLable").is(':checked')){
-                            // alert("点击标签给图片加标签");
+                            addLabelAjax(node.text);
                         }else {
-                            // alert("点击标签查看所有照片");
+                            // 点击后  访问后台的路径  后台处理完数据后直接渲染 到指定的页面去
+                            document.getElementById("iframepage").src="/pic/" + node.href;
                         }
-                        // alert($('#isAddLable').val());
                     },
                     showCheckbox:false//是否显示多选
                 });
             }
+
+            var addLabel = function (newlabelName){
+                var html ='<div id="myAlert" class="alert alert-default" style="float:left;width:fit-content;">' +
+                    '<span class="close" data-dismiss="alert">&times; </span>' +
+                    '<strong id = '+newlabelName+'>'
+                    + newlabelName + '</strong></div>';
+                $("#picTags").append(html);
+            };
+
+            // 在数据库中查询 照片是否已经存在了 请求添加的标签
+            var addLabelAjax = function (newlabelName){
+                $.ajax({
+                    type:'post',
+                    contentType : 'application/json;charset=utf-8',
+                    url:"http://localhost:8080/pic/label/isLabelExist?lable="+newlabelName,
+                    data:{},
+                    success:function(data) {
+                        if(data.exist){
+                            return;
+                        }else {
+                            addLabel(newlabelName);
+                        }
+                    },
+                    dataType:"json"
+                });
+            };
+            // 移除添加的标签时获取 标签值
+            $('body').on('click','.close',function(){
+                alert("警告消息框被关闭--"+$(this).next().text());
+            });
+
 
             //显示-添加
             $("#btnAdd").click(function(){
@@ -98,7 +138,7 @@
             function getTree(){
                 var tree = [
                     {
-                        text: "s",
+                        text: "p",
                         id:"1",
                         nodes: [
                             {
@@ -158,32 +198,29 @@
 <div id = "app">
 <header class="container" style="margin-bottom: 35px;">
     <div class="row">
-
-        <div class="col-md-8 pull-right" >
-            <input id="xxx"  @keyup.enter="searchNode()" type="text" class="form-control"  placeholder="搜索标签">
-        </div>
-    </div>
-    <div class="row">
         <div class="col-md-4" >
             <input id="searchNode"  @keyup.enter="searchNode()" type="text" class="form-control"  placeholder="搜索标签">
         </div>
+        <div class="col-md-8 pull-right" id="picTags" >
+            <%--<input  @keyup.enter="searchNode()" type="text" class="form-control"  placeholder="显示已经存在的标签">--%>
+        </div>
     </div>
+
     <div class="checkbox">
         <label>
-            <input type="checkbox"  id="isAddLable"> 给照片添加标签
+            <input type="checkbox"  id="isAddLable" checked ='checked'> 给照片添加标签
         </label>
     </div>
-
 </header>
-
-
 <div class="container">
     <div class="row">
         <div class="col-md-4">
             <div class="panel panel-primary ">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        <span id = "tag" @click = "showTagHandle()"   class="glyphicon glyphicon-tag"></span>
+                        <span data-placement="top" data-toggle="tooltip" title="<h5>点击管理标签</h5>" class="tooltip-show">
+                            <span id = "tag" @click = "showTagHandle()"   class="glyphicon glyphicon-tag"></span>
+                        </span>
                         <span id="btnAdd" v-show = "tagHandleStatu"   class="glyphicon glyphicon-plus"></span>
                         <span id="btnDel" v-show = "tagHandleStatu"   class="glyphicon glyphicon-trash"></span>
                         <span id="btnEdit" v-show = "tagHandleStatu"  class="glyphicon glyphicon-edit"></span>
@@ -194,9 +231,13 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-8 pull-right" style="float: right">
+            <iframe src="pages/picture.jsp" name='main' id="iframepage" frameborder="0" width="100%" height="100%" scrolling="no" marginheight="0" marginwidth="0" ></iframe>
+        </div> 
     </div>
 </div>
 <div>
+
     <!--弹出框 新增权限 start-->
     <div class="modal fade" id="addOperation-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
@@ -259,6 +300,7 @@
 </div>
 </body>
 <script>
+    $(function () { $("[data-toggle='tooltip']").tooltip({html : true,container: 'body'}); });
     var vm = new Vue({
         el: '#app',
         data:{
