@@ -33,50 +33,11 @@
             width:39%;
             height: 600px;
         }
-    </style>
-    <%-- alter style--%>
-    <style>
-        .alert {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            min-width: 200px;
-            margin-left: -100px;
-            z-index: 99999;
-            padding: 15px;
-            border: 1px solid transparent;
-            border-radius: 4px;
-        }
 
-        .alert-success {
-            color: #3c763d;
-            background-color: #dff0d8;
-            border-color: #d6e9c6;
-            font-size: xx-large;
+        span{
+            font-size: 25px;
         }
-
-        .alert-info {
-            color: #31708f;
-            background-color: #d9edf7;
-            border-color: #bce8f1;
-        }
-
-        .alert-warning {
-            color: #8a6d3b;
-            background-color: #fcf8e3;
-            border-color: #faebcc;
-        }
-
-        .alert-danger {
-            color: #a94442;
-            background-color: #f2dede;
-            border-color: #ebccd1;
-        }
-    </style>
-    <%--/* textarea 自适应父容器大小 */--%>
-    <style>
-
+        <%--/* textarea 自适应父容器大小 */--%>
         .comments {
             width: 100%; /*自动适应父布局宽度*/
             height: 100%; /*自动适应父布局宽度*/
@@ -88,69 +49,33 @@
             font-family: Verdana, Arial, Helvetica, sans-serif;
             border: 1px solid black;"
         }
-
-        span,input{
-            font-size: 2em;
-            font-weight: bold;
-            font-family: Verdana, Arial, Helvetica, sans-serif;
-        }
+        
     </style>
-
-    <%--alert自动消失--%>
-    <script type="text/javascript">
-        var countDown = function (secs){
-            if(--secs>0){
-                setTimeout("countDown("+secs+")",1000);
-            }else{
-                $(window).attr("location","pages/picture.jsp");
-            }
-        };
-        var prompt = function (message, style, time)
-        {
-            style = (style === undefined) ? 'alert-success' : style;
-            time = (time === undefined) ? 1200 : time;
-            $('<div>')
-                .appendTo('body')
-                .addClass('alert ' + style)
-                .html(message)
-                .show()
-                .delay(time)
-                .fadeOut();
-        };
-        var success_prompt = function(message, time)
-        {
-            prompt(message, 'alert-success', time);
-        };
-
-        // 失败提示
-        var fail_prompt = function(message, time)
-        {
-            prompt(message, 'alert-danger', time);
-        };
-
-        // 提醒
-        var warning_prompt = function(message, time)
-        {
-            prompt(message, 'alert-warning', time);
-        }
-        // 信息提示
-        var info_prompt = function(message, time)
-        {
-            prompt(message, 'alert-info', time);
-        };
-    </script>
-
 </head>
 <body>
-<h1 style="display : inline"><a href="picture/page" >  查看所有照片  </a> </h1>
-<%--显示大图--%>
-<div id="app">
-        <%--显示 照片名称  拍摄时间 地点--%>
-        <div class="c1" name = "div2">
-            <span style="width:300px;height:30px;font-size:25px;">名称：</span>
-            <%-- 对input框双重监控 失去焦点 和 按下enter 都可触发修改事件 --%>
-            <input @keyup.enter="changeName()" @blur = "changeName()" style=" border-radius: 8px;width:300px;height:30px;font-size:25px; line-height:40px;border: 1px solid #ffe57d" id="pname" name = "pname" value="${picture.pname}" pictype=${type} >
 
+
+<div class="container"  id="app" style="padding-left: 0px; padding-right: 0px;">
+    <div class="row">
+        <div class="col-md-1" style="padding-left: 0px; padding-right: 0px;border: 1px solid red">
+            <%--照片名称--%>
+            <span>名称：</span>
+        </div>
+
+        <div class="col-md-2" style="padding-left: 0px; padding-right: 0px;">
+            <%-- 对input框双重监控 失去焦点 和 按下enter 都可触发修改事件 --%>
+            <input class="form-control" @keyup.enter="changeName()"  value="${picture.pname}" pictype=${type}   @blur="changeName()" id="pname" name = "pname" style="font-size:25px;">
+        </div>
+
+        <div class="col-md-3" style="padding-left: 0px; padding-right: 0px;">
+            <span style="width:300px;height:30px;font-size:25px;">坐标：</span>
+            <span v-if = "picture.gpsLongitude=='' || picture.gpsLongitude == '' " style="color: green;width:300px;height:30px;font-size:25px;">神秘未知</span>
+            <span v-else style="color: green">
+            ${picture.gpsLongitude},${picture.gpsLatitude}
+        </div>
+
+        <%--时间和坐标信息--%>
+        <div class="col-md-5 pull-right" style="padding-left: 0px; padding-right: 0px;">
             <%--提示是否有重名的信息  错误信息  跟上面对应起来要写class--%>
             <span class="errorMsg" style="color: red;"></span>
             <span v-if = "picture.pcreatetime==''" style="color: darksalmon">神秘时间</span>
@@ -165,9 +90,10 @@
                                     <span class="glyphicon glyphicon-calendar" style="color:yellowgreen;font-size:15px;"></span>
                                 </button>
                                 <input
+                                        id = "datePicker"
                                         :value="inputValue"
                                         class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
-                                        style="width:200px;font-size:25px;height:30px;border: 1px solid #ffe57d"
+                                        style="width:130px;font-size:25px;height:30px;border: 1px solid #ffe57d"
                                         readonly
                                 />
                             </div>
@@ -183,9 +109,10 @@
                                     <span class="glyphicon glyphicon-time" style="color:blue;font-size:15px;"></span>
                                 </button>
                                 <input
+                                        id = "timePicker"
                                         :value="inputValue"
                                         class="bg-white text-gray-700 w-full py-1 px-2 appearance-none border rounded-r focus:outline-none focus:border-blue-500"
-                                        style="width:100px;font-size:25px;height:30px;border: 1px solid #ffe57d"
+                                        style="width:70px;font-size:25px;height:30px;border: 1px solid #ffe57d"
                                         readonly
                                 />
                             </div>
@@ -193,54 +120,72 @@
                     </v-date-picker>
                 </div>
             </div>
+        </div>
 
+        <%-- 照片 标签显示区--%>
+        <div id="picTags" class="col-md-2 pull-right" style="padding-left: 0px; padding-right: 0px;">
 
-            <span style="width:300px;height:30px;font-size:25px;">坐标：</span>
-            <span v-if = "picture.gpsLongitude=='' || picture.gpsLongitude == '' " style="color: green;width:300px;height:30px;font-size:25px;">神秘未知</span>
-            <span v-else style="color: green">
-                ${picture.gpsLongitude},${picture.gpsLatitude}
-            </span>
+        </div>
+    </div>
 
-            <div class="c2" @mouseenter="enter()" @mouseleave="left()">
-                <%--显示照片--%>
-                <img id = "myImg"
-                     src="${picture.path}"
-                     style="height: 100%;width: auto;position:relative;border: 1px solid yellow">
-                <button v-show = "buttonShow" @click = "deletePicture()" type="button" class="btn btn-default  btn-sm"
-                        style="position:absolute; left: 50%"
-                        data-placement="top"
-                        data-toggle="tooltip"
-                        title="点击删除照片">
-                    <span class="glyphicon glyphicon-trash" style="font-size:15px;"></span>
-                </button>
-            </div>
+    <div class="row">
+        <%--显示 照片名称  添加描述 --%>
+        <div class="c1" name = "div2">
+        <div class="c2" @mouseenter="enter()" @mouseleave="left()">
+            <%--显示照片--%>
+            <img id = "myImg"
+                 src="${picture.path}"
+                 style="height: 100%;width: auto;position:relative;border: 1px solid yellow">
+            <button v-show = "buttonShow" @click = "deletePicture()" type="button" class="btn btn-default  btn-sm"
+                    style="position:absolute; left: 50%"
+                    data-placement="top"
+                    data-toggle="tooltip"
+                    title="点击删除照片">
+                <span class="glyphicon glyphicon-trash" style="font-size:15px;"></span>
+            </button>
+        </div>
 
-            <%--添加描述--%>
-            <div class="c3" >
+        <%--添加描述--%>
+        <div class="c3" >
 
-              <textarea v-if = "picture.pdesc == '' "
-                        @keyup.enter="changeDesc()" @blur = "changeDesc()"
-                        class="comments" rows="4" cols="50"
-                        placeholder="从我这里可以添加描述鸟..."
-                        id = "pdesc"
-                        name = "pdesc"
-              ></textarea>
-                <textarea v-else class="comments" rows="4" cols="50"
-                          @keyup.enter="changeDesc()" @blur = "changeDesc()"
-                          id = "pdesc"
-                          name = "pdesc"
-                >${picture.pdesc}</textarea>
-
-            </div>
+          <textarea v-if = "picture.pdesc == '' "
+                    @keyup.enter="changeDesc()" @blur = "changeDesc()"
+                    class="comments" rows="4" cols="50"
+                    placeholder="从我这里可以添加描述鸟..."
+                    id = "pdesc"
+                    name = "pdesc"
+          ></textarea>
+            <textarea v-else class="comments" rows="4" cols="50"
+                      @keyup.enter="changeDesc()" @blur = "changeDesc()"
+                      id = "pdesc"
+                      name = "pdesc"
+            >${picture.pdesc}</textarea>
 
         </div>
 
-
-
+    </div>
+    </div>
 </div>
+
+</body>
+
 <%-- v-calender 控件--%>
 <script>
-    $(function () { $("[data-toggle='tooltip']").tooltip(); });
+    $(function () {
+        $("[data-toggle='tooltip']").tooltip();
+        var labelList = '${picture.plabel}'.split(",");
+        for (var i = 0; i < labelList.length; i++) {
+            addLabel(labelList[i]);
+        }
+        function addLabel(newlabelName){
+            var html ='<div id="myAlert" class="alert alert-default" style="float:left;width:fit-content;">' +
+                '<span class="close" data-dismiss="alert">&times; </span>' +
+                '<strong id = '+newlabelName+'>'
+                + newlabelName + '</strong></div>';
+            $("#picTags").append(html);
+
+        };
+    });
     var vm = new Vue({
         el: '#app',
         data:{

@@ -160,8 +160,7 @@
 <body>
 <%--${monthsTreeMapListPic}--%>
 <%--完美解决 图片的页面显示问题--%>
-<h1 style="display : inline"><a href="picture/page" >  查看所有照片  </a> </h1>
-<h1 style="display : inline"><a href="uploadDir.jsp" >  继续上传照片  </a> </h1>
+
 <c:if test="${not empty justUploadMsg}">
     <h1 style="color: magenta">${justUploadMsg}</h1>
 </c:if>
@@ -301,7 +300,7 @@
                                             </v-date-picker>
                                         </div>
                            --%>
-                                <form action="picture/before_edit_picture" method="post" name="${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
+                                <form action="picture/before_edit_picture" name="${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
                                     <div id='v_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}'
                                          @mouseenter="enter()" @mouseleave="left()"
                                          class="imgDiv" style="position:relative;border: 1px solid yellow">

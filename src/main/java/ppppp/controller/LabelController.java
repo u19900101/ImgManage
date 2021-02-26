@@ -141,7 +141,7 @@ public class LabelController {
         String json = new Gson().toJson(list);
         model.addAttribute("labelTree", json);
         // return "label/treeDemo";
-        return "forward:/demo/d2.jsp";
+        return "index";
     }
 
 

@@ -380,9 +380,9 @@ public class PictureController {
         return "redirect:/picture/page";
     }
 
-
-    @RequestMapping(value = "/before_edit_picture",method = RequestMethod.POST)
+    @RequestMapping(value = "/before_edit_picture")//,method = RequestMethod.POST
     public String before_edit_picture(String path,Model model){
+        path = path.replace("/", "\\");
         Picture picture = mapper.selectByPrimaryKey(path);
 
         //不带后缀名显示

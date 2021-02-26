@@ -1,37 +1,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%
-    String basePath = request.getScheme()
-            + "://"
-            + request.getServerName()
-            + ":"
-            + request.getServerPort()
-            + request.getContextPath()
-            + "/";
-    pageContext.setAttribute("basePath",basePath);
-%>
-
-<!--写base标签，永远固定相对路径跳转的结果-->
-<base href="<%=basePath%>">
+<%@ include file="/pages/head.jsp"%>
 <html>
 <head>
-    <script type="text/javascript" src="demo/public/bootstrap/jquery-3.1.1.min.js"></script>
-    <link rel="stylesheet" href="demo/public/bootstrap/bootstrap.min.css" >
-    <script type="text/javascript" src="demo/public/bootstrap/bootstrap.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="demo/public/plugins/bootstrap-treeview/bootstrap-treeview.min.css">
-    <script type="text/javascript" src="demo/public/plugins/bootstrap-treeview/bootstrap-treeview.js"></script>
-    <link rel="stylesheet" type="text/css" href="demo/public/plugins/bootstrap-dialog/bootstrap-dialog.min.css">
-    <script type="text/javascript" src="demo/public/plugins/bootstrap-dialog/bootstrap-dialog.min.js"></script>
-    <script type="text/javascript" src="static/script/2.6.12.vue.min.js"></script>
-    <style>
-
-
-    </style>
     <script type="text/javascript">
-
         $(function(){
             onLoad();
-
             //页面加载
             function onLoad() {
                 //渲染树
@@ -47,6 +21,7 @@
                     showTags: true,
                     onNodeSelected:function(event, node){
                         $('#updateName').val(node.text);
+
                         if($("#isAddLable").is(':checked')){
                             addLabelAjax(node.text);
                         }else {
@@ -59,11 +34,12 @@
             }
 
             var addLabel = function (newlabelName){
+                // alert("开始添加标签"+ newlabelName);
                 var html ='<div id="myAlert" class="alert alert-default" style="float:left;width:fit-content;">' +
                     '<span class="close" data-dismiss="alert">&times; </span>' +
                     '<strong id = '+newlabelName+'>'
                     + newlabelName + '</strong></div>';
-                $("#picTags").append(html);
+                $("#picTags_index").append(html);
             };
 
             // 在数据库中查询 照片是否已经存在了 请求添加的标签
@@ -75,6 +51,7 @@
                     data:{},
                     success:function(data) {
                         if(data.exist){
+                            alert(" 照片已 存在相同标签 不添加");
                             return;
                         }else {
                             addLabel(newlabelName);
@@ -132,6 +109,20 @@
                     $('#left-tree').treeview('removeNode', [ node, { silent: true } ]);
                 }
 
+            });
+            $("#showAllPic").click(function(){
+                document.getElementById("iframepage").src="/pic/picture/page";
+            });
+            $("#uploadPic").click(function(){
+                document.getElementById("iframepage").src="uploadDir.jsp";
+            });
+            // 点击图标 选中单选框
+            $("#clickAddLabel").click(function(){
+                if($("input[type='checkbox']").prop('checked')){
+                    $("input[type='checkbox']").prop("checked",false);
+                }else {
+                    $("input[type='checkbox']").prop("checked",true);
+                }
             });
 
             //获取树数据
@@ -191,50 +182,75 @@
                     }
                 } ]
             });
-        }
+        };
+
+
     </script>
 </head>
 <body >
 <div id = "app">
-<header class="container" style="margin-bottom: 35px;">
-    <div class="row">
-        <div class="col-md-4" >
-            <input id="searchNode"  @keyup.enter="searchNode()" type="text" class="form-control"  placeholder="搜索标签">
-        </div>
-        <div class="col-md-8 pull-right" id="picTags" >
-            <%--<input  @keyup.enter="searchNode()" type="text" class="form-control"  placeholder="显示已经存在的标签">--%>
-        </div>
-    </div>
+<header class="container-fluid" >
+   <div class="row">
+       <div class="col-md-3" style="border: 1px solid greenyellow">
+           <div class="row">
+               <div class="col-md-8" >
+                   <input id="searchNode"  @keyup.enter="searchNode()" type="text" class="form-control"  placeholder="搜索标签">
+               </div>
 
-    <div class="checkbox">
-        <label>
-            <input type="checkbox"  id="isAddLable" checked ='checked'> 给照片添加标签
-        </label>
-    </div>
-</header>
-<div class="container">
-    <div class="row">
-        <div class="col-md-4">
-            <div class="panel panel-primary ">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        <span data-placement="top" data-toggle="tooltip" title="<h5>点击管理标签</h5>" class="tooltip-show">
-                            <span id = "tag" @click = "showTagHandle()"   class="glyphicon glyphicon-tag"></span>
+               <div class="col-md-2" >
+                   <input type="checkbox"  id="isAddLable" data-placement="right" data-toggle="tooltip" title="<h5>给照片添加标签</h5>" class="tooltip-show">
+                   <button id = "clickAddLabel">
+                     <span data-placement="right" data-toggle="tooltip" title="<h5>查看所有照片</h5>" class="tooltip-show">
+                        <span class="glyphicon glyphicon-tags" style="font-size: large"></span>
+                    </span>
+                   </button>
+               </div>
+
+
+               <div class="col-md-2" >
+                   <button id = "showAllPic" style="float: left">
+                     <span data-placement="right" data-toggle="tooltip" title="<h5>查看所有照片</h5>" class="tooltip-show">
+                        <span class="glyphicon glyphicon-picture" style="font-size: large"></span>
+                    </span>
+                   </button>
+               </div>
+               <div class="col-md-2" >
+                   <button id = "uploadPic">
+                        <span data-placement="right" data-toggle="tooltip" title="<h5>上传照片</h5>" class="tooltip-show">
+                                <span class="glyphicon glyphicon-upload" style="font-size: large"></span>
                         </span>
-                        <span id="btnAdd" v-show = "tagHandleStatu"   class="glyphicon glyphicon-plus"></span>
-                        <span id="btnDel" v-show = "tagHandleStatu"   class="glyphicon glyphicon-trash"></span>
-                        <span id="btnEdit" v-show = "tagHandleStatu"  class="glyphicon glyphicon-edit"></span>
-                    </h3>
-                </div>
-                <div class="panel-body right_centent" style="">
-                    <div id="left-tree"></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-8 pull-right" style="float: right">
-            <iframe src="pages/picture.jsp" name='main' id="iframepage" frameborder="0" width="100%" height="100%" scrolling="no" marginheight="0" marginwidth="0" ></iframe>
-        </div> 
-    </div>
+                   </button>
+               </div>
+           </div>
+           <div class="row">
+               <div class="panel panel-primary ">
+                   <div class="panel-heading">
+                       <h3 class="panel-title">
+                            <span data-placement="top" data-toggle="tooltip" title="<h5>点击管理标签</h5>" class="tooltip-show">
+                                <span id = "tag" @click = "showTagHandle()"   class="glyphicon glyphicon-tag"></span>
+                            </span>
+                           <span id="btnAdd" v-show = "tagHandleStatu"   class="glyphicon glyphicon-plus"></span>
+                           <span id="btnDel" v-show = "tagHandleStatu"   class="glyphicon glyphicon-trash"></span>
+                           <span id="btnEdit" v-show = "tagHandleStatu"  class="glyphicon glyphicon-edit"></span>
+                       </h3>
+                   </div>
+                   <div class="panel-body right_centent" style="">
+                       <div id="left-tree"></div>
+                   </div>
+               </div>
+           </div>
+       </div>
+       <div class="col-md-9 pull-right" style="border: 1px solid red;padding-left: 0px;padding-right: 0px">
+           <%--<%@ include file="/pages/edit_picture.jsp"%>--%>
+               <iframe src="picture/before_edit_picture?path=img/2021/01/花发.jpg" name='main' id="iframepage" frameborder="0" width="100%" height="100%" scrolling="no" marginheight="0" marginwidth="0" ></iframe>
+       </div> 
+   </div>
+
+
+
+</header>
+<div class="container-fluid" style="padding-left: 0px">
+
 </div>
 <div>
 
@@ -300,7 +316,10 @@
 </div>
 </body>
 <script>
-    $(function () { $("[data-toggle='tooltip']").tooltip({html : true,container: 'body'}); });
+    $(function () {
+        $("[data-toggle='tooltip']").tooltip({html : true,container: 'body'});
+
+    });
     var vm = new Vue({
         el: '#app',
         data:{
