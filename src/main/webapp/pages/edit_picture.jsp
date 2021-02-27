@@ -57,16 +57,16 @@
 
 <div class="container"  id="app" style="padding-left: 0px; padding-right: 0px;">
     <div class="row">
+        <%--照片名称--%>
         <div class="col-md-1" style="padding-left: 0px; padding-right: 0px;border: 1px solid red">
-            <%--照片名称--%>
             <span>名称：</span>
         </div>
-
+        <%--照片名称 修改框--%>
         <div class="col-md-2" style="padding-left: 0px; padding-right: 0px;">
             <%-- 对input框双重监控 失去焦点 和 按下enter 都可触发修改事件 --%>
             <input class="form-control" @keyup.enter="changeName()"  value="${picture.pname}" pictype=${type}   @blur="changeName()" id="pname" name = "pname" style="font-size:25px;">
         </div>
-
+        <%--坐标信息显示--%>
         <div class="col-md-3" style="padding-left: 0px; padding-right: 0px;">
             <span style="width:300px;height:30px;font-size:25px;">坐标：</span>
             <span v-if = "picture.gpsLongitude=='' || picture.gpsLongitude == '' " style="color: green;width:300px;height:30px;font-size:25px;">神秘未知</span>
@@ -74,7 +74,7 @@
             ${picture.gpsLongitude},${picture.gpsLatitude}
         </div>
 
-        <%--时间和坐标信息--%>
+        <%--时间信息--%>
         <div class="col-md-5 pull-right" style="padding-left: 0px; padding-right: 0px;">
             <%--提示是否有重名的信息  错误信息  跟上面对应起来要写class--%>
             <span class="errorMsg" style="color: red;"></span>
@@ -121,13 +121,14 @@
                 </div>
             </div>
         </div>
-
-        <%-- 照片 标签显示区--%>
-        <div id="picTags" class="col-md-2 pull-right" picPath = ${picture.path} style="padding-left: 0px; padding-right: 0px;">
-
-        </div>
     </div>
 
+    <div class="row">
+        <%-- 照片 标签显示区--%>
+        <div id="picTags" class="col-md-10" picPath = ${picture.path} style="padding-left: 0px; padding-right: 0px;">
+
+    </div>
+    </div>
     <div class="row">
         <%--显示 照片名称  添加描述 --%>
         <div class="c1" name = "div2">

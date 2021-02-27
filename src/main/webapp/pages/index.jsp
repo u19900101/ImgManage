@@ -188,12 +188,14 @@
    <div class="row">
        <div class="col-md-3" style="border: 1px solid greenyellow">
            <div class="row">
-               <div class="col-md-8" >
+               <%-- 标签搜索框--%>
+               <div class="col-md-6" style="padding-left: 0px;padding-right: 0px">
                    <input id="searchNode"  @keyup.enter="searchNode()" type="text" class="form-control"  placeholder="搜索标签">
                </div>
 
-               <div class="col-md-2" >
-                   <input type="checkbox"  id="isAddLable" checked = "checked" data-placement="right" data-toggle="tooltip" title="<h5>给照片添加标签</h5>" class="tooltip-show">
+               <%--给照片添加标签--%>
+               <div class="col-md-1" >
+                   <input type="checkbox"  style="float: left" id="isAddLable" checked = "checked" data-placement="right" data-toggle="tooltip" title="<h5>给照片添加标签</h5>" class="tooltip-show">
                    <button id = "clickAddLabel">
                      <span data-placement="right" data-toggle="tooltip" title="<h5>给照片添加标签</h5>" class="tooltip-show">
                         <span class="glyphicon glyphicon-tags" style="font-size: large"></span>
@@ -201,15 +203,19 @@
                    </button>
                </div>
 
-
-               <div class="col-md-2" >
+               <div class="col-md-1" ></div>
+               <%-- 查看所有照片 --%>
+               <div class="col-md-1" >
                    <button id = "showAllPic" style="float: left">
                      <span data-placement="right" data-toggle="tooltip" title="<h5>查看所有照片</h5>" class="tooltip-show">
                         <span class="glyphicon glyphicon-picture" style="font-size: large"></span>
                     </span>
                    </button>
                </div>
-               <div class="col-md-2" >
+               <div class="col-md-1" ></div>
+
+               <%--上传照片--%>
+               <div class="col-md-1" style="padding-left: 0px;padding-right: 0px">
                    <button id = "uploadPic">
                         <span data-placement="right" data-toggle="tooltip" title="<h5>上传照片</h5>" class="tooltip-show">
                                 <span class="glyphicon glyphicon-upload" style="font-size: large"></span>
