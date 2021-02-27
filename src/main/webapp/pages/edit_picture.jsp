@@ -175,14 +175,29 @@
         $("[data-toggle='tooltip']").tooltip();
         // 删除照片标签
         $('body').on('click','.close',function(){
+            var deleteLabel = $(this).next().text();
+            var picPath = $("#myImg").attr('src');
+            $.post(
+                "http://localhost:8080/pic/label/ajaxDeleLabel",
+                "deleteLabel=" + deleteLabel+
+                "&picPath=" + picPath,
+                function (data) {
+                    if (!data.isDelete) {
+                        alert("失败 -- 从数据库删除标签")
+                    };
+                },
+                "json"
+            );
 
-            alert("警告消息框被关闭--"+$(this).next().text());
         });
-
-        var labelList = '${picture.plabel}'.split(",");
-        for (var i = 0; i < labelList.length; i++) {
-            addLabel(labelList[i]);
+        if('${picture.plabel}'.length>0){
+            var labelList = '${picture.plabel}'.split(",");
+            alert('${picture.plabel}' + "----"+labelList.length);
+            for (var i = 0; i < labelList.length; i++) {
+                addLabel(labelList[i]);
+            }
         }
+
         function addLabel(newlabelName){
             var html ='<div id="myAlert" class="alert alert-default" style="float:left;width:fit-content;">' +
                 '<span class="close" data-dismiss="alert">&times; </span>' +

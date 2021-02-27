@@ -307,6 +307,15 @@ public class MyUtils {
     }
 
 
+    public static String trimSubStr(String srcStr, String subStr) {
+        if(srcStr.equalsIgnoreCase(subStr)){
+            return "";
+        }
+        srcStr = ","+srcStr+",";
+        String res= srcStr.replace( subStr + ",", "");
+        return res.substring(1,res.length()-1);
+    }
+
     //   将带有时间信息的照片名  作为照片的创建时间 写入数据库中
     //   有且仅有匹配3中格式
     // 2016-08-16T09:33:17

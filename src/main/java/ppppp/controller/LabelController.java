@@ -1,6 +1,7 @@
 package ppppp.controller;
 
 import com.google.gson.Gson;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import ppppp.bean.*;
 import ppppp.dao.LabelMapper;
 import ppppp.dao.PictureMapper;
+import ppppp.util.MyUtils;
 
 
 import javax.servlet.http.HttpServletRequest;
@@ -70,7 +72,7 @@ public class LabelController {
     //实时模糊匹配 输入的label
     @ResponseBody
     @RequestMapping(value = "/ajaxAddLabel",method = RequestMethod.POST)
-    public String ajaxIsLabelExist(String picPath,String newlabel) {
+    public String ajaxAddLabel(String picPath,String newlabel) {
 
         Picture picture = pictureMapper.selectByPrimaryKey(picPath);
         String[] labels = picture.getPlabel().split(",");
@@ -91,6 +93,27 @@ public class LabelController {
         }
         map.put("exist", false);
         map.put("success", true);
+        return new Gson().toJson(map);
+    }
+
+
+    //实时模糊匹配 输入的label
+    @ResponseBody
+    @RequestMapping(value = "/ajaxDeleLabel",method = RequestMethod.POST)
+    public String ajaxDeleLabel(String picPath,String deleteLabel) {
+
+        Picture picture = pictureMapper.selectByPrimaryKey(picPath);
+        String newLabelStr = MyUtils.trimSubStr(picture.getPlabel(),deleteLabel);
+        HashMap map = new HashMap();
+        picture.setPlabel(newLabelStr);
+        int update = pictureMapper.updateByPrimaryKeySelective(picture);
+        if(update!=1){
+            System.out.println("失败 -- 从数据库删除标签");
+            map.put("isDelete", false);
+        }else {
+            System.out.println("成功 -- 从数据库删除标签失败");
+            map.put("isDelete", true);
+        }
         return new Gson().toJson(map);
     }
 
