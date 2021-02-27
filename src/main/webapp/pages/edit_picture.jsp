@@ -179,7 +179,7 @@
             var deleteLabel = $(this).next().text();
             var picPath = $("#myImg").attr('src');
             $.post(
-                "http://localhost:8080/pic/label/ajaxDeleLabel",
+                "http://localhost:8080/pic/label/ajaxDeletePicLabel",
                 "deleteLabel=" + deleteLabel+
                 "&picPath=" + picPath,
                 function (data) {

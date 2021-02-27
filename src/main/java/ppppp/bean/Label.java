@@ -11,6 +11,17 @@ public class Label {
 
     private String icon;
 
+    public Label(String labelName, String parentName, Integer tags, String href) {
+        this.labelName = labelName;
+        this.parentName = parentName;
+        this.tags = tags;
+        this.href = href;
+    }
+
+    public Label() {
+    }
+
+
     public String getLabelName() {
         return labelName;
     }

@@ -100,11 +100,10 @@ public class LabelController {
     }
 
 
-    //实时模糊匹配 输入的label
+    //删除照片的标签
     @ResponseBody
-    @RequestMapping(value = "/ajaxDeleLabel",method = RequestMethod.POST)
-    public String ajaxDeleLabel(String picPath,String deleteLabel) {
-
+    @RequestMapping(value = "/ajaxDeletePicLabel",method = RequestMethod.POST)
+    public String ajaxDeletePicLabel(String picPath,String deleteLabel) {
         Picture picture = pictureMapper.selectByPrimaryKey(picPath);
         String newLabelStr = MyUtils.trimSubStr(picture.getPlabel(),deleteLabel);
         HashMap map = new HashMap();
@@ -116,6 +115,80 @@ public class LabelController {
         }else {
             System.out.println("成功 -- 从数据库删除标签失败");
             map.put("isDelete", true);
+        }
+        return new Gson().toJson(map);
+    }
+
+    // 删除标签类
+    @ResponseBody
+    @RequestMapping(value = "/ajaxDeleteLabel",method = RequestMethod.POST)
+    public String ajaxDeleLabel(String labelName) {
+        HashMap map = new HashMap();
+        if(labelName == null){
+            map.put("isDelete", false);
+            return new Gson().toJson(map);
+        }
+        // 先删除标签的 所有子标签
+        LabelExample labelExample = new LabelExample();
+        LabelExample.Criteria criteria = labelExample.createCriteria();
+        criteria.andParentNameEqualTo(labelName);
+        List<Label> labels = labelMapper.selectByExample(labelExample);
+        // 删除所有子标签
+        int deleteLabel = deleteLabel(labels);
+        if(deleteLabel== 0){
+            System.out.println("失败 -- 从数据库删除标签  "+labelName);
+            map.put("isDelete", false);
+        }else {
+            // 删除父标签
+            deleteLabel = labelMapper.deleteByPrimaryKey(labelName);
+            if(deleteLabel == 0){
+                map.put("isDelete", false);
+            }else {
+                System.out.println("成功 -- 从数据库删除标签失败  "+labelName);
+                map.put("isDelete", true);
+            }
+        }
+        return new Gson().toJson(map);
+    }
+
+    private int deleteLabel(List<Label> labels) {
+        int delete = 0;
+        for (Label label : labels) {
+            LabelExample slabelExample = new LabelExample();
+            LabelExample.Criteria scriteria = slabelExample.createCriteria();
+            scriteria.andParentNameEqualTo(label.getLabelName());
+            List<Label> sonlabels = labelMapper.selectByExample(slabelExample);
+            if(sonlabels.size()>0){
+                delete =deleteLabel(sonlabels);
+                if(delete == 0){
+                    return 0;
+                }
+            }else {
+                delete = labelMapper.deleteByPrimaryKey(label.getLabelName());
+                if(delete == 0){
+                    return 0;
+                }
+            }
+        }
+        return delete;
+    }
+
+
+    @ResponseBody
+    @RequestMapping(value = "/ajaxCreateLabel",method = RequestMethod.POST)
+    public String ajaxCreateLabel(String labelName,String parentLabelName) {
+        if(parentLabelName.equalsIgnoreCase("null")){
+            parentLabelName = null;
+        }
+        HashMap map = new HashMap();
+        int insert = labelMapper.insert(new Label(labelName, parentLabelName,0, "label/selectByLabel?" + labelName));
+
+        if(insert!=1){
+            System.out.println("失败 -- 从数据库创建标签");
+            map.put("isInsert", false);
+        }else {
+            System.out.println("成功 -- 从数据库创建标签");
+            map.put("isInsert", true);
         }
         return new Gson().toJson(map);
     }

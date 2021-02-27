@@ -127,15 +127,10 @@
                     callback: function (result) {
                         if(result)
                         {
-                            del();
+                            deleteLabel(node);
                         }
                     }
                 });
-                function del(){
-
-                    $('#left-tree').treeview('removeNode', [ node, { silent: true } ]);
-                }
-
             });
             $("#showAllPic").click(function(){
                 document.getElementById("iframepage").src="/pic/picture/page";
@@ -321,6 +316,43 @@
         $("[data-toggle='tooltip']").tooltip({html : true,container: 'body'});
 
     });
+    function createLabel(node,parentNode){
+        var labelName = node.text;
+        if(parentNode.length != 0){
+            var parentLabelName = parentNode[0].text;
+        }else {
+            var parentLabelName = null;
+        }
+
+        $.post(
+            "http://localhost:8080/pic/label/ajaxCreateLabel",
+            "labelName="+labelName+"&parentLabelName="+parentLabelName,
+            function(data) {
+                if(!data.isInsert){
+                    alert(" 创建标签到数据库失败");
+                    return;
+                } else {
+                    $('#left-tree').treeview('addNode', [node, parentNode]);
+                }
+            },
+            "json"
+        );
+    };
+    function deleteLabel(node){
+        $.post(
+            "http://localhost:8080/pic/label/ajaxDeleteLabel",
+            "labelName="+node[0].text,
+            function(data) {
+                if(!data.isDelete){
+                    alert(" 删除标签到数据库失败");
+                    return;
+                } else {
+                    $('#left-tree').treeview('removeNode', [ node, { silent: true } ]);
+                }
+            },
+            "json"
+        );
+    };
     var vm = new Vue({
         el: '#app',
         data:{
@@ -352,7 +384,8 @@
                 if(resNodes.length>0){
                     showDialog( "存在重复同名标签，请重新命名！" );
                 }else {
-                    $('#left-tree').treeview('addNode', [node, parentNode]);
+                    // 先写进数据库 成功后再在页面显示
+                    createLabel(node, parentNode);
                 }
 
             },
