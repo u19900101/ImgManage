@@ -192,7 +192,7 @@
         });
         if('${picture.plabel}'.length>0){
             var labelList = '${picture.plabel}'.split(",");
-            alert('${picture.plabel}' + "----"+labelList.length);
+            <%--alert('${picture.plabel}' + "----"+labelList.length);--%>
             for (var i = 0; i < labelList.length; i++) {
                 addLabel(labelList[i]);
             }

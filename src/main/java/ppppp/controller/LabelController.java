@@ -77,15 +77,18 @@ public class LabelController {
         Picture picture = pictureMapper.selectByPrimaryKey(picPath);
         String[] labels = picture.getPlabel().split(",");
         HashMap map = new HashMap();
-
-        for (String label : labels) {
-            if(newlabel.equalsIgnoreCase(label)){
-                map.put("exist", true);
-                return new Gson().toJson(map);
+        if(labels.length>0){
+            for (String label : labels) {
+                if(newlabel.equalsIgnoreCase(label)){
+                    map.put("exist", true);
+                    return new Gson().toJson(map);
+                }
             }
         }
+
         // 不存在标签 向数据库中插入该标签
-        picture.setPlabel(picture.getPlabel()+","+newlabel);
+
+        picture.setPlabel(picture.getPlabel().length()==0?newlabel:picture.getPlabel()+","+newlabel);
         int update = pictureMapper.updateByPrimaryKeySelective(picture);
         if(update!=1){
             System.out.println("插入标签到数据库失败");

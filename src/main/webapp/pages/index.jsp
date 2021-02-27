@@ -5,6 +5,8 @@
 <head>
     <script type="text/javascript">
         $(function(){
+            //全局变量
+            var selectNode = {text :"",state:{selected:true}};
             onLoad();
             //页面加载
             function onLoad() {
@@ -20,6 +22,10 @@
                     nodeIcon: "glyphicon glyphicon-bookmark",
                     showTags: true,
                     onNodeSelected:function(event, node){
+                        if(selectNode.text != node.text) {
+                            // 选中已经发生改变时  将上一次选中的节点改为 未选中状态
+                            $('#left-tree').treeview('unselectNode', [selectNode, {silent: true}]);
+                        }
                         $('#updateName').val(node.text);
                         if($("#isAddLable").is(':checked')){
                             var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
@@ -27,6 +33,23 @@
                             addLabelAjax(picPath,newLabel);
                         }else {
                             // 点击后  访问后台的路径  后台处理完数据后直接渲染 到指定的页面去
+                            document.getElementById("iframepage").src="/pic/" + node.href;
+                        }
+                    },
+                    // 当节点被选中时 再次点击 选中状态不消失 功能也如旧
+                    onNodeUnselected:function(event, node){
+                        // alert(selectNode.text +"--unselected中--"+ node.text);
+                        // 记录 当选中之后 选择别的 节点之前的 节点状态
+                        // 保留 上一次选中的节点
+                        selectNode = node;
+                        // 依然保持选中状态
+                        $('#left-tree').treeview('selectNode', [node, {silent: true}]);
+                        $('#updateName').val(node.text);
+                        if($("#isAddLable").is(':checked')){
+                            var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
+                            var newLabel = node.text;
+                            addLabelAjax(picPath,newLabel);
+                        }else {
                             document.getElementById("iframepage").src="/pic/" + node.href;
                         }
                     },
