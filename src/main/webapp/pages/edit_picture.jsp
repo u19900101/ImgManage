@@ -123,8 +123,8 @@
         </div>
 
         <%-- 照片 标签显示区--%>
-        <div id="picTags" class="col-md-2 pull-right" labels = ${picture.plabel} style="padding-left: 0px; padding-right: 0px;">
-                显示已有标签区域
+        <div id="picTags" class="col-md-2 pull-right" picPath = ${picture.path} style="padding-left: 0px; padding-right: 0px;">
+
         </div>
     </div>
 

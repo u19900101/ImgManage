@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import ppppp.bean.*;
@@ -68,17 +69,28 @@ public class LabelController {
 
     //实时模糊匹配 输入的label
     @ResponseBody
-    @RequestMapping("/isLabelExist")
-    public String ajaxIsLabelExist(String lable) {
+    @RequestMapping(value = "/ajaxAddLabel",method = RequestMethod.POST)
+    public String ajaxIsLabelExist(String picPath,String newlabel) {
+
+        Picture picture = pictureMapper.selectByPrimaryKey(picPath);
+        String[] labels = picture.getPlabel().split(",");
         HashMap map = new HashMap();
-        LabelExample labelExample = new LabelExample();
-        LabelExample.Criteria criteria = labelExample.createCriteria();
-        criteria.andLabelNameLike(lable);
-        List<Label> labelList = labelMapper.selectByExample(labelExample);
-        // 标签不存在 进行添加到数据库中
-        if(labelList!=null && labelList.size()>0){
-            map.put("exist", true);
+
+        for (String label : labels) {
+            if(newlabel.equalsIgnoreCase(label)){
+                map.put("exist", true);
+                return new Gson().toJson(map);
+            }
         }
+        // 不存在标签 向数据库中插入该标签
+        picture.setPlabel(picture.getPlabel()+","+newlabel);
+        int update = pictureMapper.updateByPrimaryKeySelective(picture);
+        if(update!=1){
+            System.out.println("插入标签到数据库失败");
+            map.put("exist", "failed");
+        }
+        map.put("exist", false);
+        map.put("success", true);
         return new Gson().toJson(map);
     }
 

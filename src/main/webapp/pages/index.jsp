@@ -22,9 +22,9 @@
                     onNodeSelected:function(event, node){
                         $('#updateName').val(node.text);
                         if($("#isAddLable").is(':checked')){
-                            var labels = $("#iframepage").contents().find("#picTags").attr("labels");
+                            var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
                             var newLabel = node.text;
-                            addLabelAjax(labels,newLabel);
+                            addLabelAjax(picPath,newLabel);
                         }else {
                             // 点击后  访问后台的路径  后台处理完数据后直接渲染 到指定的页面去
                             document.getElementById("iframepage").src="/pic/" + node.href;
@@ -35,43 +35,37 @@
             }
 
             var addLabel = function (newlabelName){
-                // alert("开始添加标签"+ newlabelName);
                 var html ='<div id="myAlert" class="alert alert-default" style="float:left;width:fit-content;">' +
                     '<span class="close" data-dismiss="alert">&times; </span>' +
                     '<strong id = '+newlabelName+'>'
                     + newlabelName + '</strong></div>';
                 // 获取子页面 并追加标签 样式
                 $("#iframepage").contents().find("#picTags").append(html);
-            //    将信息写进数据库中
-
             };
 
             // 在数据库中查询 照片是否已经存在了 请求添加的标签
-            var addLabelAjax = function (labels,newlabel){
-                labels = labels.split(",");
-                alert(labels.length);
-                for (var i = 0; i < labels.length; i++) {
-                    if(labels[i] == newlabel){
-                        alert(" 照片已 存在相同标签 不添加");
-                        return;
-                    }
-                }
-                addLabel(newlabel);
-               /* $.ajax({
-                    type:'post',
-                    contentType : 'application/json;charset=utf-8',
-                    url:"http://localhost:8080/pic/label/isLabelExist?lable="+newlabelName,
-                    data:{},
-                    success:function(data) {
+            var addLabelAjax = function (picPath,newlabel){
+                // 将信息写进数据库中
+                // alert(picPath+"---"+newlabel);
+                $.post(
+                    "http://localhost:8080/pic/label/ajaxAddLabel",
+                    "picPath="+picPath+"&newlabel="+newlabel,
+                    function(data) {
+                        if(data.exist == "failed"){
+                            alert(" 插入标签到数据库失败");
+                            return;
+                        }
                         if(data.exist){
                             alert(" 照片已 存在相同标签 不添加");
                             return;
                         }else {
-                            addLabel(newlabelName);
+                            // alert(" 添加新标签 ");
+                            addLabel(newlabel);
                         }
                     },
-                    dataType:"json"
-                });*/
+                    "json"
+                );
+
             };
             // 移除添加的标签时获取 标签值
             $('body').on('click','.close',function(){
