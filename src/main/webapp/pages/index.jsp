@@ -21,9 +21,10 @@
                     showTags: true,
                     onNodeSelected:function(event, node){
                         $('#updateName').val(node.text);
-
                         if($("#isAddLable").is(':checked')){
-                            addLabelAjax(node.text);
+                            var labels = $("#iframepage").contents().find("#picTags").attr("labels");
+                            var newLabel = node.text;
+                            addLabelAjax(labels,newLabel);
                         }else {
                             // 点击后  访问后台的路径  后台处理完数据后直接渲染 到指定的页面去
                             document.getElementById("iframepage").src="/pic/" + node.href;
@@ -39,12 +40,24 @@
                     '<span class="close" data-dismiss="alert">&times; </span>' +
                     '<strong id = '+newlabelName+'>'
                     + newlabelName + '</strong></div>';
-                $("#picTags_index").append(html);
+                // 获取子页面 并追加标签 样式
+                $("#iframepage").contents().find("#picTags").append(html);
+            //    将信息写进数据库中
+
             };
 
             // 在数据库中查询 照片是否已经存在了 请求添加的标签
-            var addLabelAjax = function (newlabelName){
-                $.ajax({
+            var addLabelAjax = function (labels,newlabel){
+                labels = labels.split(",");
+                alert(labels.length);
+                for (var i = 0; i < labels.length; i++) {
+                    if(labels[i] == newlabel){
+                        alert(" 照片已 存在相同标签 不添加");
+                        return;
+                    }
+                }
+                addLabel(newlabel);
+               /* $.ajax({
                     type:'post',
                     contentType : 'application/json;charset=utf-8',
                     url:"http://localhost:8080/pic/label/isLabelExist?lable="+newlabelName,
@@ -58,7 +71,7 @@
                         }
                     },
                     dataType:"json"
-                });
+                });*/
             };
             // 移除添加的标签时获取 标签值
             $('body').on('click','.close',function(){
@@ -125,38 +138,6 @@
                 }
             });
 
-            //获取树数据
-            function getTree(){
-                var tree = [
-                    {
-                        text: "p",
-                        id:"1",
-                        nodes: [
-                            {
-                                text: "一班",
-                                id:"2",
-                                nodes: [
-                                    {
-                                        text: "物理"
-                                    },
-                                    {
-                                        text: "化学"
-                                    }
-                                ]
-                            },
-                            {
-                                text: "二班"
-                            }
-                        ]
-                    },
-                    {
-                        text: "二年级"
-                    },
-                    {
-                        text: "三年级"
-                    } ];
-                return tree;
-            }
             /*-----页面pannel内容区高度自适应 -----*/
             $(window).resize(function () {
                 setCenterHeight();
@@ -198,9 +179,9 @@
                </div>
 
                <div class="col-md-2" >
-                   <input type="checkbox"  id="isAddLable" data-placement="right" data-toggle="tooltip" title="<h5>给照片添加标签</h5>" class="tooltip-show">
+                   <input type="checkbox"  id="isAddLable" checked = "checked" data-placement="right" data-toggle="tooltip" title="<h5>给照片添加标签</h5>" class="tooltip-show">
                    <button id = "clickAddLabel">
-                     <span data-placement="right" data-toggle="tooltip" title="<h5>查看所有照片</h5>" class="tooltip-show">
+                     <span data-placement="right" data-toggle="tooltip" title="<h5>给照片添加标签</h5>" class="tooltip-show">
                         <span class="glyphicon glyphicon-tags" style="font-size: large"></span>
                     </span>
                    </button>
