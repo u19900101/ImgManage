@@ -32,7 +32,6 @@
                         // 当操作 标签时 左边页面不栋
 
                         if($("#statu").text() == "false"){
-                            alert("kkk");
                             if($("#isAddLable").is(':checked')){
                                 var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
                                 var newLabel = node.text;
@@ -84,11 +83,11 @@
                     "picPath="+picPath+"&newlabel="+newlabel,
                     function(data) {
                         if(data.exist == "failed"){
-                            alert(" 插入标签到数据库失败");
+                            showDialog(" 插入标签到数据库失败");
                             return;
                         }
                         if(data.exist){
-                            alert(" 照片已 存在相同标签 不添加");
+                            showDialog(" 照片已 存在相同标签 不添加");
                             return;
                         }else {
                             // alert(" 添加新标签 ");
@@ -339,7 +338,7 @@
             "labelName="+labelName+"&parentLabelName="+parentLabelName,
             function(data) {
                 if(!data.isInsert){
-                    alert(" 创建标签到数据库失败");
+                    showDialog("创建标签到数据库失败");
                     return;
                 } else {
                     $('#left-tree').treeview('addNode', [node, parentNode]);
@@ -354,10 +353,25 @@
             "labelName="+node[0].text,
             function(data) {
                 if(!data.isDelete){
-                    alert(" 删除标签到数据库失败");
+                    showDialog(" 删除标签到数据库失败");
                     return;
                 } else {
                     $('#left-tree').treeview('removeNode', [ node, { silent: true } ]);
+                }
+            },
+            "json"
+        );
+    };
+    function editLabel(node,newNode){
+        $.post(
+            "http://localhost:8080/pic/label/ajaxEditLabel",
+            "srclabelName="+node[0].text+"&newLabelName="+newNode.text,
+            function(data) {
+                if(!data.isEdit){
+                    showDialog(" 失败——修改标签到数据库");
+                    return;
+                } else {
+                    $('#left-tree').treeview('updateNode', [ node, newNode]);
                 }
             },
             "json"
@@ -376,7 +390,17 @@
                 var newNode={
                     text:$('#updateName').val()
                 };
-                $('#left-tree').treeview('updateNode', [ node, newNode]);
+                var resNodes = $('#left-tree').treeview('search', [ newNode.text, {
+                    ignoreCase: true,
+                    exactMatch: true,
+                    revealResults: true,
+                }]);
+                if(resNodes.length>0){
+                    showDialog( "存在重复同名标签，请重新命名！" );
+                }else {
+                    // 先写进数据库 成功后再在页面显示
+                    editLabel(node,newNode);
+                }
             },
             add_comfirm: function () {
                 $('#addOperation-dialog').modal('hide');
@@ -440,120 +464,4 @@
         },
     });
 </script>
-<%--<script>
-    var defaultData = [
-                {
-                    text: '一级标签',
-                    href: '#',
-                    tags: ['4'],
-                    nodes: [
-                        {
-                            text: '二级标签',
-                            href: 'https://google.com',
-                            tags: ['2344'],
-                            // image: "something.png",
-
-                            nodes: [
-                                {
-                                    nodeId:"kkk",
-                                    text: '我是kkk三级标签',
-                                    href: 'https://google.com',
-                                    icon:  "glyphicon glyphicon-user",
-                                    tags: ['100000']
-                                },
-                                {
-                                    text: '待开发功能',
-                                    href: '#grandchild2',
-                                    tags: ['0']
-                                }
-                            ]
-                        },
-                        {
-                            text: 'Child 2',
-                            href: '#child2',
-                            tags: ['0']
-                        }
-                    ],
-                }];
-
-    $('#tree').treeview({
-            color: "#000000",
-            backColor: "#FFFFFF",
-            // enableLinks: true,
-            expandIcon: "glyphicon glyphicon-chevron-right",
-            collapseIcon: "glyphicon glyphicon-chevron-down",
-            nodeIcon: "glyphicon glyphicon-bookmark",
-            showTags: true,
-            data: defaultData,
-            // levels: 2,
-            highlightSelected:false,
-            // onhoverColor:'#bce8f5', //鼠标 悬浮时的颜色
-            // selectedIcon:"glyphicon glyphicon-stop", //选中时的按钮
-            // showBorder:true,
-            // showCheckbox:true,  // 单选框
-
-            // tooltip:"提示信息",
-        });
-
-    // $('#tree').treeview('checkAll', { silent: true });
-    // $('#tree').treeview('collapseAll', { silent: true });
-    // $('#tree').treeview('expandAll', { levels: 2, silent: true });
-    // $('#tree').treeview('disableAll', { silent: true });
-    // $('#tree').treeview('disableNode', [ 3, { silent: true } ]);
-
-
-    // $('#tree').treeview('remove');  // 移除所有
-    // var nodeInfo = $('#tree').treeview('revealNode', [ 3, { silent: true } ]);
-    // alert(JSON.stringify(nodeInfo));
-
-    // 搜索 text 内容模糊匹配的 所有 node 结果 红色 高亮  //新版本中有点bug
-
-  /*  $('#tree').treeview('search', [ 'c', {
-        ignoreCase: true,     // case insensitive
-        exactMatch: false,    // like or equals
-        revealResults: true,  // reveal matching nodes
-    }]);*/
-    // $('#tree').treeview('findNodes', ['一', '一']);
-    // $('#tree').treeview('selectNode', [ 0, { silent: true } ]); // 选中 指定 id的标签
-    $('#tree').on('nodeSelected', function(event, data) { // 触发选中事件
-        // $('#tree').treeview('disableNode', [ data, { silent: true, keepState: true } ]);
-
-
-        // alert(JSON.stringify(tempNode));
-        var newNode =  {
-            text: '新增的标签',
-            href: '#',
-            tags: ['0']
-        };
-        var tempNode =  $('#tree').treeview('getSelected');
-        /*  If parentNode evaluates to false, node will be added to root
-       If index evaluates to false, node will be appended to the nodes */
-        var parentNode = false;
-        // 0 代表 一级标签 在开头
-        // 1 或者其他  代表 二级标签
-        $('#tree').treeview('addNode', [ newNode, tempNode, false, { silent: true } ]);
-
-        // 在标签之后添加 新标签
-        // $('#tree').treeview('addNodeAfter', [ newNode, tempNode, { silent: true } ]);
-        // 更新标签
-        // $('#tree').treeview('updateNode', [ tempNode, newNode, { silent: true } ]);
-        // 移除标签
-        // $('#tree').treeview('removeNode', [ tempNode, { silent: true } ]);
-    });
-
-
-
-
-
-    $('#tree').treeview('addNode', [ nodes2, parentNode, 1, { silent: true } ]);
-
-    $('#tree').treeview('disableNode', [ nodes2, { silent: true, keepState: true } ]);
-
-
-    // var node = false;
-    // $('#tree').treeview('addNodeAfter', [ nodes, node, { silent: true } ]);
-
-
-
-</script>--%>
 </html>

@@ -69,7 +69,7 @@ public class LabelController {
         return new Gson().toJson(map);
     }
 
-    //实时模糊匹配 输入的label
+
     @ResponseBody
     @RequestMapping(value = "/ajaxAddLabel",method = RequestMethod.POST)
     public String ajaxAddLabel(String picPath,String newlabel) {
@@ -85,9 +85,7 @@ public class LabelController {
                 }
             }
         }
-
         // 不存在标签 向数据库中插入该标签
-
         picture.setPlabel(picture.getPlabel().length()==0?newlabel:picture.getPlabel()+","+newlabel);
         int update = pictureMapper.updateByPrimaryKeySelective(picture);
         if(update!=1){
@@ -192,6 +190,31 @@ public class LabelController {
         }
         return new Gson().toJson(map);
     }
+
+    @ResponseBody
+    @RequestMapping(value = "/ajaxEditLabel",method = RequestMethod.POST)
+    public String ajaxEditLabel(String srclabelName,String newLabelName) {
+        HashMap map = new HashMap();
+
+        if(labelMapper.selectByPrimaryKey(newLabelName) != null){
+            System.out.println("失败 -- 从数据库更新标签  已存在同名标签");
+            map.put("isEdit", false);
+            return new Gson().toJson(map);
+        }
+        Label label = labelMapper.selectByPrimaryKey(srclabelName);
+        int delete = labelMapper.deleteByPrimaryKey(srclabelName);
+        label.setLabelName(newLabelName);
+        int insert = labelMapper.insert(label);
+        if(insert!=1 || delete!= 1){
+            System.out.println("失败 -- 从数据库更新标签");
+            map.put("isEdit", false);
+        }else {
+            System.out.println("成功 -- 从数据库更新标签");
+            map.put("isEdit", true);
+        }
+        return new Gson().toJson(map);
+    }
+
 
     // @ResponseBody
     @RequestMapping("/selectByLabel")
