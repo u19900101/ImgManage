@@ -173,6 +173,12 @@
 <script>
     $(function () {
         $("[data-toggle='tooltip']").tooltip();
+        // 删除照片标签
+        $('body').on('click','.close',function(){
+
+            alert("警告消息框被关闭--"+$(this).next().text());
+        });
+
         var labelList = '${picture.plabel}'.split(",");
         for (var i = 0; i < labelList.length; i++) {
             addLabel(labelList[i]);

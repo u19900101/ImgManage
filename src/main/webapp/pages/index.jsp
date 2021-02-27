@@ -67,10 +67,7 @@
                 );
 
             };
-            // 移除添加的标签时获取 标签值
-            $('body').on('click','.close',function(){
-                alert("警告消息框被关闭--"+$(this).next().text());
-            });
+
 
 
             //显示-添加
