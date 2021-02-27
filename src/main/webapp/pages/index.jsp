@@ -5,6 +5,8 @@
 <head>
     <script type="text/javascript">
         $(function(){
+
+
             //全局变量
             var selectNode = {text :"",state:{selected:true}};
             onLoad();
@@ -27,13 +29,18 @@
                             $('#left-tree').treeview('unselectNode', [selectNode, {silent: true}]);
                         }
                         $('#updateName').val(node.text);
-                        if($("#isAddLable").is(':checked')){
-                            var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
-                            var newLabel = node.text;
-                            addLabelAjax(picPath,newLabel);
-                        }else {
-                            // 点击后  访问后台的路径  后台处理完数据后直接渲染 到指定的页面去
-                            document.getElementById("iframepage").src="/pic/" + node.href;
+                        // 当操作 标签时 左边页面不栋
+
+                        if($("#statu").text() == "false"){
+                            alert("kkk");
+                            if($("#isAddLable").is(':checked')){
+                                var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
+                                var newLabel = node.text;
+                                addLabelAjax(picPath,newLabel);
+                            }else {
+                                // 点击后  访问后台的路径  后台处理完数据后直接渲染 到指定的页面去
+                                document.getElementById("iframepage").src="/pic/" + node.href;
+                            }
                         }
                     },
                     // 当节点被选中时 再次点击 选中状态不消失 功能也如旧
@@ -45,12 +52,14 @@
                         // 依然保持选中状态
                         $('#left-tree').treeview('selectNode', [node, {silent: true}]);
                         $('#updateName').val(node.text);
-                        if($("#isAddLable").is(':checked')){
-                            var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
-                            var newLabel = node.text;
-                            addLabelAjax(picPath,newLabel);
-                        }else {
-                            document.getElementById("iframepage").src="/pic/" + node.href;
+                        if($("#statu").text() == "false"){
+                            if($("#isAddLable").is(':checked')){
+                                var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
+                                var newLabel = node.text;
+                                addLabelAjax(picPath,newLabel);
+                            }else {
+                                document.getElementById("iframepage").src="/pic/" + node.href;
+                            }
                         }
                     },
                     showCheckbox:false//是否显示多选
@@ -225,6 +234,7 @@
                             <span data-placement="top" data-toggle="tooltip" title="<h5>点击管理标签</h5>" class="tooltip-show">
                                 <span id = "tag" @click = "showTagHandle()"   class="glyphicon glyphicon-tag"></span>
                             </span>
+                           <p id ="statu" hidden >{{tagHandleStatu}}</p>
                            <span id="btnAdd" v-show = "tagHandleStatu"   class="glyphicon glyphicon-plus"></span>
                            <span id="btnDel" v-show = "tagHandleStatu"   class="glyphicon glyphicon-trash"></span>
                            <span id="btnEdit" v-show = "tagHandleStatu"  class="glyphicon glyphicon-edit"></span>
@@ -353,6 +363,7 @@
             "json"
         );
     };
+
     var vm = new Vue({
         el: '#app',
         data:{
