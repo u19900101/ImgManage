@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ppppp.dao.LabelMapper">
+  <resultMap id="BaseResultMap" type="ppppp.bean.Label">
+    <id column="labelId" jdbcType="INTEGER" property="labelid" />
+    <result column="label_name" jdbcType="VARCHAR" property="labelName" />
+    <result column="parentId" jdbcType="INTEGER" property="parentid" />
+    <result column="parent_name" jdbcType="VARCHAR" property="parentName" />
+    <result column="tags" jdbcType="INTEGER" property="tags" />
+    <result column="href" jdbcType="VARCHAR" property="href" />
+    <result column="icon" jdbcType="VARCHAR" property="icon" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    labelId, label_name, parentId, parent_name, tags, href, icon
+  </sql>
+  <select id="selectByExample" parameterType="ppppp.bean.LabelExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_label
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_label
+    where labelId = #{labelid,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByLabelName" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from t_label
+    where label_name = #{labelName,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByParentName" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from t_label
+    where parent_name = #{parentName,jdbcType=VARCHAR}
+  </select>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from t_label
+    where labelId = #{labelid,jdbcType=INTEGER}
+  </delete>
+
+  <delete id="deleteByLabelName" parameterType="java.lang.String">
+    delete from t_label
+    where label_name = #{labelName,jdbcType=VARCHAR}
+  </delete>
+
+  <delete id="deleteByExample" parameterType="ppppp.bean.LabelExample">
+    delete from t_label
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="ppppp.bean.Label">
+    insert into t_label (labelId, label_name, parentId, 
+      parent_name, tags, href, 
+      icon)
+    values (#{labelid,jdbcType=INTEGER}, #{labelName,jdbcType=VARCHAR}, #{parentid,jdbcType=INTEGER}, 
+      #{parentName,jdbcType=VARCHAR}, #{tags,jdbcType=INTEGER}, #{href,jdbcType=VARCHAR}, 
+      #{icon,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="ppppp.bean.Label">
+    insert into t_label
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="labelid != null">
+        labelId,
+      </if>
+      <if test="labelName != null">
+        label_name,
+      </if>
+      <if test="parentid != null">
+        parentId,
+      </if>
+      <if test="parentName != null">
+        parent_name,
+      </if>
+      <if test="tags != null">
+        tags,
+      </if>
+      <if test="href != null">
+        href,
+      </if>
+      <if test="icon != null">
+        icon,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="labelid != null">
+        #{labelid,jdbcType=INTEGER},
+      </if>
+      <if test="labelName != null">
+        #{labelName,jdbcType=VARCHAR},
+      </if>
+      <if test="parentid != null">
+        #{parentid,jdbcType=INTEGER},
+      </if>
+      <if test="parentName != null">
+        #{parentName,jdbcType=VARCHAR},
+      </if>
+      <if test="tags != null">
+        #{tags,jdbcType=INTEGER},
+      </if>
+      <if test="href != null">
+        #{href,jdbcType=VARCHAR},
+      </if>
+      <if test="icon != null">
+        #{icon,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="ppppp.bean.LabelExample" resultType="java.lang.Long">
+    select count(*) from t_label
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_label
+    <set>
+      <if test="record.labelid != null">
+        labelId = #{record.labelid,jdbcType=INTEGER},
+      </if>
+      <if test="record.labelName != null">
+        label_name = #{record.labelName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.parentid != null">
+        parentId = #{record.parentid,jdbcType=INTEGER},
+      </if>
+      <if test="record.parentName != null">
+        parent_name = #{record.parentName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.tags != null">
+        tags = #{record.tags,jdbcType=INTEGER},
+      </if>
+      <if test="record.href != null">
+        href = #{record.href,jdbcType=VARCHAR},
+      </if>
+      <if test="record.icon != null">
+        icon = #{record.icon,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_label
+    set labelId = #{record.labelid,jdbcType=INTEGER},
+      label_name = #{record.labelName,jdbcType=VARCHAR},
+      parentId = #{record.parentid,jdbcType=INTEGER},
+      parent_name = #{record.parentName,jdbcType=VARCHAR},
+      tags = #{record.tags,jdbcType=INTEGER},
+      href = #{record.href,jdbcType=VARCHAR},
+      icon = #{record.icon,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="ppppp.bean.Label">
+    update t_label
+    <set>
+      <if test="labelName != null">
+        label_name = #{labelName,jdbcType=VARCHAR},
+      </if>
+      <if test="parentid != null">
+        parentId = #{parentid,jdbcType=INTEGER},
+      </if>
+      <if test="parentName != null">
+        parent_name = #{parentName,jdbcType=VARCHAR},
+      </if>
+      <if test="tags != null">
+        tags = #{tags,jdbcType=INTEGER},
+      </if>
+      <if test="href != null">
+        href = #{href,jdbcType=VARCHAR},
+      </if>
+      <if test="icon != null">
+        icon = #{icon,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where labelId = #{labelid,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="ppppp.bean.Label">
+    update t_label
+    set label_name = #{labelName,jdbcType=VARCHAR},
+      parentId = #{parentid,jdbcType=INTEGER},
+      parent_name = #{parentName,jdbcType=VARCHAR},
+      tags = #{tags,jdbcType=INTEGER},
+      href = #{href,jdbcType=VARCHAR},
+      icon = #{icon,jdbcType=VARCHAR}
+    where labelId = #{labelid,jdbcType=INTEGER}
+  </update>
+</mapper>

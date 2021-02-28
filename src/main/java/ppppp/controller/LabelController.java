@@ -195,16 +195,16 @@ public class LabelController {
     public String ajaxEditLabel(String srclabelName,String newLabelName) {
         HashMap map = new HashMap();
 
-        if(labelMapper.selectByLabelName(newLabelName) != null){
+        if(labelMapper.selectByLabelName(newLabelName).size() >0){
             System.out.println("失败 -- 从数据库更新标签  已存在同名标签");
             map.put("isEdit", false);
             return new Gson().toJson(map);
         }
         Label label = labelMapper.selectByLabelName(srclabelName).get(0);
-        int delete = labelMapper.deleteByLabelName(srclabelName);
         label.setLabelName(newLabelName);
-        int insert = labelMapper.insert(label);
-        if(insert!=1 || delete!= 1){
+        int update = labelMapper.updateByPrimaryKey(label);
+
+        if(update!= 1){
             System.out.println("失败 -- 从数据库更新标签");
             map.put("isEdit", false);
         }else {
