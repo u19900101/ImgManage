@@ -1,5 +1,6 @@
 package ppppp.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import ppppp.bean.Picture;
@@ -34,4 +35,5 @@ public interface PictureMapper {
 
     int updateByPrimaryKey(String record);
 
+    ArrayList<Picture> selectByLabelNameLike(List labelNameList);
 }

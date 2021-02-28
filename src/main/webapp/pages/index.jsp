@@ -34,8 +34,9 @@
                         if($("#statu").text() == "false"){
                             if($("#isAddLable").is(':checked')){
                                 var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
-                                var newLabel = node.text;
-                                addLabelAjax(picPath,newLabel);
+                                var newlabelName = node.text;
+                                var newLabelId = node.id;
+                                addLabelAjax(picPath,newLabelId,newlabelName);
                             }else {
                                 // 点击后  访问后台的路径  后台处理完数据后直接渲染 到指定的页面去
                                 document.getElementById("iframepage").src="/pic/" + node.href;
@@ -75,12 +76,12 @@
             };
 
             // 在数据库中查询 照片是否已经存在了 请求添加的标签
-            var addLabelAjax = function (picPath,newlabel){
+            var addLabelAjax = function (picPath,newLabelId,newlabelName){
                 // 将信息写进数据库中
                 // alert(picPath+"---"+newlabel);
                 $.post(
-                    "http://localhost:8080/pic/label/ajaxAddLabel",
-                    "picPath="+picPath+"&newlabel="+newlabel,
+                    "http://localhost:8080/pic/label/ajaxAddLabelToPic",
+                    "picPath="+picPath+"&newLabelId="+newLabelId,
                     function(data) {
                         if(data.exist == "failed"){
                             showDialog(" 插入标签到数据库失败");
@@ -91,7 +92,7 @@
                             return;
                         }else {
                             // alert(" 添加新标签 ");
-                            addLabel(newlabel);
+                            addLabel(newlabelName);
                         }
                     },
                     "json"
@@ -246,7 +247,6 @@
            </div>
        </div>
        <div class="col-md-9 pull-right" style="border: 1px solid red;padding-left: 0px;padding-right: 0px">
-           <%--<%@ include file="/pages/edit_picture.jsp"%>--%>
                <iframe src="picture/before_edit_picture?path=img/2021/01/花发.jpg" name='main' id="iframepage" frameborder="0" width="100%" height="100%" scrolling="no" marginheight="0" marginwidth="0" ></iframe>
        </div> 
    </div>

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ppppp.bean.Picture;
 import ppppp.bean.PictureExample;
+import ppppp.dao.LabelMapper;
 import ppppp.dao.PictureMapper;
 import ppppp.service.PictureService;
 import ppppp.util.MyUtils;
@@ -34,6 +35,8 @@ public class PictureController {
     PictureService pictureService;
     @Autowired
     PictureMapper mapper;
+    @Autowired
+    LabelMapper labelMapper;
     // 直接上传到的服务器路径
     public static String uploadimgDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT\\img";
     public static String baseDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT";
@@ -388,6 +391,12 @@ public class PictureController {
         //不带后缀名显示
         String[] split = picture.getPname().split("\\.");
         picture.setPname(split[0]);
+        String[] labels = picture.getPlabel().replace(","," ").trim().split(" ");
+        String labelsListStr = "";
+        for (String label : labels) {
+            labelsListStr +=" " +labelMapper.selectByPrimaryKey(Integer.valueOf(label)).getLabelName();
+        }
+        picture.setPlabel(labelsListStr);
         model.addAttribute("picture",picture);
         model.addAttribute("type","."+split[1]);
         return "forward:/pages/edit_picture.jsp";

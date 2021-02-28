@@ -119,6 +119,28 @@
     from t_pic
     where path = #{path,jdbcType=VARCHAR}
   </select>
+
+
+
+
+  <select id="selectByLabelNameLike" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_pic
+    where
+    <foreach collection="list" item="item" index="index"  separator="OR">
+      `plabel` LIKE CONCAT('%',#{item},'%')
+    </foreach>
+  </select>
+
+
+
+
+
+
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
     delete from t_pic
     where path = #{path,jdbcType=VARCHAR}

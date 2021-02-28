@@ -7,23 +7,57 @@ import java.util.ArrayList;
  * @create 2021-02-23 7:18
  */
 public class nodes {
-
+        int id;
         String text;
         String href;
         ArrayList<String> tags;
         ArrayList<nodes> nodes;
 
-        @Override
-        public String toString() {
-            return "nodes{" +
-                    "text='" + text + '\'' +
-                    ", href='" + href + '\'' +
-                    ", tags=" + tags +
-                    ", nodes=" + nodes +
-                    '}';
-        }
 
-        public String getText() {
+    public nodes(Integer id,String text, String href, ArrayList<String> tags, ArrayList<ppppp.bean.nodes> nodes) {
+        this.id = id;
+        this.text = text;
+        this.href = href;
+        this.tags = tags;
+        this.nodes = nodes;
+    }
+
+    public nodes(Integer id,String text, String href, ArrayList<String> tags) {
+        this.id = id;
+        this.text = text;
+        this.href = href;
+        this.tags = tags;
+    }
+
+
+    @Override
+    public String toString() {
+        return "nodes{" +
+                "id=" + id +
+                ", text='" + text + '\'' +
+                ", href='" + href + '\'' +
+                ", tags=" + tags +
+                ", nodes=" + nodes +
+                '}';
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getHref() {
+        return href;
+    }
+
+    public void setHref(String href) {
+        this.href = href;
+    }
+
+    public String getText() {
             return text;
         }
 
@@ -55,18 +89,6 @@ public class nodes {
             this.nodes = nodes;
         }
 
-        public nodes(String text, String href, ArrayList<String> tags, ArrayList<ppppp.bean.nodes> nodes) {
-            this.text = text;
-            this.href = href;
-            this.tags = tags;
-            this.nodes = nodes;
-        }
-
-        public nodes(String text, String href, ArrayList<String> tags) {
-            this.text = text;
-            this.href = href;
-            this.tags = tags;
-        }
 
         public nodes() {
         }

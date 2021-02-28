@@ -16,10 +16,7 @@ import ppppp.util.MyUtils;
 
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * @author lppppp
@@ -69,32 +66,119 @@ public class LabelController {
         return new Gson().toJson(map);
     }
 
+    @RequestMapping("/selectByLabel")
+    // 根据 标签名称 获取所有的包含该标签的照片 按照月份(不包含二级标签) 装进map中
+    public String selectByLabel(Integer labelid, String labelName,HttpServletRequest req) {
+        TreeMap<String,ArrayList<Picture>> listHashMap = new TreeMap<>();
 
-    @ResponseBody
-    @RequestMapping(value = "/ajaxAddLabel",method = RequestMethod.POST)
-    public String ajaxAddLabel(String picPath,String newlabel) {
+        // 获取 标签子标签的所有 id 通过 ',{labelName},' 字段来 查询所有
+        ArrayList labelNameList = new ArrayList();
+        getAllSonLabelId(labelName,labelNameList);//也包含自己
 
-        Picture picture = pictureMapper.selectByPrimaryKey(picPath);
-        String[] labels = picture.getPlabel().split(",");
-        HashMap map = new HashMap();
-        if(labels.length>0){
-            for (String label : labels) {
-                if(newlabel.equalsIgnoreCase(label)){
-                    map.put("exist", true);
-                    return new Gson().toJson(map);
-                }
+        ArrayList<Picture> pictureArrayList = pictureMapper.selectByLabelNameLike(labelNameList);
+        if(pictureArrayList.size()>0){
+            listHashMap.put(labelName, pictureArrayList);
+        }
+
+        //将map 写进 MonthPic
+        req.getSession().setAttribute("monthsTreeMapListPic", listHashMap);
+        return "picture";
+    }
+
+    private void getAllSonLabelId(String labelName,List resLabellist) {
+        List<Label> sonLabelList = labelMapper.selectByParentName(labelName);
+        if(sonLabelList.size()>0){
+            for (Label label : sonLabelList) {
+                getAllSonLabelId(label.getLabelName(),resLabellist);
             }
         }
+        resLabellist.add(labelMapper.selectByLabelName(labelName).get(0).getLabelid());
+    }
+
+
+    @RequestMapping("/getLabelTree")
+    public String getAllLabels(Model model) {
+        LabelExample labelExample = new LabelExample();
+        LabelExample.Criteria criteria = labelExample.createCriteria();
+        criteria.andParentNameIsNull();
+        // 获取所有以及节点
+        List<Label> firstLevelLabels= labelMapper.selectByExample(labelExample);
+
+        ArrayList list = getChildLabel(firstLevelLabels);
+        String json = new Gson().toJson(list);
+        model.addAttribute("labelTree", json);
+        return "index";
+    }
+
+
+    public ArrayList getChildLabel( List<Label> father){
+        // 标签不存在 进行添加到数据库中
+        ArrayList list = new ArrayList();
+        for (Label label : father) {
+            // 为父标签
+            LabelExample cExample = new LabelExample();
+            LabelExample.Criteria ccriteria = cExample.createCriteria();
+            ccriteria.andParentNameEqualTo(label.getLabelName());
+            List<Label> sonLabels= labelMapper.selectByExample(cExample);
+            ArrayList<String> times = new ArrayList<>();
+            times.add(String.valueOf(label.getTags()));
+            if(sonLabels!=null && sonLabels.size()>0){
+                ArrayList sonList = getChildLabel(sonLabels);
+                list.add(new nodes(label.getLabelid(),label.getLabelName(),"label/selectByLabel?labelName="+label.getLabelName()+"&labelid="+label.getLabelid(), times, sonList));
+            }
+            // 为叶子标签
+            else {
+                list.add(new nodes(label.getLabelid(),label.getLabelName(), "label/selectByLabel?labelName="+label.getLabelName()+"&labelid="+label.getLabelid(), times));
+            }
+        }
+        return list;
+    }
+
+
+    @ResponseBody
+    @RequestMapping(value = "/ajaxAddLabelToPic",method = RequestMethod.POST)
+    public String ajaxAddLabelToPic(String picPath,Integer newLabelId) {
+
+        Picture picture = pictureMapper.selectByPrimaryKey(picPath);
+        String[] labelsId = picture.getPlabel().split(",");
+        HashMap map = new HashMap();
+        // 判断原 照片是否已经存在 新增的标签
+        if(Arrays.asList(labelsId).contains(newLabelId)){
+            map.put("exist", true);
+            return new Gson().toJson(map);
+        }
+        // 1.更新 t_pic 表
         // 不存在标签 向数据库中插入该标签
-        picture.setPlabel(picture.getPlabel().length()==0?newlabel:picture.getPlabel()+","+newlabel);
-        int update = pictureMapper.updateByPrimaryKeySelective(picture);
-        if(update!=1){
+        picture.setPlabel(picture.getPlabel().length()==0?","+newLabelId+",":picture.getPlabel()+newLabelId+",");
+        int updatePic = pictureMapper.updateByPrimaryKeySelective(picture);
+        // 2.更新 t_label 更新标签的徽记  本标签 以及 父标签
+        int updateLabel = updateTagsById(newLabelId);
+
+        if(updatePic!=1 || updateLabel !=1){
             System.out.println("插入标签到数据库失败");
             map.put("exist", "failed");
+        }else {
+            System.out.println("插入 更新 标签 "+ newLabelId +" 到数据库成功");
+            map.put("exist", false);
+            map.put("success", true);
         }
-        map.put("exist", false);
-        map.put("success", true);
+
         return new Gson().toJson(map);
+    }
+
+    private int updateTagsById(Integer newLabelId) {
+        int update = 0;
+        Label label = labelMapper.selectByPrimaryKey(newLabelId);
+        if(label.getParentName()!=null){
+            List<Label> parentLabel = labelMapper.selectByLabelName(label.getParentName());
+            update = updateTagsById(parentLabel.get(0).getLabelid());
+            if(update == 0){
+                return 0;
+            }
+        }
+        label.setTags(label.getTags()+1);
+        update = labelMapper.updateByPrimaryKey(label);
+        return update;
     }
 
 
@@ -170,13 +254,13 @@ public class LabelController {
 
         int insert = 0;
         if(parentLabelName.equalsIgnoreCase("null")){
-            insert = labelMapper.insert(new Label(labelName, 0, "label/selectByLabel?" + labelName));
+            insert = labelMapper.insert(new Label(labelName, 0, "label/selectByLabel?labelName=" + labelName));
 
         }else if(parentLabelName !=null){
             List<Label> labels = labelMapper.selectByLabelName(parentLabelName);
             if(labels.size()==1){
                 Label parentLabel = labels.get(0);
-                insert = labelMapper.insert(new Label(labelName, parentLabel.getLabelid(),parentLabelName, 0,"label/selectByLabel?" + labelName));
+                insert = labelMapper.insert(new Label(labelName, parentLabel.getLabelid(),parentLabelName, 0,"label/selectByLabel?labelName=" + labelName));
             }
         }
         HashMap map = new HashMap();
@@ -188,6 +272,8 @@ public class LabelController {
             map.put("isInsert", true);
         }
         return new Gson().toJson(map);
+        // 更新 node的值 重新显示
+        // return "forward:/pic/label/getLabelTree";
     }
 
     @ResponseBody
@@ -215,90 +301,6 @@ public class LabelController {
     }
 
 
-    // @ResponseBody
-    @RequestMapping("/selectByLabel")
-    public String selectByLabel(String labelName, HttpServletRequest req) {
-        TreeMap<String,ArrayList<Picture>> listHashMap = new TreeMap<>();
-        // 添加标签本身的照片
-        PictureExample fexample = new PictureExample();
-        PictureExample.Criteria fexampleCriteria = fexample.createCriteria();
-        fexampleCriteria.andPlabelEqualTo(labelName);
-        ArrayList<Picture> flabelPictures = (ArrayList<Picture>) pictureMapper.selectByExample(fexample);
-        if(flabelPictures!=null){
-            listHashMap.put(labelName, flabelPictures);
-        }
 
-
-        LabelExample labelExample = new LabelExample();
-        LabelExample.Criteria criteria = labelExample.createCriteria();
-        criteria.andLabelNameEqualTo(labelName);
-        // 获取所有 节点 label
-        List<Label> firstLevelLabels= labelMapper.selectByExample(labelExample);
-        ArrayList list = getChildLabel(firstLevelLabels);
-        nodes nodes = (nodes) list.get(0);
-        ArrayList<ppppp.bean.nodes> nodesArrayList = nodes.getNodes();
-        if(nodesArrayList != null){
-            for (ppppp.bean.nodes sonNode : nodesArrayList) {
-                String sonLabelName = sonNode.getText();
-                PictureExample pexample = new PictureExample();
-                PictureExample.Criteria pexampleCriteria = pexample.createCriteria();
-                pexampleCriteria.andPlabelEqualTo(sonLabelName);
-                ArrayList<Picture> labelPictures = (ArrayList<Picture>) pictureMapper.selectByExample(pexample);
-                listHashMap.put(sonLabelName, labelPictures);
-            }
-        }else {
-            String sonLabelName = labelName;
-            PictureExample pexample = new PictureExample();
-            PictureExample.Criteria pexampleCriteria = pexample.createCriteria();
-            pexampleCriteria.andPlabelEqualTo(sonLabelName);
-            List<Picture> labelPictures = pictureMapper.selectByExample(pexample);
-            listHashMap.put(sonLabelName, (ArrayList<Picture>) labelPictures);
-        }
-
-        //将map 写进 MonthPic
-        req.getSession().setAttribute("monthsTreeMapListPic", listHashMap);
-        // return new Gson().toJson(listHashMap);
-        return "picture";
-    }
-
-
-    @RequestMapping("/getLabelTree")
-    public String getAllLabels(Model model) {
-        LabelExample labelExample = new LabelExample();
-        LabelExample.Criteria criteria = labelExample.createCriteria();
-        criteria.andParentNameIsNull();
-        // 获取所有以及节点
-        List<Label> firstLevelLabels= labelMapper.selectByExample(labelExample);
-
-        ArrayList list = getChildLabel(firstLevelLabels);
-        String json = new Gson().toJson(list);
-        model.addAttribute("labelTree", json);
-        // return "label/treeDemo";
-        return "index";
-    }
-
-
-    public ArrayList getChildLabel( List<Label> father){
-        // 标签不存在 进行添加到数据库中
-        ArrayList list = new ArrayList();
-        for (Label label : father) {
-            // 为父标签
-            LabelExample cExample = new LabelExample();
-            LabelExample.Criteria ccriteria = cExample.createCriteria();
-            ccriteria.andParentNameEqualTo(label.getLabelName());
-            List<Label> sonLabels= labelMapper.selectByExample(cExample);
-            ArrayList<String> times = new ArrayList<>();
-            times.add(String.valueOf(label.getTags()));
-            if(sonLabels!=null && sonLabels.size()>0){
-                ArrayList sonList = getChildLabel(sonLabels);
-                list.add(new nodes(label.getLabelName(),"label/selectByLabel?labelName="+label.getLabelName(), times, sonList));
-            }
-            // 为叶子标签
-            else {
-                list.add(new nodes(label.getLabelName(), "label/selectByLabel?labelName="+label.getLabelName(), times));
-            }
-        }
-        return list;
-    }
 
 }
