@@ -198,7 +198,7 @@
 
                <%--给照片添加标签--%>
                <div class="col-md-1" >
-                   <input type="checkbox"  style="float: left" id="isAddLable" checked = "checked" data-placement="right" data-toggle="tooltip" title="<h5>给照片添加标签</h5>" class="tooltip-show">
+                   <input type="checkbox"  style="float: left" id="isAddLable" data-placement="right" data-toggle="tooltip" title="<h5>给照片添加标签</h5>" class="tooltip-show">
                    <button id = "clickAddLabel">
                      <span data-placement="right" data-toggle="tooltip" title="<h5>给照片添加标签</h5>" class="tooltip-show">
                         <span class="glyphicon glyphicon-tags" style="font-size: large"></span>
@@ -327,6 +327,7 @@
     });
     function createLabel(node,parentNode){
         var labelName = node.text;
+        // alert(parentNode.length);
         if(parentNode.length != 0){
             var parentLabelName = parentNode[0].text;
         }else {

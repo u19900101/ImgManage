@@ -48,9 +48,9 @@ public class LabelController {
     @RequestMapping("/insert")
     public String ajaxInsertLabel(String newLable) {
         HashMap map = new HashMap();
-        Label label= labelMapper.selectByPrimaryKey(newLable);
+        List<Label> label =  labelMapper.selectByLabelName(newLable);
         // 标签不存在 进行添加到数据库中
-        if(label!=null){
+        if(label.size()>0){
             map.put("exist", true);
             map.put("msg", "标签已存在");
             map.put("label", label);
@@ -127,46 +127,38 @@ public class LabelController {
             return new Gson().toJson(map);
         }
         // 先删除标签的 所有子标签
-        LabelExample labelExample = new LabelExample();
-        LabelExample.Criteria criteria = labelExample.createCriteria();
-        criteria.andParentNameEqualTo(labelName);
-        List<Label> labels = labelMapper.selectByExample(labelExample);
-        // 删除所有子标签
-        int deleteLabel = deleteLabel(labels);
+
+        int deleteLabel = deleteLabel(labelName);
         if(deleteLabel== 0){
             System.out.println("失败 -- 从数据库删除标签  "+labelName);
             map.put("isDelete", false);
         }else {
-            // 删除父标签
-            deleteLabel = labelMapper.deleteByPrimaryKey(labelName);
-            if(deleteLabel == 0){
-                map.put("isDelete", false);
-            }else {
-                System.out.println("成功 -- 从数据库删除标签失败  "+labelName);
-                map.put("isDelete", true);
-            }
+            System.out.println("成功 -- 从数据库删除标签  "+labelName);
+            map.put("isDelete", true);
         }
+
         return new Gson().toJson(map);
     }
 
-    private int deleteLabel(List<Label> labels) {
+    private int deleteLabel(String labelName) {
         int delete = 0;
+        List<Label> labels = labelMapper.selectByLabelName(labelName);
         for (Label label : labels) {
-            LabelExample slabelExample = new LabelExample();
-            LabelExample.Criteria scriteria = slabelExample.createCriteria();
-            scriteria.andParentNameEqualTo(label.getLabelName());
-            List<Label> sonlabels = labelMapper.selectByExample(slabelExample);
+            // 删除所有子标签
+            List<Label> sonlabels = labelMapper.selectByParentName(label.getLabelName());
             if(sonlabels.size()>0){
-                delete =deleteLabel(sonlabels);
-                if(delete == 0){
-                    return 0;
-                }
-            }else {
-                delete = labelMapper.deleteByPrimaryKey(label.getLabelName());
-                if(delete == 0){
-                    return 0;
+                for (Label sonlabel : sonlabels) {
+                    delete =deleteLabel(sonlabel.getLabelName());
+                    if(delete == 0){
+                        return 0;
+                    }
                 }
             }
+            delete = labelMapper.deleteByLabelName(label.getLabelName());
+            if(delete == 0){
+                return 0;
+            }
+
         }
         return delete;
     }
@@ -175,12 +167,19 @@ public class LabelController {
     @ResponseBody
     @RequestMapping(value = "/ajaxCreateLabel",method = RequestMethod.POST)
     public String ajaxCreateLabel(String labelName,String parentLabelName) {
+
+        int insert = 0;
         if(parentLabelName.equalsIgnoreCase("null")){
-            parentLabelName = null;
+            insert = labelMapper.insert(new Label(labelName, 0, "label/selectByLabel?" + labelName));
+
+        }else if(parentLabelName !=null){
+            List<Label> labels = labelMapper.selectByLabelName(parentLabelName);
+            if(labels.size()==1){
+                Label parentLabel = labels.get(0);
+                insert = labelMapper.insert(new Label(labelName, parentLabel.getLabelid(),parentLabelName, 0,"label/selectByLabel?" + labelName));
+            }
         }
         HashMap map = new HashMap();
-        int insert = labelMapper.insert(new Label(labelName, parentLabelName,0, "label/selectByLabel?" + labelName));
-
         if(insert!=1){
             System.out.println("失败 -- 从数据库创建标签");
             map.put("isInsert", false);
@@ -196,13 +195,13 @@ public class LabelController {
     public String ajaxEditLabel(String srclabelName,String newLabelName) {
         HashMap map = new HashMap();
 
-        if(labelMapper.selectByPrimaryKey(newLabelName) != null){
+        if(labelMapper.selectByLabelName(newLabelName) != null){
             System.out.println("失败 -- 从数据库更新标签  已存在同名标签");
             map.put("isEdit", false);
             return new Gson().toJson(map);
         }
-        Label label = labelMapper.selectByPrimaryKey(srclabelName);
-        int delete = labelMapper.deleteByPrimaryKey(srclabelName);
+        Label label = labelMapper.selectByLabelName(srclabelName).get(0);
+        int delete = labelMapper.deleteByLabelName(srclabelName);
         label.setLabelName(newLabelName);
         int insert = labelMapper.insert(label);
         if(insert!=1 || delete!= 1){
