@@ -176,11 +176,11 @@
         $("[data-toggle='tooltip']").tooltip();
         // 删除照片标签
         $('body').on('click','.close',function(){
-            var deleteLabel = $(this).next().text();
+            var deleteLabelName = $(this).next().text();
             var picPath = $("#myImg").attr('src');
             $.post(
                 "http://localhost:8080/pic/label/ajaxDeletePicLabel",
-                "deleteLabel=" + deleteLabel+
+                "deleteLabelName=" + deleteLabelName+
                 "&picPath=" + picPath,
                 function (data) {
                     if (!data.isDelete) {

@@ -56,7 +56,8 @@
                             if($("#isAddLable").is(':checked')){
                                 var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
                                 var newLabel = node.text;
-                                addLabelAjax(picPath,newLabel);
+                                var newLabelId = node.id;
+                                addLabelAjax(picPath,newLabelId,newLabel);
                             }else {
                                 document.getElementById("iframepage").src="/pic/" + node.href;
                             }
@@ -66,10 +67,10 @@
                 });
             }
 
-            var addLabel = function (newlabelName){
+            var addLabel = function (newlabelId,newlabelName){
                 var html ='<div id="myAlert" class="alert alert-default" style="float:left;width:fit-content;">' +
                     '<span class="close" data-dismiss="alert">&times; </span>' +
-                    '<strong id = '+newlabelName+'>'
+                    '<strong id = '+newlabelId+'>'
                     + newlabelName + '</strong></div>';
                 // 获取子页面 并追加标签 样式
                 $("#iframepage").contents().find("#picTags").append(html);
@@ -92,7 +93,7 @@
                             return;
                         }else {
                             // alert(" 添加新标签 ");
-                            addLabel(newlabelName);
+                            addLabel(newlabelId,newlabelName);
                         }
                     },
                     "json"
