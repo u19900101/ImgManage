@@ -30,8 +30,7 @@
                         }
                         $('#updateName').val(node.text);
                         // 当操作 标签时 左边页面不栋
-
-                        if($("#statu").text() == "false"){
+                        if($("#tagHandleStatu").text() == "false"){
                             if($("#isAddLable").is(':checked')){
                                 var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
                                 var newlabelName = node.text;
@@ -45,23 +44,26 @@
                     },
                     // 当节点被选中时 再次点击 选中状态不消失 功能也如旧
                     onNodeUnselected:function(event, node){
+                        // 依然保持选中状态
+                        $('#left-tree').treeview('selectNode', [node, {silent: true}]);
+                        $('#updateName').val(node.text);
+                        if($("#tagHandleStatu").text() == "false"){
+                            // 当点击新的 node 时 则不执行 添加方法 不然 会出现重复操作
+                            if(node.text == selectNode.text){
+                                if($("#isAddLable").is(':checked')){
+                                    var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
+                                    var newLabel = node.text;
+                                    var newLabelId = node.id;
+                                    addLabelAjax(picPath,newLabelId,newLabel);
+                                }else {
+                                    document.getElementById("iframepage").src="/pic/" + node.href;
+                                }
+                            }
+                        }
                         // alert(selectNode.text +"--unselected中--"+ node.text);
                         // 记录 当选中之后 选择别的 节点之前的 节点状态
                         // 保留 上一次选中的节点
                         selectNode = node;
-                        // 依然保持选中状态
-                        $('#left-tree').treeview('selectNode', [node, {silent: true}]);
-                        $('#updateName').val(node.text);
-                        if($("#statu").text() == "false"){
-                            if($("#isAddLable").is(':checked')){
-                                var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
-                                var newLabel = node.text;
-                                var newLabelId = node.id;
-                                addLabelAjax(picPath,newLabelId,newLabel);
-                            }else {
-                                document.getElementById("iframepage").src="/pic/" + node.href;
-                            }
-                        }
                     },
                     showCheckbox:false//是否显示多选
                 });
@@ -89,7 +91,7 @@
                             return;
                         }
                         if(data.exist){
-                            showDialog(" 照片已 存在相同标签 不添加");
+                            showDialog(" 照片已 存在相同标签sssss 不添加");
                             return;
                         }else {
                             // alert(" 添加新标签 ");
@@ -235,7 +237,7 @@
                             <span data-placement="top" data-toggle="tooltip" title="<h5>点击管理标签</h5>" class="tooltip-show">
                                 <span id = "tag" @click = "showTagHandle()"   class="glyphicon glyphicon-tag"></span>
                             </span>
-                           <p id ="statu" hidden >{{tagHandleStatu}}</p>
+                           <p id ="tagHandleStatu" hidden >{{tagHandleStatu}}</p>
                            <span id="btnAdd" v-show = "tagHandleStatu"   class="glyphicon glyphicon-plus"></span>
                            <span id="btnDel" v-show = "tagHandleStatu"   class="glyphicon glyphicon-trash"></span>
                            <span id="btnEdit" v-show = "tagHandleStatu"  class="glyphicon glyphicon-edit"></span>

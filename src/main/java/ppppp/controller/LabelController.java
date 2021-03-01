@@ -147,7 +147,7 @@ public class LabelController {
     public String ajaxAddLabelToPic(String picPath,Integer newLabelId) {
 
         Picture picture = pictureMapper.selectByPrimaryKey(picPath);
-        String[] labelsId = picture.getPlabel().split(",");
+        String[] labelsId = picture.getPlabel().replace(","," ").trim().split(" ");
         HashMap map = new HashMap();
         // 判断原 照片是否已经存在 新增的标签
         if(Arrays.asList(labelsId).contains(newLabelId.toString())){
