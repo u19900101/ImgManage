@@ -33,4 +33,6 @@ public interface LabelMapper {
     List<Label> selectByLabelName(String labelName);
 
     List<Label> selectByParentName(String labelName);
+
+    List<Label> selectByParentId(Integer parentid);
 }

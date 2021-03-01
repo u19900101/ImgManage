@@ -15,7 +15,7 @@
                 //渲染树
                 $('#left-tree').treeview({
                     data: ${labelTree},
-                    levels:2,
+                    levels:4,
                     color: "#000000",
                     backColor: "#FFFFFF",
                     // enableLinks: true,

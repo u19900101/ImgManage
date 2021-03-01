@@ -391,12 +391,14 @@ public class PictureController {
         //不带后缀名显示
         String[] split = picture.getPname().split("\\.");
         picture.setPname(split[0]);
-        String[] labels = picture.getPlabel().replace(","," ").trim().split(" ");
-        String labelsListStr = "";
-        for (String label : labels) {
-            labelsListStr +=" " +labelMapper.selectByPrimaryKey(Integer.valueOf(label)).getLabelName();
+        if(picture.getPlabel()!=null && picture.getPlabel().length()>1){
+            String[] labels = picture.getPlabel().replace(","," ").trim().split(" ");
+            String labelsListStr = "";
+            for (String label : labels) {
+                labelsListStr +=" " +labelMapper.selectByPrimaryKey(Integer.valueOf(label)).getLabelName();
+            }
+            picture.setPlabel(labelsListStr);
         }
-        picture.setPlabel(labelsListStr);
         model.addAttribute("picture",picture);
         model.addAttribute("type","."+split[1]);
         return "forward:/pages/edit_picture.jsp";
