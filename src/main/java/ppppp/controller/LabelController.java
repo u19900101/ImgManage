@@ -156,7 +156,7 @@ public class LabelController {
         }
 
         // 2.更新 t_label 更新标签的徽记  本标签 以及 父标签
-        int updateLabel = addTagsById(picture.getPlabel(),newLabelId);
+        int updateLabel = addOrDeleteTagsById(picture.getPlabel(),newLabelId,1);
 
         // 1.更新 t_pic 表
         // 不存在标签 向数据库中插入该标签
@@ -176,7 +176,7 @@ public class LabelController {
         return new Gson().toJson(map);
     }
 
-    private int addTagsById(String plabel, Integer newLabelId) {
+    private int addOrDeleteTagsById(String plabel, Integer newLabelId,int num) {
         //1.若 原标签中已有 新增标签的子类 则 所有的 徽记数量不变
         //2.若 原标签中已有 新增标签的父类 则 徽记数量只更新到父类
         //3.若 无相关子父类 则 更新 新增标签的所有父类
@@ -197,7 +197,7 @@ public class LabelController {
 
         //  2.判断是否  包含父类
         // 查找所有的父标签  找到 最近一级的父标签后跳出
-        return updateTagsById(plabel, newLabelId, 1);
+        return updateTagsById(plabel, newLabelId, num);
 
     }
 
@@ -206,6 +206,10 @@ public class LabelController {
     private int updateTagsById(String plabel, Integer newid, int num) {
        Integer parentid = newid;
         // 查找所有的父标签  找到 最近一级的父标签后跳出
+        // 删除时 原标签中已存在删除的 标签则从原标签的父类开始查找
+        if(num == -1){
+            parentid = labelMapper.selectByPrimaryKey(newid).getParentid();
+        }
         while (parentid != null){
             if(plabel.indexOf(parentid.toString()) != -1){
                 break;
@@ -247,7 +251,7 @@ public class LabelController {
 
         // 更新 t_label 修改徽记
         // 若 标签同时包含父标签的id 则不进行级联更新
-        int updateTags = updateTagsById(picture.getPlabel(),label.getLabelid(),-1);
+        int updateTags = addOrDeleteTagsById(picture.getPlabel(),label.getLabelid(),-1);
         String replace = picture.getPlabel().replace(label.getLabelid() + ",", "");
         if(replace.length()==1){
             replace = "";
