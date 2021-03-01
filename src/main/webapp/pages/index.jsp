@@ -107,6 +107,7 @@
 
             };
 
+
             var updateTags  = function(changeLabels,num){
                 isUpdateStatu = true;
                 for (var i = 0; i < changeLabels.length; i++) {
