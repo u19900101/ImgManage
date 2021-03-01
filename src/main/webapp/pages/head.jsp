@@ -51,7 +51,7 @@
 
 
 <%--图标--%>
-<link rel="stylesheet" href="http://static.runoob.com/assets/foundation-icons/foundation-icons.css">
+<%--<link rel="stylesheet" href="http://static.runoob.com/assets/foundation-icons/foundation-icons.css">--%>
 
 <%--<script src='https://unpkg.com/vue/dist/vue.js'></script>--%>
 <%--<script src='https://unpkg.com/v-calendar'></script>--%>

@@ -1,7 +1,6 @@
 package ppppp.controller;
 
 import com.google.gson.Gson;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import ppppp.bean.*;
 import ppppp.dao.LabelMapper;
 import ppppp.dao.PictureMapper;
-import ppppp.util.MyUtils;
 
 
 import javax.servlet.http.HttpServletRequest;
@@ -141,10 +139,9 @@ public class LabelController {
         return list;
     }
 
-
     @ResponseBody
     @RequestMapping(value = "/ajaxAddLabelToPic",method = RequestMethod.POST)
-    public String ajaxAddLabelToPic(String picPath,Integer newLabelId) {
+    public String ajaxAddLabelToPic(String picPath,Integer newLabelId,String newlabelName) {
 
         Picture picture = pictureMapper.selectByPrimaryKey(picPath);
         String[] labelsId = picture.getPlabel().replace(","," ").trim().split(" ");
@@ -156,27 +153,28 @@ public class LabelController {
         }
 
         // 2.更新 t_label 更新标签的徽记  本标签 以及 父标签
-        int updateLabel = addOrDeleteTagsById(picture.getPlabel(),newLabelId,1);
+        ArrayList<String> changeLabels = new ArrayList<>();
+        int addOrDeleteTagsById = addOrDeleteTagsById(picture.getPlabel(), newLabelId, 1, changeLabels);
 
         // 1.更新 t_pic 表
         // 不存在标签 向数据库中插入该标签
         picture.setPlabel(picture.getPlabel().length()==0?","+newLabelId+",":picture.getPlabel()+newLabelId+",");
         int updatePic = pictureMapper.updateByPrimaryKeySelective(picture);
-
-
-        if(updatePic!=1 || updateLabel !=1){
-            System.out.println("插入标签到数据库失败");
-            map.put("exist", "failed");
+        if(updatePic!=1 || addOrDeleteTagsById !=1){
+            System.out.println("失败 给照片添加标签");
+            map.put("failed", true);
         }else {
             System.out.println("插入 更新 标签 "+ newLabelId +" 到数据库成功");
-            map.put("exist", false);
-            map.put("success", true);
+            map.put("succeed", true);
+            map.put("newLabelId", newLabelId);
+            map.put("newlabelName", newlabelName);
+            map.put("changeLabels", changeLabels);
         }
 
         return new Gson().toJson(map);
     }
 
-    private int addOrDeleteTagsById(String plabel, Integer newLabelId,int num) {
+    private int addOrDeleteTagsById(String plabel, Integer newLabelId, int num,ArrayList<String> changeLabels) {
         //1.若 原标签中已有 新增标签的子类 则 所有的 徽记数量不变
         //2.若 原标签中已有 新增标签的父类 则 徽记数量只更新到父类
         //3.若 无相关子父类 则 更新 新增标签的所有父类
@@ -194,16 +192,14 @@ public class LabelController {
                 }
             }
         }
-
         //  2.判断是否  包含父类
         // 查找所有的父标签  找到 最近一级的父标签后跳出
-        return updateTagsById(plabel, newLabelId, num);
-
+        return updateTagsById(plabel, newLabelId, num,changeLabels);
     }
 
     // 更新到 父标签包含 同样标签的下一级为止
     // 检查新增的标签 与 已经存在的标签是否有 子父类关系 有的话 只更新到 父类的下一级标签
-    private int updateTagsById(String plabel, Integer newid, int num) {
+    private int updateTagsById(String plabel, Integer newid, int num,ArrayList<String> changeLabels) {
        Integer parentid = newid;
         // 查找所有的父标签  找到 最近一级的父标签后跳出
         // 删除时 原标签中已存在删除的 标签则从原标签的父类开始查找
@@ -218,10 +214,10 @@ public class LabelController {
             parentid = label.getParentid();
             // 标签组 中包含子标签
         }
-        return updateTagsById(newid,parentid,num);
+        return updateTagsById(newid,parentid,num,changeLabels);
     }
 
-    public int updateTagsById(Integer newLabelId,Integer parentId,int num) {
+    public int updateTagsById(Integer newLabelId,Integer parentId,int num,ArrayList<String> changeLabels) {
         int update =-1;
         // parentid 为null 时 表示 不包含父类 更新 newid 所有的  父类
         Integer t_parentId = newLabelId;
@@ -230,11 +226,10 @@ public class LabelController {
             label.setTags(label.getTags()+num);
             update = labelMapper.updateByPrimaryKey(label);
             t_parentId = label.getParentid();
+            changeLabels.add(label.getLabelName());
         }
         return update;
     }
-
-
 
     //删除照片的标签  同时修改徽记数量
     @ResponseBody
@@ -251,7 +246,8 @@ public class LabelController {
 
         // 更新 t_label 修改徽记
         // 若 标签同时包含父标签的id 则不进行级联更新
-        int updateTags = addOrDeleteTagsById(picture.getPlabel(),label.getLabelid(),-1);
+        ArrayList<String> changeLabels = new ArrayList<>();
+        int updateTags = addOrDeleteTagsById(picture.getPlabel(),label.getLabelid(),-1,changeLabels);
         String replace = picture.getPlabel().replace(label.getLabelid() + ",", "");
         if(replace.length()==1){
             replace = "";
@@ -268,6 +264,7 @@ public class LabelController {
         }else {
             System.out.println("成功 -- 删除照片标签");
             map.put("isDelete", true);
+            map.put("changeLabels", changeLabels);
         }
         return new Gson().toJson(map);
     }

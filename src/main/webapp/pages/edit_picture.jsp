@@ -185,7 +185,9 @@
                 function (data) {
                     if (!data.isDelete) {
                         alert("失败 -- 从数据库删除标签")
-                    };
+                    }else {
+                        updateTags(data.changeLabels,-1);
+                    }
                 },
                 "json"
             );

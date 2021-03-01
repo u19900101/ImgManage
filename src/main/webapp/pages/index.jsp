@@ -5,10 +5,9 @@
 <head>
     <script type="text/javascript">
         $(function(){
-
-
-            //全局变量
-            var selectNode = {text :"",state:{selected:true}};
+            //全局变量  用于记录二次点击
+            var lastSelectNode = {text :"",state:{selected:true}};
+            var isUpdateStatu = false;
             onLoad();
             //页面加载
             function onLoad() {
@@ -24,9 +23,10 @@
                     nodeIcon: "glyphicon glyphicon-bookmark",
                     showTags: true,
                     onNodeSelected:function(event, node){
-                        if(selectNode.text != node.text) {
+                        // alert("selected中： lastSelectNode——"+lastSelectNode.text +" ***  node——"+ node.text);
+                        if(lastSelectNode.text != node.text) {
                             // 选中已经发生改变时  将上一次选中的节点改为 未选中状态
-                            $('#left-tree').treeview('unselectNode', [selectNode, {silent: true}]);
+                            $('#left-tree').treeview('unlastSelectNode', [lastSelectNode, {silent: true}]);
                         }
                         $('#updateName').val(node.text);
                         // 当操作 标签时 左边页面不栋
@@ -41,42 +41,43 @@
                                 document.getElementById("iframepage").src="/pic/" + node.href;
                             }
                         }
+                        // 保留选中的状态
+                        lastSelectNode = node;
                     },
                     // 当节点被选中时 再次点击 选中状态不消失 功能也如旧
                     onNodeUnselected:function(event, node){
+                        // 出于更新状态时 不执行
+                        // alert("isUpdateStatu: "+isUpdateStatu);
+                        if(isUpdateStatu){
+                            lastSelectNode = node;
+                            return
+                        }
                         // 依然保持选中状态
-                        $('#left-tree').treeview('selectNode', [node, {silent: true}]);
+                        // alert("Unselected中： lastSelectNode——"+lastSelectNode.text +" ***  node——"+ node.text);
+                        $('#left-tree').treeview('lastSelectNode', [node, {silent: true}]);
                         $('#updateName').val(node.text);
                         if($("#tagHandleStatu").text() == "false"){
                             // 当点击新的 node 时 则不执行 添加方法 不然 会出现重复操作
-                            if(node.text == selectNode.text){
-                                if($("#isAddLable").is(':checked')){
-                                    var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
-                                    var newLabel = node.text;
-                                    var newLabelId = node.id;
-                                    addLabelAjax(picPath,newLabelId,newLabel);
-                                }else {
-                                    document.getElementById("iframepage").src="/pic/" + node.href;
+
+                                if(node.text == lastSelectNode.text){
+                                    if($("#isAddLable").is(':checked')){
+                                        var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
+                                        var newLabel = node.text;
+                                        var newLabelId = node.id;
+                                        //
+                                        addLabelAjax(picPath,newLabelId,newLabel);
+                                    }else {
+                                        document.getElementById("iframepage").src="/pic/" + node.href;
+                                    }
                                 }
                             }
-                        }
-                        // alert(selectNode.text +"--unselected中--"+ node.text);
                         // 记录 当选中之后 选择别的 节点之前的 节点状态
                         // 保留 上一次选中的节点
-                        selectNode = node;
+                        lastSelectNode = node;
                     },
                     showCheckbox:false//是否显示多选
                 });
             }
-
-            var addLabel = function (newlabelId,newlabelName){
-                var html ='<div id="myAlert" class="alert alert-default" style="float:left;width:fit-content;">' +
-                    '<span class="close" data-dismiss="alert">&times; </span>' +
-                    '<strong id = '+newlabelId+'>'
-                    + newlabelName + '</strong></div>';
-                // 获取子页面 并追加标签 样式
-                $("#iframepage").contents().find("#picTags").append(html);
-            };
 
             // 在数据库中查询 照片是否已经存在了 请求添加的标签
             var addLabelAjax = function (picPath,newLabelId,newlabelName){
@@ -84,27 +85,47 @@
                 // alert(picPath+"---"+newlabel);
                 $.post(
                     "http://localhost:8080/pic/label/ajaxAddLabelToPic",
-                    "picPath="+picPath+"&newLabelId="+newLabelId,
+                    "picPath="+picPath+"&newLabelId="+newLabelId+"&newlabelName="+newlabelName,
                     function(data) {
-                        if(data.exist == "failed"){
-                            showDialog(" 插入标签到数据库失败");
-                            return;
-                        }
                         if(data.exist){
-                            showDialog(" 照片已 存在相同标签sssss 不添加");
+                            showDialog(" 照片已 存在相同标签不添加");
                             return;
-                        }else {
-                            // alert(" 添加新标签 ");
-                            addLabel(newlabelId,newlabelName);
-                        }
+                        }else if(data.failed){
+                            showDialog(" 失败 给照片添加标签");
+                            return;
+                        }else if(data.succeed)
+                        {
+                            // 在 右侧页面 添加标签图标
+                            addLabel(data.newLabelId,data.newlabelName);
+                            // 在 左侧导航栏 进行Tags的更新
+                            updateTags(data.changeLabels,1);
+                            return;
+                        };
                     },
                     "json"
                 );
 
             };
 
-
-
+            var updateTags  = function(changeLabels,num){
+                isUpdateStatu = true;
+                for (var i = 0; i < changeLabels.length; i++) {
+                    // alert(changeLabels[i]);
+                    var resNodes = $('#left-tree').treeview('search', [ changeLabels[i], {
+                        ignoreCase: true,
+                        exactMatch: true,
+                        revealResults: false,
+                    }]);
+                    // 更新涉及到的所有徽记
+                    if(resNodes.length>0){
+                        var newNode = resNodes[0];
+                        newNode.tags = [(parseInt(newNode.tags)+num).toString()];
+                        // alert(i + "newNode.tags: "+newNode.tags);
+                        $('#left-tree').treeview('updateNode', [ resNodes[0], newNode ]);
+                    }
+                }
+                isUpdateStatu = false;
+            };
             //显示-添加
             $("#btnAdd").click(function(){
                 $('#addName').val('');
@@ -169,8 +190,18 @@
                 var centerHight = height - 240;
                 $(".right_centent").height(centerHight).css("overflow", "auto");
             }
+
         });
 
+        function addLabel(newlabelId,newlabelName){
+            // alert("kkk");
+            var html ='<div id="myAlert" class="alert alert-default" style="float:left;width:fit-content;">' +
+                '<span class="close" data-dismiss="alert">&times; </span>' +
+                '<strong id = '+newlabelId+'>'
+                + newlabelName + '</strong></div>';
+            // 获取子页面 并追加标签 样式
+            $("#iframepage").contents().find("#picTags").append(html);
+        };
         function showDialog( msg ) {
             BootstrapDialog.show({
                 title: '提示',
@@ -185,12 +216,11 @@
                 } ]
             });
         };
-
-
     </script>
 </head>
 <body >
 <div id = "app">
+
 <header class="container-fluid" >
    <div class="row">
        <div class="col-md-3" style="border: 1px solid greenyellow">
@@ -253,8 +283,6 @@
                <iframe src="picture/before_edit_picture?path=img/2021/01/花发.jpg" name='main' id="iframepage" frameborder="0" width="100%" height="100%" scrolling="no" marginheight="0" marginwidth="0" ></iframe>
        </div> 
    </div>
-
-
 
 </header>
 <div class="container-fluid" style="padding-left: 0px">
