@@ -53,8 +53,6 @@
     </style>
 </head>
 <body>
-
-
 <div class="container"  id="app" style="padding-left: 0px; padding-right: 0px;">
     <div class="row">
         <%--照片名称--%>
@@ -167,13 +165,15 @@
     </div>
     </div>
 </div>
-
+<%--保存要传递的值到 主页面--%>
+<input type="hidden" id = "changeLabels" >
 </body>
 
 <%-- v-calender 控件--%>
 <script>
     $(function () {
         $("[data-toggle='tooltip']").tooltip();
+
         // 删除照片标签
         $('body').on('click','.close',function(){
             var deleteLabelName = $(this).next().text();
@@ -186,12 +186,13 @@
                     if (!data.isDelete) {
                         alert("失败 -- 从数据库删除标签")
                     }else {
-                        updateTags(data.changeLabels,-1);
+                        // 操作主页面的徽记
+                        $("#changeLabels").val(data.changeLabels);
+                        parent.$(window.parent.document).find('#updateTags').click();
                     }
                 },
                 "json"
             );
-
         });
         if('${picture.plabel}'.length>0){
             var labelList = '${picture.plabel}'.split(" ");

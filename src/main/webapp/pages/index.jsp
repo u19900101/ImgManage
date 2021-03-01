@@ -5,6 +5,8 @@
 <head>
     <script type="text/javascript">
         $(function(){
+
+
             //全局变量  用于记录二次点击
             var lastSelectNode = {text :"",state:{selected:true}};
             var isUpdateStatu = false;
@@ -26,7 +28,7 @@
                         // alert("selected中： lastSelectNode——"+lastSelectNode.text +" ***  node——"+ node.text);
                         if(lastSelectNode.text != node.text) {
                             // 选中已经发生改变时  将上一次选中的节点改为 未选中状态
-                            $('#left-tree').treeview('unlastSelectNode', [lastSelectNode, {silent: true}]);
+                            $('#left-tree').treeview('unselectNode', [lastSelectNode, {silent: true}]);
                         }
                         $('#updateName').val(node.text);
                         // 当操作 标签时 左边页面不栋
@@ -77,8 +79,7 @@
                     },
                     showCheckbox:false//是否显示多选
                 });
-            }
-
+            };
             // 在数据库中查询 照片是否已经存在了 请求添加的标签
             var addLabelAjax = function (picPath,newLabelId,newlabelName){
                 // 将信息写进数据库中
@@ -89,17 +90,14 @@
                     function(data) {
                         if(data.exist){
                             showDialog(" 照片已 存在相同标签不添加");
-                            return;
                         }else if(data.failed){
                             showDialog(" 失败 给照片添加标签");
-                            return;
                         }else if(data.succeed)
                         {
                             // 在 右侧页面 添加标签图标
                             addLabel(data.newLabelId,data.newlabelName);
                             // 在 左侧导航栏 进行Tags的更新
                             updateTags(data.changeLabels,1);
-                            return;
                         };
                     },
                     "json"
@@ -107,6 +105,11 @@
 
             };
 
+            $("#updateTags").on('click',function () {
+                var changeLabels = $("#iframepage").contents().find("#changeLabels").val();
+                var list = changeLabels.split(",");
+                updateTags(list,-1);
+            });
 
             var updateTags  = function(changeLabels,num){
                 isUpdateStatu = true;
@@ -217,6 +220,7 @@
                 } ]
             });
         };
+
     </script>
 </head>
 <body >
@@ -351,11 +355,14 @@
     <!--弹出框 新增权限 end-->
 </div>
 </div>
+<input type="hidden" id="updateTags">
 </body>
 <script>
     $(function () {
-        $("[data-toggle='tooltip']").tooltip({html : true,container: 'body'});
 
+
+
+        $("[data-toggle='tooltip']").tooltip({html : true,container: 'body'});
     });
     function createLabel(node,parentNode){
         var labelName = node.text;
