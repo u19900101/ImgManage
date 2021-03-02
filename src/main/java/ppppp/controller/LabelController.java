@@ -155,7 +155,6 @@ public class LabelController {
                 return new Gson().toJson(map);
             }
             addOrDeleteTagsById = addOrDeleteTagsById(picture.getPlabel(), newLabelId, 1, changeLabels);
-            picture.setPlabel(picture.getPlabel().length()==0?","+newLabelId+",":picture.getPlabel()+newLabelId+",");
         }else {
             addOrDeleteTagsById = updateTagsById(newLabelId,null,1,changeLabels);
         }

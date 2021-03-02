@@ -8,7 +8,6 @@
             //全局变量  用于记录二次点击
             var lastSelectNode = {text :"",state:{selected:true}};
             var isUpdateStatu = false;
-            var selectStatu = "";
             onLoad();
             //页面加载
             function onLoad() {
@@ -23,14 +22,12 @@
                     collapseIcon: "glyphicon glyphicon-chevron-down",
                     nodeIcon: "glyphicon glyphicon-bookmark",
                     showTags: true,
+                    //
+                    allowReselect:true,
+                    preventUnselect:true,
                     onNodeSelected:function(event, node){
-
                         // alert("点击： lastSelectNode——"+lastSelectNode.text +" ***  node——"+ node.text);
                         // alert("进入选中： selectStatu——"+selectStatu);
-                        if(lastSelectNode.text != node.text) {
-                            // 选中已经发生改变时  将上一次选中的节点改为 未选中状态
-                            $('#left-tree').treeview('unselectNode', [lastSelectNode, {silent: true}]);
-                        }
                         $('#updateName').val(node.text);
                         // 当操作 标签时 左边页面不栋
                         if($("#tagHandleStatu").text() == "false"){
@@ -45,24 +42,6 @@
                             }
                         }
                     },
-                    // 当节点被选中时 再次点击 选中状态不消失
-                    onNodeUnselected:function(event, node){
-                        $('#left-tree').treeview('selectNode', [node, {silent: true}]);
-                        $('#updateName').val(node.text);
-
-                        if($("#tagHandleStatu").text() == "false"){
-                            if($("#isAddLable").is(':checked')){
-                                var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
-                                var newLabel = node.text;
-                                var newLabelId = node.id;
-                                addLabelAjax(picPath,newLabelId,newLabel);
-                            }else {
-                                document.getElementById("iframepage").src="/pic/" + node.href;
-                            }
-                        }
-                        // 记录 当选中之后 选择别的 节点之前的 节点状态
-                        lastSelectNode = node;
-                    },
                     showCheckbox:false//是否显示多选
                 });
             };
@@ -75,7 +54,7 @@
                     "picPath="+picPath+"&newLabelId="+newLabelId+"&newlabelName="+newlabelName,
                     function(data) {
                         if(data.exist){
-                            // showDialog(" 照片已 存在相同标签不添加");
+                            showDialog(" 照片已 存在相同标签不添加");
                         }else if(data.failed){
                             showDialog(" 失败 给照片添加标签");
                         }else if(data.succeed)
