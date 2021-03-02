@@ -38,7 +38,10 @@
                                 var newLabelId = node.id;
                                 // alert(picPath+"---"+newLabelId+"---"+newlabelName);
                                 // alert(JSON.stringify(node));
-                                addLabelAjax(picPath,newLabelId,newlabelName);
+                                // alert(picPath);
+                                if(picPath != undefined){
+                                    addLabelAjax(picPath,newLabelId,newlabelName);
+                                }
                             }else {
                                 // 点击后  访问后台的路径  后台处理完数据后直接渲染 到指定的页面去
                                 document.getElementById("iframepage").src="/pic/" + node.href;
@@ -374,7 +377,7 @@
     function editLabel(node,newNode){
         $.post(
             "http://localhost:8080/pic/label/ajaxEditLabel",
-            "srclabelName="+node[0].text+"&newLabelName="+newNode.text,
+            "srclabelId="+node[0].id+"&newLabelName="+newNode.text,
             function(data) {
                 if(!data.isEdit){
                     showDialog(" 失败——修改标签到数据库");

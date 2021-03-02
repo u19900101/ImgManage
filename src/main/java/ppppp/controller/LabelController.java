@@ -375,15 +375,15 @@ public class LabelController {
 
     @ResponseBody
     @RequestMapping(value = "/ajaxEditLabel",method = RequestMethod.POST)
-    public String ajaxEditLabel(String srclabelName,String newLabelName) {
+    public String ajaxEditLabel(Integer srclabelId,String newLabelName) {
         HashMap map = new HashMap();
 
         if(labelMapper.selectByLabelName(newLabelName).size() >0){
-            System.out.println("失败 -- 从数据库更新标签  已存在同名标签");
+            System.out.println("未修改 -- 已存在同名标签");
             map.put("isEdit", false);
             return new Gson().toJson(map);
         }
-        Label label = labelMapper.selectByLabelName(srclabelName).get(0);
+        Label label = labelMapper.selectByPrimaryKey(srclabelId);
         label.setLabelName(newLabelName);
         int update = labelMapper.updateByPrimaryKey(label);
 
@@ -396,8 +396,4 @@ public class LabelController {
         }
         return new Gson().toJson(map);
     }
-
-
-
-
 }
