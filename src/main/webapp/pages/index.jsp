@@ -5,11 +5,10 @@
 <head>
     <script type="text/javascript">
         $(function(){
-
-
             //全局变量  用于记录二次点击
             var lastSelectNode = {text :"",state:{selected:true}};
             var isUpdateStatu = false;
+            var selectStatu = "";
             onLoad();
             //页面加载
             function onLoad() {
@@ -25,7 +24,8 @@
                     nodeIcon: "glyphicon glyphicon-bookmark",
                     showTags: true,
                     onNodeSelected:function(event, node){
-                        // alert("selected中： lastSelectNode——"+lastSelectNode.text +" ***  node——"+ node.text);
+                        // alert("点击： lastSelectNode——"+lastSelectNode.text +" ***  node——"+ node.text);
+                        // alert("进入选中： selectStatu——"+selectStatu);
                         if(lastSelectNode.text != node.text) {
                             // 选中已经发生改变时  将上一次选中的节点改为 未选中状态
                             $('#left-tree').treeview('unselectNode', [lastSelectNode, {silent: true}]);
@@ -45,36 +45,12 @@
                         }
                         // 保留选中的状态
                         lastSelectNode = node;
+                        // 保留操作的状态 便于取消选中时是否执行方法的判断
+                        selectStatu = "selected";
                     },
-                    // 当节点被选中时 再次点击 选中状态不消失 功能也如旧
+                    // 当节点被选中时 再次点击 选中状态不消失
                     onNodeUnselected:function(event, node){
-                        // 出于更新状态时 不执行
-                        // alert("isUpdateStatu: "+isUpdateStatu);
-                        if(isUpdateStatu){
-                            lastSelectNode = node;
-                            return
-                        }
-                        // 依然保持选中状态
-                        // alert("Unselected中： lastSelectNode——"+lastSelectNode.text +" ***  node——"+ node.text);
-                        $('#left-tree').treeview('lastSelectNode', [node, {silent: true}]);
-                        $('#updateName').val(node.text);
-                        if($("#tagHandleStatu").text() == "false"){
-                            // 当点击新的 node 时 则不执行 添加方法 不然 会出现重复操作
-
-                                if(node.text == lastSelectNode.text){
-                                    if($("#isAddLable").is(':checked')){
-                                        var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
-                                        var newLabel = node.text;
-                                        var newLabelId = node.id;
-                                        //
-                                        addLabelAjax(picPath,newLabelId,newLabel);
-                                    }else {
-                                        document.getElementById("iframepage").src="/pic/" + node.href;
-                                    }
-                                }
-                            }
-                        // 记录 当选中之后 选择别的 节点之前的 节点状态
-                        // 保留 上一次选中的节点
+                        $('#left-tree').treeview('selectNode', [node, {silent: true}]);
                         lastSelectNode = node;
                     },
                     showCheckbox:false//是否显示多选
@@ -105,6 +81,7 @@
 
             };
 
+            // 由于删除标签时 的Tags更新
             $("#updateTags").on('click',function () {
                 var changeLabels = $("#iframepage").contents().find("#changeLabels").val();
                 var list = changeLabels.split(",");
@@ -237,7 +214,7 @@
 
                <%--给照片添加标签--%>
                <div class="col-md-1" >
-                   <input type="checkbox"  style="float: left" id="isAddLable" data-placement="right" data-toggle="tooltip" title="<h5>给照片添加标签</h5>" class="tooltip-show">
+                   <input type="checkbox"  checked = "checked" style="float: left" id="isAddLable" data-placement="right" data-toggle="tooltip" title="<h5>给照片添加标签</h5>" class="tooltip-show">
                    <button id = "clickAddLabel">
                      <span data-placement="right" data-toggle="tooltip" title="<h5>给照片添加标签</h5>" class="tooltip-show">
                         <span class="glyphicon glyphicon-tags" style="font-size: large"></span>
@@ -359,9 +336,6 @@
 </body>
 <script>
     $(function () {
-
-
-
         $("[data-toggle='tooltip']").tooltip({html : true,container: 'body'});
     });
     function createLabel(node,parentNode){
