@@ -139,26 +139,34 @@ public class LabelController {
         return list;
     }
 
+
     @ResponseBody
     @RequestMapping(value = "/ajaxAddLabelToPic",method = RequestMethod.POST)
     public String ajaxAddLabelToPic(String picPath,Integer newLabelId,String newlabelName) {
-
-        Picture picture = pictureMapper.selectByPrimaryKey(picPath);
-        String[] labelsId = picture.getPlabel().replace(","," ").trim().split(" ");
         HashMap map = new HashMap();
-        // 判断原 照片是否已经存在 新增的标签
-        if(Arrays.asList(labelsId).contains(newLabelId.toString())){
-            map.put("exist", true);
-            return new Gson().toJson(map);
+        ArrayList<String> changeLabels = new ArrayList<>();
+        int addOrDeleteTagsById = 0;
+        Picture picture = pictureMapper.selectByPrimaryKey(picPath);
+        if(picture.getPlabel()!=null && picture.getPlabel().length()>0){
+            String[] labelsId = picture.getPlabel().replace(","," ").trim().split(" ");
+            // 判断原 照片是否已经存在 新增的标签
+            if(Arrays.asList(labelsId).contains(newLabelId.toString())){
+                map.put("exist", true);
+                return new Gson().toJson(map);
+            }
+            addOrDeleteTagsById = addOrDeleteTagsById(picture.getPlabel(), newLabelId, 1, changeLabels);
+            picture.setPlabel(picture.getPlabel().length()==0?","+newLabelId+",":picture.getPlabel()+newLabelId+",");
+        }else {
+            addOrDeleteTagsById = updateTagsById(newLabelId,null,1,changeLabels);
         }
 
         // 2.更新 t_label 更新标签的徽记  本标签 以及 父标签
-        ArrayList<String> changeLabels = new ArrayList<>();
-        int addOrDeleteTagsById = addOrDeleteTagsById(picture.getPlabel(), newLabelId, 1, changeLabels);
+        picture.setPlabel(picture.getPlabel() == null || picture.getPlabel().length()==0?","+newLabelId+",":picture.getPlabel()+newLabelId+",");
+
 
         // 1.更新 t_pic 表
         // 不存在标签 向数据库中插入该标签
-        picture.setPlabel(picture.getPlabel().length()==0?","+newLabelId+",":picture.getPlabel()+newLabelId+",");
+
         int updatePic = pictureMapper.updateByPrimaryKeySelective(picture);
         if(updatePic!=1 || addOrDeleteTagsById !=1){
             System.out.println("失败 给照片添加标签");
@@ -178,6 +186,7 @@ public class LabelController {
         //1.若 原标签中已有 新增标签的子类 则 所有的 徽记数量不变
         //2.若 原标签中已有 新增标签的父类 则 徽记数量只更新到父类
         //3.若 无相关子父类 则 更新 新增标签的所有父类
+
         String[] split = plabel.replace(",", " ").trim().split(" ");
         //  1.判断是否  包含子类
         //  得到所有子类

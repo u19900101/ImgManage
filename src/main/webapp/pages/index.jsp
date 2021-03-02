@@ -24,6 +24,7 @@
                     nodeIcon: "glyphicon glyphicon-bookmark",
                     showTags: true,
                     onNodeSelected:function(event, node){
+
                         // alert("点击： lastSelectNode——"+lastSelectNode.text +" ***  node——"+ node.text);
                         // alert("进入选中： selectStatu——"+selectStatu);
                         if(lastSelectNode.text != node.text) {
@@ -43,14 +44,23 @@
                                 document.getElementById("iframepage").src="/pic/" + node.href;
                             }
                         }
-                        // 保留选中的状态
-                        lastSelectNode = node;
-                        // 保留操作的状态 便于取消选中时是否执行方法的判断
-                        selectStatu = "selected";
                     },
                     // 当节点被选中时 再次点击 选中状态不消失
                     onNodeUnselected:function(event, node){
                         $('#left-tree').treeview('selectNode', [node, {silent: true}]);
+                        $('#updateName').val(node.text);
+
+                        if($("#tagHandleStatu").text() == "false"){
+                            if($("#isAddLable").is(':checked')){
+                                var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
+                                var newLabel = node.text;
+                                var newLabelId = node.id;
+                                addLabelAjax(picPath,newLabelId,newLabel);
+                            }else {
+                                document.getElementById("iframepage").src="/pic/" + node.href;
+                            }
+                        }
+                        // 记录 当选中之后 选择别的 节点之前的 节点状态
                         lastSelectNode = node;
                     },
                     showCheckbox:false//是否显示多选
@@ -65,7 +75,7 @@
                     "picPath="+picPath+"&newLabelId="+newLabelId+"&newlabelName="+newlabelName,
                     function(data) {
                         if(data.exist){
-                            showDialog(" 照片已 存在相同标签不添加");
+                            // showDialog(" 照片已 存在相同标签不添加");
                         }else if(data.failed){
                             showDialog(" 失败 给照片添加标签");
                         }else if(data.succeed)
