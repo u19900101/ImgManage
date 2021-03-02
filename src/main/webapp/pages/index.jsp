@@ -50,6 +50,17 @@
                     },
                     showCheckbox:false//是否显示多选
                 });
+               // 添加 recentLabelBar
+                <c:forEach items="${recent3AndMax7Label}" var="bar" >
+                    <%--alert('${bar.labelName}');--%>
+                    var newlabelId = '${bar.labelid}';
+                    var newlabelName = '${bar.labelName}';
+                    var html ='<div id='+newlabelId+' draggable="true" ondragstart="drag(event,id)" class="alert alert-default" style="float:left;width:fit-content;">' +
+                        '<span class="close" data-dismiss="alert">&times; </span>' +
+                        '<strong id = '+newlabelId+'>'
+                        + newlabelName + '</strong></div>';
+                    $("#recentLabelBar").append(html);
+                </c:forEach>
             };
             // 在数据库中查询 照片是否已经存在了 请求添加的标签
             var addLabelAjax = function (picPath,newLabelId,newlabelName){
@@ -81,7 +92,6 @@
                 var list = changeLabels.split(",");
                 updateTags(list,-1);
             });
-
             var updateTags  = function(changeLabels,num){
                 isUpdateStatu = true;
                 for (var i = 0; i < changeLabels.length; i++) {
@@ -106,7 +116,6 @@
                 $('#addName').val('');
                 $('#addOperation-dialog').modal('show');
             });
-
             $("#btnEdit").click(function(){
                 var node=$('#left-tree').treeview('getSelected');
                 if (node.length == 0) {
@@ -154,7 +163,6 @@
                     $("input[type='checkbox']").prop("checked",true);
                 }
             });
-
             /*-----页面pannel内容区高度自适应 -----*/
             $(window).resize(function () {
                 setCenterHeight();
@@ -193,6 +201,30 @@
         };
 
     </script>
+
+    <%-- 拖拽框 --%>
+    <script>
+        function allowDrop(ev)
+        {
+            ev.preventDefault();
+        }
+
+        function drag(ev,id)
+        {
+            // ev.dataTransfer.setData("Text",ev.target.id);
+            ev.dataTransfer.setData("label",id);
+        }
+
+        function drop(ev)
+        {
+            ev.preventDefault();
+            // var data=ev.dataTransfer.getData("Text");
+            var label=ev.dataTransfer.getData("label");
+            // ev.target.appendChild(document.getElementById(data));
+            $("#picArea").append(label);
+        }
+    </script>
+
 </head>
 <body >
 <div id = "app">
@@ -255,8 +287,18 @@
                </div>
            </div>
        </div>
-       <div class="col-md-9 pull-right" style="border: 1px solid red;padding-left: 0px;padding-right: 0px">
-               <iframe src="picture/page" name='main' id="iframepage" frameborder="0" width="100%" height="100%" scrolling="no" marginheight="0" marginwidth="0" ></iframe>
+       <div class="col-md-9 pull-right" >
+           <div id = "recentLabelBar" class="row" style="border: 1px solid red;padding-left: 0px;padding-right: 0px">
+
+           </div>
+           <div id = "picArea" class="row"  style="border: 1px solid red;padding-left: 0px;padding-right: 0px"
+                ondragover="allowDrop(event)"
+                ondrop="drop(event)" >
+                    <span>拖到此处</span>
+           </div>
+           <div class="row" style="border: 1px solid red;padding-left: 0px;padding-right: 0px">
+       <%--         <iframe src="picture/page" name='main' id="iframepage" frameborder="0" width="100%" height="100%" scrolling="no" marginheight="0" marginwidth="0" ></iframe>--%>
+           </div>
        </div> 
    </div>
 

@@ -134,10 +134,10 @@
 </div>
 
 <div id = "labels" >
-    <span draggable="true"
+    <div draggable="true"
           ondragstart="drag(event,id)"
-          id = "person" style="border: 2px solid #ffe57d;background: lightgreen;font-size: larger;font-weight: bolder">
-    人物</span>
+          id = "person" style="width:fit-content;border: 2px solid #ffe57d;background: lightgreen;font-size: larger;font-weight: bolder">
+    人物</div>
     <span draggable="true"
           ondragstart="drag(event,id)"
           id = "flower" style="color:red;border: 2px solid #ffe57d;background: lightgreen;font-size: larger;font-weight: bolder">

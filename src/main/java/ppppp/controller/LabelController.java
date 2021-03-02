@@ -103,6 +103,17 @@ public class LabelController {
         // 获取所有以及节点
         List<Label> firstLevelLabels= labelMapper.selectByExample(labelExample);
 
+
+        List<Label>  Max7Label = labelMapper.selectMaxNTags(7);
+        if(labelMapper.getCount() > 7){
+            List<Label> recentN3IdLabel = labelMapper.selectRecentNId(3);
+            for (Label label : recentN3IdLabel) {
+                if(!Max7Label.contains(label)){
+                    Max7Label.add(label);
+                }
+            }
+        }
+        model.addAttribute("recent3AndMax7Label", Max7Label);
         ArrayList list = getChildLabel(firstLevelLabels);
         String json = new Gson().toJson(list);
         model.addAttribute("labelTree", json);

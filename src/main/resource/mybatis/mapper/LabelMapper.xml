@@ -112,6 +112,29 @@
   </select>
 
 
+  <select id="selectMaxNTags" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from t_label
+    ORDER BY tags DESC LIMIT 0,#{MaxN,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectRecentNId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from t_label
+    ORDER BY labelId DESC LIMIT 0,#{RecentN,jdbcType=INTEGER}
+  </select>
+
+  <select id="getCount" resultType="java.lang.Long">
+    select count(*) from t_label
+  </select>
+
+
+
+
+
+
 
 
 

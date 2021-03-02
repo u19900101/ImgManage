@@ -36,4 +36,8 @@ public interface LabelMapper {
 
     List<Label> selectByParentId(Integer parentid);
 
+    List<Label> selectMaxNTags(Integer MaxN);
+    List<Label> selectRecentNId(Integer RecentN);
+
+    long getCount();
 }
