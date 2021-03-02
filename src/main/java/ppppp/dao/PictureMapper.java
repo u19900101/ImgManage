@@ -36,4 +36,6 @@ public interface PictureMapper {
     int updateByPrimaryKey(String record);
 
     ArrayList<Picture> selectByLabelNameLike(List labelNameList);
+
+    ArrayList<Picture> selectByLabelIdLike(List labelIdList);
 }

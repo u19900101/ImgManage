@@ -1,6 +1,7 @@
 package ppppp.controller;
 
 import com.google.gson.Gson;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -70,10 +71,10 @@ public class LabelController {
         TreeMap<String,ArrayList<Picture>> listHashMap = new TreeMap<>();
 
         // 获取 标签子标签的所有 id 通过 ',{labelName},' 字段来 查询所有
-        ArrayList labelNameList = new ArrayList();
-        getAllSonLabelId(labelName,labelNameList);//也包含自己
+        ArrayList labelidList = new ArrayList();
+        getAllSonLabelId(labelName,labelidList);//也包含自己
 
-        ArrayList<Picture> pictureArrayList = pictureMapper.selectByLabelNameLike(labelNameList);
+        ArrayList<Picture> pictureArrayList = pictureMapper.selectByLabelIdLike(labelidList);
         if(pictureArrayList.size()>0){
             listHashMap.put(labelName, pictureArrayList);
         }
@@ -147,7 +148,7 @@ public class LabelController {
         ArrayList<String> changeLabels = new ArrayList<>();
         int addOrDeleteTagsById = 0;
         Picture picture = pictureMapper.selectByPrimaryKey(picPath);
-        if(picture.getPlabel()!=null && picture.getPlabel().length()>0){
+        if(picture.getPlabel()!=null && picture.getPlabel().length()>1){
             String[] labelsId = picture.getPlabel().replace(","," ").trim().split(" ");
             // 判断原 照片是否已经存在 新增的标签
             if(Arrays.asList(labelsId).contains(newLabelId.toString())){
@@ -160,7 +161,7 @@ public class LabelController {
         }
 
         // 2.更新 t_label 更新标签的徽记  本标签 以及 父标签
-        picture.setPlabel(picture.getPlabel() == null || picture.getPlabel().length()==0?","+newLabelId+",":picture.getPlabel()+newLabelId+",");
+        picture.setPlabel(picture.getPlabel() == null || picture.getPlabel().length()<=1?","+newLabelId+",":picture.getPlabel()+newLabelId+",");
 
 
         // 1.更新 t_pic 表
@@ -280,47 +281,59 @@ public class LabelController {
 
 
     // 删除标签类
+    // 1. 删除本身标签以及子类标签
+    // 2. 移除 所有照片中的该标签
     @ResponseBody
     @RequestMapping(value = "/ajaxDeleteLabel",method = RequestMethod.POST)
-    public String ajaxDeleLabel(String labelName) {
+    public String ajaxDeleLabel(Integer labelId) {
         HashMap map = new HashMap();
-        if(labelName == null){
+        if(labelId == null){
             map.put("isDelete", false);
             return new Gson().toJson(map);
         }
         // 先删除标签的 所有子标签
-
-        int deleteLabel = deleteLabel(labelName);
+        int deleteLabel = deleteLabel(labelId);
         if(deleteLabel== 0){
-            System.out.println("失败 -- 从数据库删除标签  "+labelName);
+            System.out.println("失败 -- 从数据库删除标签  "+labelId);
             map.put("isDelete", false);
         }else {
-            System.out.println("成功 -- 从数据库删除标签  "+labelName);
+            System.out.println("成功 -- 从数据库删除标签  "+labelId);
             map.put("isDelete", true);
         }
 
         return new Gson().toJson(map);
     }
 
-    private int deleteLabel(String labelName) {
+    private int deleteLabel(Integer labelId) {
         int delete = 0;
-        List<Label> labels = labelMapper.selectByLabelName(labelName);
-        for (Label label : labels) {
-            // 删除所有子标签
-            List<Label> sonlabels = labelMapper.selectByParentName(label.getLabelName());
-            if(sonlabels.size()>0){
-                for (Label sonlabel : sonlabels) {
-                    delete =deleteLabel(sonlabel.getLabelName());
-                    if(delete == 0){
-                        return 0;
-                    }
+        // 删除所有子标签
+        List<Label> sonlabels = labelMapper.selectByParentId(labelId);
+        if(sonlabels.size()>0){
+            for (Label sonlabel : sonlabels) {
+                delete =deleteLabel(sonlabel.getLabelid());
+                if(delete == 0){
+                    return 0;
                 }
             }
-            delete = labelMapper.deleteByLabelName(label.getLabelName());
-            if(delete == 0){
-                return 0;
+        }
+        // 2.移除所有照片中的该标签
+        List list = new ArrayList<>();
+        list.add(labelId);
+        ArrayList<Picture> pictureArrayList = pictureMapper.selectByLabelIdLike(list);
+        if(pictureArrayList.size()>0){
+            for (Picture picture : pictureArrayList) {
+                String newPicLabel = picture.getPlabel().replace(labelId+",","");
+                picture.setPlabel(newPicLabel.length()==1?"":newPicLabel);
+                int update = pictureMapper.updateByPrimaryKeySelective(picture);
+                if(update == 0){
+                    return 0;
+                }
             }
-
+        }
+        // 1.删除标签类
+        delete = labelMapper.deleteByPrimaryKey(labelId);
+        if(delete == 0){
+            return 0;
         }
         return delete;
     }
@@ -342,12 +355,18 @@ public class LabelController {
             }
         }
         HashMap map = new HashMap();
-        if(insert!=1){
+        List<Label> labels = labelMapper.selectByLabelName(labelName);
+        Integer labelid = -1;
+        if(labels.size()>0){
+            labelid = labels.get(0).getLabelid();
+        }
+        if(insert!=1 || labelid == -1){
             System.out.println("失败 -- 从数据库创建标签");
             map.put("isInsert", false);
         }else {
             System.out.println("成功 -- 从数据库创建标签");
             map.put("isInsert", true);
+            map.put("id", labelid);
         }
         return new Gson().toJson(map);
         // 更新 node的值 重新显示

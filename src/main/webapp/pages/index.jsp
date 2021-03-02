@@ -6,7 +6,6 @@
     <script type="text/javascript">
         $(function(){
             //全局变量  用于记录二次点击
-            var lastSelectNode = {text :"",state:{selected:true}};
             var isUpdateStatu = false;
             onLoad();
             //页面加载
@@ -31,10 +30,14 @@
                         $('#updateName').val(node.text);
                         // 当操作 标签时 左边页面不栋
                         if($("#tagHandleStatu").text() == "false"){
+                            // alert("判断 check");
                             if($("#isAddLable").is(':checked')){
+                                // alert("check 选中 开始添加");
                                 var picPath = $("#iframepage").contents().find("#picTags").attr("picPath");
                                 var newlabelName = node.text;
                                 var newLabelId = node.id;
+                                // alert(picPath+"---"+newLabelId+"---"+newlabelName);
+                                // alert(JSON.stringify(node));
                                 addLabelAjax(picPath,newLabelId,newlabelName);
                             }else {
                                 // 点击后  访问后台的路径  后台处理完数据后直接渲染 到指定的页面去
@@ -48,7 +51,6 @@
             // 在数据库中查询 照片是否已经存在了 请求添加的标签
             var addLabelAjax = function (picPath,newLabelId,newlabelName){
                 // 将信息写进数据库中
-                // alert(picPath+"---"+newlabel);
                 $.post(
                     "http://localhost:8080/pic/label/ajaxAddLabelToPic",
                     "picPath="+picPath+"&newLabelId="+newLabelId+"&newlabelName="+newlabelName,
@@ -251,7 +253,7 @@
            </div>
        </div>
        <div class="col-md-9 pull-right" style="border: 1px solid red;padding-left: 0px;padding-right: 0px">
-               <iframe src="picture/before_edit_picture?path=img/2021/01/花发.jpg" name='main' id="iframepage" frameborder="0" width="100%" height="100%" scrolling="no" marginheight="0" marginwidth="0" ></iframe>
+               <iframe src="picture/page" name='main' id="iframepage" frameborder="0" width="100%" height="100%" scrolling="no" marginheight="0" marginwidth="0" ></iframe>
        </div> 
    </div>
 
@@ -344,6 +346,10 @@
                     showDialog("创建标签到数据库失败");
                     return;
                 } else {
+                    node.id = data.id;
+                    node.tags = ["0"];
+                    // alert(typeof data.id);
+                    // alert(typeof node.text);
                     $('#left-tree').treeview('addNode', [node, parentNode]);
                 }
             },
@@ -353,7 +359,7 @@
     function deleteLabel(node){
         $.post(
             "http://localhost:8080/pic/label/ajaxDeleteLabel",
-            "labelName="+node[0].text,
+            "labelId="+node[0].id,
             function(data) {
                 if(!data.isDelete){
                     showDialog(" 删除标签到数据库失败");
