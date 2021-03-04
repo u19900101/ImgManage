@@ -222,6 +222,7 @@
             var label=ev.dataTransfer.getData("label");
             // ev.target.appendChild(document.getElementById(data));
             $("#picArea").append(label);
+        //    写进数据库
         }
     </script>
 

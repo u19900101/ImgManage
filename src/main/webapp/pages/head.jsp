@@ -25,6 +25,18 @@
 <script type="text/javascript" src="static/script/2.6.12.vue.min.js"></script>
 
 
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
+<%--<script src="static/jqTree/jquery.min.js"></script>--%>
+<script src="static/jqTree/tree.jquery.js"></script>
+<link rel="stylesheet" href="static/jqTree/jqtree.css">
+<script src="static/jqTree/Sortable.js"></script>
+
+
+<link rel="stylesheet" href="static/script/jquery-ui.css">
+<%--<script src="//code.jquery.com/jquery-1.12.4.js"></script>--%>
+<script src="static/script/jquery-ui.js"></script>
+<script src="static/script/jquery-ui-droppable-iframe.js"></script>
+
 <%--<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.4.1/css/bootstrap.css">--%>
 <%--<link rel="stylesheet" href="static/bootstrap-treeview/bootstrap-treeview.css">--%>
 
