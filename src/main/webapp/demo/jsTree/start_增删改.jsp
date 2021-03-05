@@ -56,6 +56,7 @@
     </ul>
 </div>
 
+
 <li id="drop" class="jstree-drop">jstree-drop</li>
 <li id="drag" class="drag">jstree-drag</li>
 <%--<div style="border: 1px solid red;width: 200px;height: 200px;float: left" class="picdiv">iframe-2</div>--%>
