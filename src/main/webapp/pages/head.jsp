@@ -37,6 +37,8 @@
 <script src="static/script/jquery-ui.js"></script>
 <script src="static/script/jquery-ui-droppable-iframe.js"></script>
 
+<link rel="stylesheet" href="static/jstree/style.min.css" />
+<script src="static/jstree/jstree.min.js"></script>
 <%--<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.4.1/css/bootstrap.css">--%>
 <%--<link rel="stylesheet" href="static/bootstrap-treeview/bootstrap-treeview.css">--%>
 

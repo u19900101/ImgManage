@@ -30,7 +30,7 @@
 </head>
 <body>
 <div id="trash" class="trash">我是垃圾箱啦啦啦</div>
-<%--<iframe src="./d.jsp" frameborder="0" id="iframe"></iframe>--%>
+<%--<iframe src="./源码_拖拽node到div中.jsp" frameborder="0" id="iframe"></iframe>--%>
 <iframe src="./son.jsp" frameborder="0" id="iframe"></iframe>
 <script type="text/javascript">
     $(function(){
