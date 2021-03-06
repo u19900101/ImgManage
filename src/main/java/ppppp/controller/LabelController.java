@@ -113,7 +113,8 @@ public class LabelController {
         String allLabelJson = new Gson().toJson(allLabelNode);
 
         req.getSession().setAttribute("allLabelJson", allLabelJson);
-        return "solution";
+        // return "solution";
+        return "tree";
     }
 
     // /*public String getAllLabels(Model model) {
