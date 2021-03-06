@@ -151,6 +151,18 @@ public class LabelController {
         return list;
     }
 
+    @ResponseBody
+    @RequestMapping(value = "/ajaxGetLabelHref",method = RequestMethod.POST)
+    public String ajaxGetLabelHref(HttpServletRequest request,String labelHref) {
+        HashMap  map = new HashMap<>();
+        request.getSession().setAttribute("labelHref", labelHref);
+        if(labelHref != null){
+            map.put("status", "success");
+            return new Gson().toJson(map);
+        }else {
+            return null;
+        }
+    }
 
     @ResponseBody
     @RequestMapping(value = "/ajaxAddLabelToPic",method = RequestMethod.POST)

@@ -44,18 +44,6 @@
     </ul>--%>
 </div>
 
-<div id="jstree2">
-    <span>第 2 棵树：</span>
-    <ul class="jstree-open">
-        <li id="c1" class="jstree-drop">jstree-drop</li>
-        <li id="c2" class="jstree-draggable">jstree-draggable</li>
-    </ul>
-
-    <ul class="jstree-default-responsive">
-
-    </ul>
-</div>
-
 
 <li id="drop" class="jstree-drop">jstree-drop</li>
 <li id="drag" class="drag">jstree-drag</li>
@@ -76,24 +64,12 @@
                     "variant" : "large"
                 },
                 "check_callback" : true,
-            },
-            "dnd" : {
-                "drop_finish" : function () {
-                    alert("DROP");
-                },
-                "drag_check" : function (data) {
-                    if(data.r.attr("id") == "phtml_1") {
-                        return false;
-                    }
-                    return {
-                        after : false,
-                        before : false,
-                        inside : true
-                    };
-                },
-                "drag_finish" : function (data) {
-                    alert("DRAG OK");
-                }
+                'data' : [
+                    { "id" : "ajson1", "parent" : "#", "text" : "Simple root node" ,"icon": "glyphicon glyphicon-leaf" },
+                    { "id" : "ajson2", "parent" : "#", "text" : "Root node 2" ,"icon": "glyphicon glyphicon-tag" },
+                    { "id" : "ajson3", "parent" : "ajson2", "text" : "Child 1" },
+                    { "id" : "ajson4", "parent" : "ajson2", "text" : "Child 2" },
+                ],
             },
             /*'data' : [
                 'Simple root node',
@@ -109,40 +85,11 @@
                     ]
                 }
             ],*/
-            /*  'data' : [
-                  { "id" : "ajson1", "parent" : "#", "text" : "Simple root node" ,"icon": "glyphicon glyphicon-leaf" },
-                  { "id" : "ajson2", "parent" : "#", "text" : "Root node 2" ,"icon": "glyphicon glyphicon-tag" },
-                  { "id" : "ajson3", "parent" : "ajson2", "text" : "Child 1" },
-                  { "id" : "ajson4", "parent" : "ajson2", "text" : "Child 2" },
-              ]*/
+
             /*  "checkbox" : {
                   "keep_selected_style" : false
               }, "wholerow",   */
             "plugins" : ["dnd","search", "contextmenu"]
-        });
-        $('#jstree2').jstree({
-            "core" : {
-                "check_callback" : true,
-            },
-            "dnd" : {
-                "drop_finish" : function () {
-                    alert("DROP");
-                },
-                "drag_check" : function (data) {
-                    if(data.r.attr("id") == "phtml_1") {
-                        return false;
-                    }
-                    return {
-                        after : false,
-                        before : false,
-                        inside : true
-                    };
-                },
-                "drag_finish" : function (data) {
-                    alert("DRAG OK");
-                }
-            },
-            "plugins" : ["themes", "html_data", "dnd" ],
         });
         // 6 create an instance when the DOM is ready
 

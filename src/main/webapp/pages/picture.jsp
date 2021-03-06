@@ -230,19 +230,22 @@
                                 <form action="picture/before_edit_picture" method="post" name="${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
                                     <div id='v_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}'
                                          @mouseenter="enter()" @mouseleave="left()"
-                                        class="imgDiv" style="position:relative;border: 1px solid yellow">
+                                        class="imgDiv" path = "${picture.path}"
+                                         style="position:relative;border: 1px solid yellow">
                                         <input type="hidden" name="path" value="${picture.path}">
 
-                                        <a href="javascript:document.${picture.path.replace('\\', '').replace('_', '').replace('.', '')}.submit();">
-                                            <img id = "myImg${picture.path.replace('\\', '').replace('_', '').replace('.', '')}"
-                                                 src="${picture.path}"
-                                                 class="tooltip-show"
-                                                 data-placement="top"
-                                                 data-toggle="tooltip"
-                                                 title="<h5>${picture.pname}</h5>${picture.pcreatime}"
-                                                 style="height: 100%;width: auto">
+                                        <img id = "myImg${picture.path.replace('\\', '').replace('_', '').replace('.', '')}"
+                                             src="${picture.path}"
+                                             class="tooltip-show"
+                                             data-placement="top"
+                                             data-toggle="tooltip"
+                                             title="<h5>${picture.pname}</h5>${picture.pcreatime}"
+                                             style="height: 100%;width: auto">
 
-                                        </a>
+                                   <%--     <a href="javascript:document.${picture.path.replace('\\', '').replace('_', '').replace('.', '')}.submit();">
+
+
+                                        </a>--%>
                                         <button v-show = "buttonShow" @click = "deletePicture()" type="button" class="btn btn-default  btn-sm"
                                                 style="position:absolute; left: 48%; top: 90%;"
                                                 data-placement="top"
