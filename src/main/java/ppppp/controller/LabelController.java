@@ -96,29 +96,49 @@ public class LabelController {
 
 
     @RequestMapping("/getLabelTree")
-    public String getAllLabels(Model model) {
-        LabelExample labelExample = new LabelExample();
-        LabelExample.Criteria criteria = labelExample.createCriteria();
-        criteria.andParentNameIsNull();
-        // 获取所有以及节点
-        List<Label> firstLevelLabels= labelMapper.selectByExample(labelExample);
+    public String init(HttpServletRequest req){
 
-
-        List<Label>  Max7Label = labelMapper.selectMaxNTags(7);
-        if(labelMapper.getCount() > 7){
-            List<Label> recentN3IdLabel = labelMapper.selectRecentNId(3);
-            for (Label label : recentN3IdLabel) {
-                if(!Max7Label.contains(label)){
-                    Max7Label.add(label);
-                }
+        List<Label> allLabel = labelMapper.getAllLabel();
+        List<labelNode> allLabelNode = new ArrayList<>();
+        if(allLabel.size()>0){
+            for (Label label : allLabel) {
+                String id = label.getLabelid().toString();
+                String parent = label.getParentid() == null?"#":label.getParentid().toString();
+                String tags = label.getTags().toString();
+                String text = label.getLabelName()+"("+tags+")";
+                String href = label.getHref();
+                allLabelNode.add(new labelNode(id, parent, text, tags, href));
             }
         }
-        model.addAttribute("recent3AndMax7Label", Max7Label);
-        ArrayList list = getChildLabel(firstLevelLabels);
-        String json = new Gson().toJson(list);
-        model.addAttribute("labelTree", json);
-        return "index";
+        String allLabelJson = new Gson().toJson(allLabelNode);
+
+        req.getSession().setAttribute("allLabelJson", allLabelJson);
+        return "solution";
     }
+
+    // /*public String getAllLabels(Model model) {
+    //     LabelExample labelExample = new LabelExample();
+    //     LabelExample.Criteria criteria = labelExample.createCriteria();
+    //     criteria.andParentNameIsNull();
+    //     // 获取所有以及节点
+    //     List<Label> firstLevelLabels= labelMapper.selectByExample(labelExample);
+    //
+    //
+    //     List<Label>  Max7Label = labelMapper.selectMaxNTags(7);
+    //     if(labelMapper.getCount() > 7){
+    //         List<Label> recentN3IdLabel = labelMapper.selectRecentNId(3);
+    //         for (Label label : recentN3IdLabel) {
+    //             if(!Max7Label.contains(label)){
+    //                 Max7Label.add(label);
+    //             }
+    //         }
+    //     }
+    //     model.addAttribute("recent3AndMax7Label", Max7Label);
+    //     ArrayList list = getChildLabel(firstLevelLabels);
+    //     String json = new Gson().toJson(list);
+    //     model.addAttribute("labelTree", json);
+    //     return "index";
+    // }*/
 
     public void getChildLabelId( Integer labelId,List<String> labelIdList){
 
@@ -168,9 +188,10 @@ public class LabelController {
     @RequestMapping(value = "/ajaxAddLabelToPic",method = RequestMethod.POST)
     public String ajaxAddLabelToPic(String picPath,Integer newLabelId,String newlabelName) {
         HashMap map = new HashMap();
-        ArrayList<String> changeLabels = new ArrayList<>();
+        ArrayList<Integer> changeLabels = new ArrayList<>();
         int addOrDeleteTagsById = 0;
-        Picture picture = pictureMapper.selectByPrimaryKey(picPath);
+        // 将字符串从 / 转为 \ 以便查询
+        Picture picture = pictureMapper.selectByPrimaryKey(picPath.replace("/", "\\"));
         if(picture.getPlabel()!=null && picture.getPlabel().length()>1){
             String[] labelsId = picture.getPlabel().replace(","," ").trim().split(" ");
             // 判断原 照片是否已经存在 新增的标签
@@ -198,14 +219,15 @@ public class LabelController {
             System.out.println("插入 更新 标签 "+ newLabelId +" 到数据库成功");
             map.put("succeed", true);
             map.put("newLabelId", newLabelId);
-            map.put("newlabelName", newlabelName);
+            // "jimi(111)  --> jimi
+            map.put("newlabelName", newlabelName.substring(0, newlabelName.lastIndexOf("(")));
             map.put("changeLabels", changeLabels);
         }
 
         return new Gson().toJson(map);
     }
 
-    private int addOrDeleteTagsById(String plabel, Integer newLabelId, int num,ArrayList<String> changeLabels) {
+    private int addOrDeleteTagsById(String plabel, Integer newLabelId, int num,ArrayList<Integer> changeLabels) {
         //1.若 原标签中已有 新增标签的子类 则 所有的 徽记数量不变
         //2.若 原标签中已有 新增标签的父类 则 徽记数量只更新到父类
         //3.若 无相关子父类 则 更新 新增标签的所有父类
@@ -231,7 +253,7 @@ public class LabelController {
 
     // 更新到 父标签包含 同样标签的下一级为止
     // 检查新增的标签 与 已经存在的标签是否有 子父类关系 有的话 只更新到 父类的下一级标签
-    private int updateTagsById(String plabel, Integer newid, int num,ArrayList<String> changeLabels) {
+    private int updateTagsById(String plabel, Integer newid, int num,ArrayList<Integer> changeLabels) {
        Integer parentid = newid;
         // 查找所有的父标签  找到 最近一级的父标签后跳出
         // 删除时 原标签中已存在删除的 标签则从原标签的父类开始查找
@@ -249,7 +271,7 @@ public class LabelController {
         return updateTagsById(newid,parentid,num,changeLabels);
     }
 
-    public int updateTagsById(Integer newLabelId,Integer parentId,int num,ArrayList<String> changeLabels) {
+    public int updateTagsById(Integer newLabelId,Integer parentId,int num,ArrayList<Integer> changeLabels) {
         int update =-1;
         // parentid 为null 时 表示 不包含父类 更新 newid 所有的  父类
         Integer t_parentId = newLabelId;
@@ -258,7 +280,7 @@ public class LabelController {
             label.setTags(label.getTags()+num);
             update = labelMapper.updateByPrimaryKey(label);
             t_parentId = label.getParentid();
-            changeLabels.add(label.getLabelName());
+            changeLabels.add(label.getLabelid());
         }
         return update;
     }
@@ -278,7 +300,7 @@ public class LabelController {
 
         // 更新 t_label 修改徽记
         // 若 标签同时包含父标签的id 则不进行级联更新
-        ArrayList<String> changeLabels = new ArrayList<>();
+        ArrayList<Integer> changeLabels = new ArrayList<>();
         int updateTags = addOrDeleteTagsById(picture.getPlabel(),label.getLabelid(),-1,changeLabels);
         String replace = picture.getPlabel().replace(label.getLabelid() + ",", "");
         if(replace.length()==1){

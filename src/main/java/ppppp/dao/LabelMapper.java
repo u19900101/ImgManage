@@ -38,6 +38,6 @@ public interface LabelMapper {
 
     List<Label> selectMaxNTags(Integer MaxN);
     List<Label> selectRecentNId(Integer RecentN);
-
     long getCount();
+    List<Label> getAllLabel();
 }

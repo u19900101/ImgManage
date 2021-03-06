@@ -3,6 +3,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ include file="/pages/head.jsp"%>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <style>
         .app{
             width:100%;
@@ -53,19 +54,20 @@
     </style>
 </head>
 <body>
-<div class="container"  id="app" style="padding-left: 0px; padding-right: 0px;">
+<div class="container"  id="app" style="width:100%;height:100%;overflow: scroll;padding-left: 20px; padding-right: 20px;">
+    <%-- 照片基本信息显示区 --%>
     <div class="row">
         <%--照片名称--%>
-        <div class="col-md-1" style="padding-left: 0px; padding-right: 0px;border: 1px solid red">
-            <span>名称：</span>
+        <div class="col-md-2" style="padding-left: 0px; padding-right: 0px;border: 1px solid red">
+            <span >名称：</span>
         </div>
         <%--照片名称 修改框--%>
-        <div class="col-md-2" style="padding-left: 0px; padding-right: 0px;">
+        <div class="col-md-2" style="padding-left: 0px; padding-right: 0px;border: 1px solid pink">
             <%-- 对input框双重监控 失去焦点 和 按下enter 都可触发修改事件 --%>
             <input class="form-control" @keyup.enter="changeName()"  value="${picture.pname}" pictype=${type}   @blur="changeName()" id="pname" name = "pname" style="font-size:25px;">
         </div>
         <%--坐标信息显示--%>
-        <div class="col-md-3" style="padding-left: 0px; padding-right: 0px;">
+        <div class="col-md-3" style="padding-left: 0px; padding-right: 0px;border: 1px solid peru">
             <span style="width:300px;height:30px;font-size:25px;">坐标：</span>
             <span v-if = "picture.gpsLongitude=='' || picture.gpsLongitude == '' " style="color: green;width:300px;height:30px;font-size:25px;">神秘未知</span>
             <span v-else style="color: green">
@@ -73,7 +75,7 @@
         </div>
 
         <%--时间信息--%>
-        <div class="col-md-5 pull-right" style="padding-left: 0px; padding-right: 0px;">
+        <div class="col-md-5 pull-right" style="padding-left: 0px; padding-right: 0px;border: 1px solid darkred">
             <%--提示是否有重名的信息  错误信息  跟上面对应起来要写class--%>
             <span class="errorMsg" style="color: red;"></span>
             <span v-if = "picture.pcreatetime==''" style="color: darksalmon">神秘时间</span>
@@ -121,45 +123,41 @@
         </div>
     </div>
 
+    <%-- 照片 标签显示区--%>
     <div class="row">
-        <%-- 照片 标签显示区--%>
-        <div id="picTags" class="col-md-10" picPath = ${picture.path} style="padding-left: 0px; padding-right: 0px;">
+        <div id="picTags" class="col-md-10" style="padding-left: 0px; padding-right: 0px;" picPath = ${picture.path} ></div>
+    </div>
 
-    </div>
-    </div>
+    <%--显示 照片名称  添加描述 --%>
     <div class="row">
-        <%--显示 照片名称  添加描述 --%>
-        <div class="c1" name = "div2">
-        <div class="c2" @mouseenter="enter()" @mouseleave="left()">
+        <div class="col-md-6" name = "div2">
             <%--显示照片--%>
-            <img id = "myImg"
-                 src="${picture.path}"
-                 style="height: 100%;width: auto;position:relative;border: 1px solid yellow">
-            <button v-show = "buttonShow" @click = "deletePicture()" type="button" class="btn btn-default  btn-sm"
-                    style="position:absolute; left: 50%"
-                    data-placement="top"
-                    data-toggle="tooltip"
-                    title="点击删除照片">
-                <span class="glyphicon glyphicon-trash" style="font-size:15px;"></span>
-            </button>
+            <div class="imgDiv" @mouseenter="enter()" @mouseleave="left()" style="border: 1px solid yellow">
+                <img id = "myImg"
+                     src="${picture.path}"
+                     style="height: 100%;width: auto;position:relative;border: 1px solid yellow"
+                    class="imgDiv">
+                <button v-show = "buttonShow" @click = "deletePicture()" type="button" class="btn btn-default  btn-sm"
+                        style="position:absolute; left: 90%;top: 50%"
+                        data-placement="top"
+                        data-toggle="tooltip"
+                        title="点击删除照片">
+                    <span class="glyphicon glyphicon-trash" style="font-size:15px;"></span>
+                </button>
+            </div>
         </div>
-
         <%--添加描述--%>
-        <div class="c3" >
-
+        <div class="col-md-6">
           <textarea v-if = "picture.pdesc == '' "
                     @keyup.enter="changeDesc()" @blur = "changeDesc()"
                     class="comments" rows="4" cols="50"
                     placeholder="从我这里可以添加描述鸟..."
                     id = "pdesc"
-                    name = "pdesc"
-          ></textarea>
+                    name = "pdesc"></textarea>
             <textarea v-else class="comments" rows="4" cols="50"
                       @keyup.enter="changeDesc()" @blur = "changeDesc()"
                       id = "pdesc"
-                      name = "pdesc"
-            >${picture.pdesc}</textarea>
-
+                      name = "pdesc">${picture.pdesc}</textarea>
         </div>
 
     </div>

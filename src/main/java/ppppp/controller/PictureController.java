@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ppppp.bean.Label;
 import ppppp.bean.Picture;
 import ppppp.bean.PictureExample;
 import ppppp.dao.LabelMapper;
@@ -41,6 +42,7 @@ public class PictureController {
     public static String uploadimgDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT\\img";
     public static String baseDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT";
     public static String tempimgDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT\\temp\\img";
+
 
     // 查询数据库中的图片信息  在页面中显示
     @RequestMapping("/page")

@@ -54,8 +54,14 @@
 <%--<div style="border: 1px solid red;width: 200px;height: 200px;float: left" class="picdiv">iframe-6</div>--%>
 <%--<button>demo button</button>--%>
 <input id="serach">
-
+<button id = "getNodeById">getNodeById</button>
 <script>
+        $("#getNodeById").on("click",function () {
+
+            // var node = $('#jstree1').jstree("get_node","ajson1");
+            var node = $('#jstree1').jstree("get_node","44");
+            console.log("node",node);
+        });
         $('#jstree1').jstree({
             "core" : {
                 "multiple" : false,//只进行单选
@@ -64,12 +70,13 @@
                     "variant" : "large"
                 },
                 "check_callback" : true,
-                'data' : [
+                /*'data' : [
                     { "id" : "ajson1", "parent" : "#", "text" : "Simple root node" ,"icon": "glyphicon glyphicon-leaf" },
                     { "id" : "ajson2", "parent" : "#", "text" : "Root node 2" ,"icon": "glyphicon glyphicon-tag" },
                     { "id" : "ajson3", "parent" : "ajson2", "text" : "Child 1" },
                     { "id" : "ajson4", "parent" : "ajson2", "text" : "Child 2" },
-                ],
+                ],*/
+                'data' : ${allLabelJson},
             },
             /*'data' : [
                 'Simple root node',
@@ -160,16 +167,6 @@
                 "contextmenu", "dnd", "search",
                 "state", "types", "wholerow"
             ]
-        });*/
-       /* $("li").draggable({
-            appendTo: "body",
-            containment: "window",
-            cursor: "move",
-            revert: true,
-            helper: "clone",
-            scroll: true,
-            iframeFix: true, //Core jquery ui params needs for fix iframe bug
-            iframeScroll: true
         });*/
 </script>
 
