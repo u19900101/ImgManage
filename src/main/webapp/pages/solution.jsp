@@ -36,6 +36,8 @@
        <%-- 右侧页面显示区域 --%>
 
     </div>
+        <%--右边页面点击 删除标签时 更新到主页面 --%>
+    <input type="hidden" id="updateTags">
 </div>
 
 <script>
@@ -43,7 +45,8 @@
         onload();
         function onload() {
             // 不加载 不然无法展开所有节点
-            $("#rightPage").load("label/selectByLabel?labelName=花花");
+            // $("#rightPage").load("label/selectByLabel?labelName=花花");
+            $("#rightPage").load("picture/page");
             var labelHref = "label/getLabelTree";
             $("#leftPage").load(labelHref);
         };

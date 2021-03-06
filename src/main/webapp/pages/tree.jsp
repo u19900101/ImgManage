@@ -123,10 +123,10 @@
                                  // var text = "("+(Number(node.tags)+1)+")";
                                  // console.log("node: ",node[0].innerText);
                                  // // console.log("node: ",node.text);
-                                 console.log("node: ");
-
-                                var node =  { "id" : "44", "parent" : "#", "text" : "Child 1" };
-                                $("#jstree").jstree('rename_node', node , "text_NodeName" );
+                                //  console.log("node: ");
+                                //
+                                // var node =  { "id" : "44", "parent" : "#", "text" : "Child 1" };
+                                // $("#jstree").jstree('rename_node', node , "text_NodeName" );
                              }
                             var labelHref = "label/getLabelTree";
                             $("#leftPage").load(labelHref);

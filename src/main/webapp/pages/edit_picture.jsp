@@ -186,7 +186,10 @@
                     }else {
                         // 操作主页面的徽记
                         $("#changeLabels").val(data.changeLabels);
-                        parent.$(window.parent.document).find('#updateTags').click();
+                        console.log("edit 页面 点击了删除标签")
+                        var labelHref = "label/getLabelTree";
+                        $("#leftPage").load(labelHref);
+                        // parent.$(window.parent.document).find('#updateTags').click();
                     }
                 },
                 "json"
