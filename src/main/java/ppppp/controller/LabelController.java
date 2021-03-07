@@ -95,6 +95,7 @@ public class LabelController {
     }
 
 
+
     @RequestMapping("/getLabelTree")
     public String init(HttpServletRequest req){
 
@@ -286,6 +287,8 @@ public class LabelController {
         return update;
     }
 
+
+
     //删除照片的标签  同时修改徽记数量
     @ResponseBody
     @RequestMapping(value = "/ajaxDeletePicLabel",method = RequestMethod.POST)
@@ -429,6 +432,8 @@ public class LabelController {
         }
         Label label = labelMapper.selectByPrimaryKey(srclabelId);
         label.setLabelName(newLabelName);
+        String newHref = label.getHref().substring(0,label.getHref().indexOf("=")+1)+newLabelName;
+        label.setHref(newHref);
         int update = labelMapper.updateByPrimaryKey(label);
 
         if(update!= 1){
@@ -441,26 +446,112 @@ public class LabelController {
         return new Gson().toJson(map);
     }
 
-    //",
-    //             "labelId="++"&parentLabelId="+
+    private void getAllLabelId(Integer labelId,List resLabelIdlist) {
+        List<Label> sonLabelList = labelMapper.selectByParentId(labelId);
+        if(sonLabelList.size()>0){
+            for (Label label : sonLabelList) {
+                getAllLabelId(label.getLabelid(),resLabelIdlist);
+            }
+        }
+        resLabelIdlist.add(labelId);
+    }
+    private ArrayList<Picture> getAllLabelPicPath(Integer labelId) {
+        List allLabelList = new ArrayList<>();
+        getAllLabelId(labelId,allLabelList);
+        return pictureMapper.selectByLabelNameLike(allLabelList);
+    }
+
+    public int updateMoveTags(Integer labelId,int newParentLabelId) {
+        int update = 1;
+        ArrayList<Picture> allSrcLabelPicPath = getAllLabelPicPath(labelId);
+        ArrayList<Picture> allOldParentPicPath = null;
+        ArrayList<Picture> allNewParentPicPath = null;
+        Integer oldParentId = -1;
+
+        Label label = labelMapper.selectByPrimaryKey(labelId);
+        if(label != null){
+               if(allSrcLabelPicPath.size()>0){
+
+                   // 获取 原父标签 排除掉原label 后剩下的label所包含的路径集合
+                   if(label.getParentid() != null){
+                       oldParentId = label.getParentid();
+                       List  allLabelIdList = new ArrayList<>();
+                       getAllLabelId(oldParentId,allLabelIdList);
+                       allLabelIdList.remove(labelId);
+                       allOldParentPicPath = pictureMapper.selectByLabelNameLike(allLabelIdList);
+                   }
+
+                   // 获取所有新父节点的路径集合
+                   if(newParentLabelId != -1){
+                       allNewParentPicPath = getAllLabelPicPath(newParentLabelId);
+                   }
+
+                   for (Picture picture : allSrcLabelPicPath) {
+
+                        if(allOldParentPicPath != null && !allOldParentPicPath.contains(picture)){
+                            // 修改 本级的tag 直到父标签包含或者为空
+                            update = updateMoveTagsById(oldParentId,picture,-1);
+                        }
+
+                       if(allNewParentPicPath != null && !allNewParentPicPath.contains(picture)){
+                           // 修改 本级的tag 直到父标签包含或者为空
+                           update = updateMoveTagsById(newParentLabelId,picture,1);
+                       }
+                }
+            }
+        }
+
+        return update;
+    }
+
+    private int updateMoveTagsById(Integer labelId,Picture picture,int addOrSub) {
+        int moveTagsById =-1;
+        // 修改 不包含该照片的 标签类
+        Label label = labelMapper.selectByPrimaryKey(labelId);
+        label.setTags(label.getTags()+addOrSub);
+        moveTagsById = labelMapper.updateByPrimaryKey(label);
+
+        // 查找父类
+        Integer parentId = label.getParentid();
+        if ( parentId != null){
+            List list = new ArrayList<>();
+            list.add(parentId);
+            ArrayList<Picture> pictures = pictureMapper.selectByLabelIdLike(list);
+            // 若 父类中也不包该标签 则继续修改
+            if(!pictures.contains(picture)){
+                moveTagsById = updateMoveTagsById(parentId, picture, addOrSub);
+            }
+        }
+        return moveTagsById;
+    }
+
+
     @ResponseBody
     @RequestMapping(value = "/ajaxMoveLabel",method = RequestMethod.POST)
-    public String ajaxMoveLabel(Integer labelId,Integer parentLabelId) {
+    public String ajaxMoveLabel(Integer labelId,Integer newParentLabelId) {
         HashMap map = new HashMap();
 
-        Label parentLabel = labelMapper.selectByPrimaryKey(parentLabelId);
+        Label parentLabel = labelMapper.selectByPrimaryKey(newParentLabelId == -1?null:newParentLabelId);
         Label label = labelMapper.selectByPrimaryKey(labelId);
-        if(parentLabel == null || label == null ){
+        if( label == null ){
             System.out.println("失败 -- 移动标签 -- 标签不存在");
             map.put("isMove", false);
             return new Gson().toJson(map);
         }
 
-        label.setParentid(parentLabelId);
-        label.setParentName(parentLabel.getLabelName());
-        int update = labelMapper.updateByPrimaryKey(label);
+        //减去 节点原所有 parent的tag
+        //增加 现 parent 所有父 的 tag
 
-        if(update!= 1){
+        int updateTags = updateMoveTags(labelId,newParentLabelId);
+
+        if(updateTags == 1){
+            label.setParentid(newParentLabelId==-1?null:newParentLabelId);
+            label.setParentName(parentLabel == null?null:parentLabel.getLabelName());
+            updateTags = labelMapper.updateByPrimaryKey(label);
+        }
+
+
+        if( updateTags!= 1){
             System.out.println("失败 -- 移动标签");
             map.put("isMove", false);
         }else {

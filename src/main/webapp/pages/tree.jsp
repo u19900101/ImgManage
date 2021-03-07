@@ -15,72 +15,8 @@
 <div id="jstree">
 
 </div>
-<script>
-    function createLabel(labelName,parentLabelId){
-        $.post(
-            "http://localhost:8080/pic/label/ajaxCreateLabel",
-            "labelName="+labelName+"&parentLabelId="+parentLabelId,
-            function(data) {
-                if(!data.isInsert){
-                    showDialog("创建标签到数据库失败");
-                    return;
-                } else {
-                   console.log("成功--创建标签",labelName,"到数据库");
-                }
-            },
-            "json"
-        );
-    };
-    function deleteLabel(labelId){
-        $.post(
-            "http://localhost:8080/pic/label/ajaxDeleteLabel",
-            "labelId="+labelId,
-            function(data) {
-                if(!data.isDelete){
-                    console.log("失败 -- 删除标签到数据库");
-                    return;
-                } else {
-                    console.log("成功 -- 删除标签到数据库");
-                }
-            },
-            "json"
-        );
-    };
-    function editLabel(srclabelId,newLabelName){
-        var node = $('#jstree').jstree("get_node","44");
-        console.log("获取树--node",node);
-        $.post(
-            "http://localhost:8080/pic/label/ajaxEditLabel",
-            "srclabelId="+srclabelId+"&newLabelName="+newLabelName,
-            function(data) {
-                if(!data.isEdit){
-                    console.log(" 失败——修改标签到数据库");
-                    return;
-                } else {
-                   console.log(" 成功——修改标签到数据库");
-                }
-            },
-            "json"
-        );
-    };
-    function moveLabel(labelId,parentLabelId){
-        $.post(
-            "http://localhost:8080/pic/label/ajaxMoveLabel",
-            "labelId="+labelId+"&parentLabelId="+parentLabelId,
-            function(data) {
-                if(!data.isMove){
-                    console.log(" 失败——移动标签到数据库");
-                    return;
-                } else {
-                   console.log(" 成功——移动标签到数据库");
-                }
-            },
-            "json"
-        );
-    };
-</script>
-<script>
 
+<script>
     $(document).ready(function() {
         $(document).on('click','.imgDiv',function(){
             console.log($(this).attr("id"));
@@ -123,12 +59,13 @@
                 createLabel(labelName,parentLabelId);
             }else {
                 console.log("  更新节点 ",data.node.text);
-
                 editLabel(labelId,labelName);
             }
+
         }).on('delete_node.jstree', function (e, data) {
             console.log("delete_node ",data.node);
-            deleteLabel(data.node.id)
+            deleteLabel(data.node.id);
+            reLoadLeftPage();
         }).on('create_node.jstree', function (e, data) {
                 // update_item('new', data.node.parent, 0, data.node.text);
             // console.log("create_node ",data.node);
@@ -163,9 +100,9 @@
             console.log("data.old_parent",data.old_parent);*/
             console.log("  移动节点 ",data.node.text);
             var labelId = data.node.id;
-            var parentLabelId = data.parent == "#"?null:data.parent;
-            // console.log("  labelId ",labelId);
-            // console.log("  parentLabelId ",parentLabelId);
+            var parentLabelId = data.parent == "#"?-1:data.parent;
+            console.log("  labelId ",labelId);
+            console.log("  parentLabelId ",parentLabelId);
             moveLabel(labelId,parentLabelId);
         });
 
@@ -226,8 +163,7 @@
                                 // var node =  { "id" : "44", "parent" : "#", "text" : "Child 1" };
                                 // $("#jstree").jstree('rename_node', node , "text_NodeName" );
                              }
-                            var labelHref = "label/getLabelTree";
-                            $("#leftPage").load(labelHref);
+                            reLoadLeftPage();
                             // console.log("changeLabels: ",);
                             // updateTags(data.changeLabels,1);
                         };
@@ -237,7 +173,10 @@
             }
 
         });
-
+        function reLoadLeftPage(){
+            var labelHref = "label/getLabelTree";
+            $("#leftPage").load(labelHref);
+        }
         ///eof document ready
         function addLabel(newlabelId,newlabelName){
             // alert("kkk");
@@ -247,6 +186,69 @@
                 + newlabelName + '</strong></div>';
             // 获取子页面 并追加标签 样式
             $("#picTags").append(html);
+        };
+        function createLabel(labelName,parentLabelId){
+            $.post(
+                "http://localhost:8080/pic/label/ajaxCreateLabel",
+                "labelName="+labelName+"&parentLabelId="+parentLabelId,
+                function(data) {
+                    if(!data.isInsert){
+                        console.log("失败 -- 创建标签到数据库");
+                        return;
+                    } else {
+                        console.log("成功--创建标签",labelName,"到数据库");
+                    }
+                    reLoadLeftPage();
+                },
+                "json"
+            );
+        };
+        function deleteLabel(labelId){
+            $.post(
+                "http://localhost:8080/pic/label/ajaxDeleteLabel",
+                "labelId="+labelId,
+                function(data) {
+                    if(!data.isDelete){
+                        console.log("失败 -- 删除标签到数据库");
+                        return;
+                    } else {
+                        console.log("成功 -- 删除标签到数据库");
+                    }
+                    reLoadLeftPage();
+                },
+                "json"
+            );
+        };
+        function editLabel(srclabelId,newLabelName){
+            $.post(
+                "http://localhost:8080/pic/label/ajaxEditLabel",
+                "srclabelId="+srclabelId+"&newLabelName="+newLabelName,
+                function(data) {
+                    if(!data.isEdit){
+                        console.log(" 失败——修改标签到数据库");
+                    } else {
+                        console.log(" 成功——修改标签到数据库");
+                    }
+                    reLoadLeftPage();
+                },
+                "json"
+            );
+        };
+        function moveLabel(labelId,newParentLabelId){
+            $.post(
+                "http://localhost:8080/pic/label/ajaxMoveLabel",
+                "labelId="+labelId+"&newParentLabelId="+newParentLabelId,
+                function(data) {
+                    if(!data.isMove){
+                        console.log(" 失败——移动标签到数据库");
+                        return;
+                    } else {
+                        console.log(" 成功——移动标签到数据库");
+                    }
+                    reLoadLeftPage();
+                },
+                "json"
+            );
         };
     });
 

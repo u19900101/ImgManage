@@ -1,5 +1,7 @@
 package ppppp.bean;
 
+import java.util.Objects;
+
 public class Picture {
     private String path;
 
@@ -22,6 +24,36 @@ public class Picture {
     private String plabel;
 
     private String pdesc;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Picture picture = (Picture) o;
+        return Objects.equals(path, picture.path) &&
+                Objects.equals(pid, picture.pid) &&
+                Objects.equals(pname, picture.pname) &&
+                Objects.equals(pcreatime, picture.pcreatime) &&
+                Objects.equals(gpsLongitude, picture.gpsLongitude) &&
+                Objects.equals(gpsLatitude, picture.gpsLatitude) &&
+                Objects.equals(pwidth, picture.pwidth) &&
+                Objects.equals(pheight, picture.pheight) &&
+                Objects.equals(psize, picture.psize) &&
+                Objects.equals(plabel, picture.plabel) &&
+                Objects.equals(pdesc, picture.pdesc);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path, pid, pname, pcreatime, gpsLongitude, gpsLatitude, pwidth, pheight, psize, plabel, pdesc);
+    }
+
+    public Picture() {
+    }
+
+    public Picture(String path) {
+        this.path = path;
+    }
 
     @Override
     public String toString() {
