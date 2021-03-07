@@ -353,7 +353,14 @@
 <%-- v-calender 控件 有点冗余--%>
 <script>
 
-    $(function () { $("[data-toggle='tooltip']").tooltip({html : true,container: 'body' }); });
+    $(function () {
+         // $("[data-toggle='tooltip']").tooltip();
+        // $("[data-toggle='tooltip']").tooltip({html : true,container: 'body' });
+        // $("[data-toggle='tooltip']").tooltip({html : true});
+        // 太魔性 自己好了....
+        $(".tooltip-show").tooltip({html : true});
+        console.log("picture 页面加载了！");
+    });
 
     <c:forEach var="item" items="${monthsTreeMapListPic}">
         <c:forEach items="${item.value}" var="picture" >
