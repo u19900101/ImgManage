@@ -60,7 +60,7 @@ public class PictureController {
 
         List<Picture> pictures = mapper.selectByExample(pictureExample);
 
-        TreeMap<String,ArrayList<Picture>> map = pictureService.groupPictureByMonth(pictures);
+        TreeMap<String,ArrayList<Picture>> map = pictureService.groupPictureByMonth(pictures.subList(0, 10));
         //将map 写进 MonthPic
         req.getSession().setAttribute("monthsTreeMapListPic", map);
         return "picture";

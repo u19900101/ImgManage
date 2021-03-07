@@ -387,17 +387,15 @@ public class LabelController {
 
     @ResponseBody
     @RequestMapping(value = "/ajaxCreateLabel",method = RequestMethod.POST)
-    public String ajaxCreateLabel(String labelName,String parentLabelName) {
+    public String ajaxCreateLabel(String labelName,String parentLabelId) {
 
         int insert = 0;
-        if(parentLabelName.equalsIgnoreCase("null")){
+        if(parentLabelId ==null){
             insert = labelMapper.insert(new Label(labelName, 0, "label/selectByLabel?labelName=" + labelName));
-
-        }else if(parentLabelName !=null){
-            List<Label> labels = labelMapper.selectByLabelName(parentLabelName);
-            if(labels.size()==1){
-                Label parentLabel = labels.get(0);
-                insert = labelMapper.insert(new Label(labelName, parentLabel.getLabelid(),parentLabelName, 0,"label/selectByLabel?labelName=" + labelName));
+        }else if(parentLabelId !=null){
+            Label parentLabel = labelMapper.selectByPrimaryKey(Integer.valueOf(parentLabelId));
+            if(parentLabel != null){
+                insert = labelMapper.insert(new Label(labelName, parentLabel.getLabelid(),parentLabel.getLabelName(), 0,"label/selectByLabel?labelName=" + labelName));
             }
         }
         HashMap map = new HashMap();
@@ -439,6 +437,35 @@ public class LabelController {
         }else {
             System.out.println("成功 -- 从数据库更新标签");
             map.put("isEdit", true);
+        }
+        return new Gson().toJson(map);
+    }
+
+    //",
+    //             "labelId="++"&parentLabelId="+
+    @ResponseBody
+    @RequestMapping(value = "/ajaxMoveLabel",method = RequestMethod.POST)
+    public String ajaxMoveLabel(Integer labelId,Integer parentLabelId) {
+        HashMap map = new HashMap();
+
+        Label parentLabel = labelMapper.selectByPrimaryKey(parentLabelId);
+        Label label = labelMapper.selectByPrimaryKey(labelId);
+        if(parentLabel == null || label == null ){
+            System.out.println("失败 -- 移动标签 -- 标签不存在");
+            map.put("isMove", false);
+            return new Gson().toJson(map);
+        }
+
+        label.setParentid(parentLabelId);
+        label.setParentName(parentLabel.getLabelName());
+        int update = labelMapper.updateByPrimaryKey(label);
+
+        if(update!= 1){
+            System.out.println("失败 -- 移动标签");
+            map.put("isMove", false);
+        }else {
+            System.out.println("成功 -- 移动标签");
+            map.put("isMove", true);
         }
         return new Gson().toJson(map);
     }

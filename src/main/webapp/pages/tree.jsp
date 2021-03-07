@@ -15,7 +15,70 @@
 <div id="jstree">
 
 </div>
-
+<script>
+    function createLabel(labelName,parentLabelId){
+        $.post(
+            "http://localhost:8080/pic/label/ajaxCreateLabel",
+            "labelName="+labelName+"&parentLabelId="+parentLabelId,
+            function(data) {
+                if(!data.isInsert){
+                    showDialog("创建标签到数据库失败");
+                    return;
+                } else {
+                   console.log("成功--创建标签",labelName,"到数据库");
+                }
+            },
+            "json"
+        );
+    };
+    function deleteLabel(labelId){
+        $.post(
+            "http://localhost:8080/pic/label/ajaxDeleteLabel",
+            "labelId="+labelId,
+            function(data) {
+                if(!data.isDelete){
+                    console.log("失败 -- 删除标签到数据库");
+                    return;
+                } else {
+                    console.log("成功 -- 删除标签到数据库");
+                }
+            },
+            "json"
+        );
+    };
+    function editLabel(srclabelId,newLabelName){
+        var node = $('#jstree').jstree("get_node","44");
+        console.log("获取树--node",node);
+        $.post(
+            "http://localhost:8080/pic/label/ajaxEditLabel",
+            "srclabelId="+srclabelId+"&newLabelName="+newLabelName,
+            function(data) {
+                if(!data.isEdit){
+                    console.log(" 失败——修改标签到数据库");
+                    return;
+                } else {
+                   console.log(" 成功——修改标签到数据库");
+                }
+            },
+            "json"
+        );
+    };
+    function moveLabel(labelId,parentLabelId){
+        $.post(
+            "http://localhost:8080/pic/label/ajaxMoveLabel",
+            "labelId="+labelId+"&parentLabelId="+parentLabelId,
+            function(data) {
+                if(!data.isMove){
+                    console.log(" 失败——移动标签到数据库");
+                    return;
+                } else {
+                   console.log(" 成功——移动标签到数据库");
+                }
+            },
+            "json"
+        );
+    };
+</script>
 <script>
 
     $(document).ready(function() {
@@ -39,7 +102,38 @@
             // var labelHref = "label/selectByLabel?labelName=花花";
             var labelHref = data.node.original.href;
             $("#rightPage").load(labelHref);
+        }).on('rename_node.jstree', function (e, data) {
+            console.log("node ",data.node);
+
+            // 更新名称和创建 节点合并
+            var labelId= data.node.id;
+            var labelName = data.node.text;
+            // console.log("  labelId ",labelId,"type",typeof labelId);
+            // console.log("  Number(labelId) ",Number(labelId),"type",typeof Number(labelId));
+
+            if(isNaN(Number(labelId))){
+                console.log(" 创建节点 ",data.node.text);
+                var parentLabelId = data.node.parent;
+                console.log("labelName ",labelName);
+                console.log("parentLabelId ",parentLabelId);
+                if(parentLabelId == '#') {
+                    // 创建 根节点
+                    parentLabelId = null;
+                };
+                createLabel(labelName,parentLabelId);
+            }else {
+                console.log("  更新节点 ",data.node.text);
+
+                editLabel(labelId,labelName);
+            }
+        }).on('delete_node.jstree', function (e, data) {
+            console.log("delete_node ",data.node);
+            deleteLabel(data.node.id)
+        }).on('create_node.jstree', function (e, data) {
+                // update_item('new', data.node.parent, 0, data.node.text);
+            // console.log("create_node ",data.node);
         });
+        ;
 
 
         $('#jstree').jstree({
@@ -62,13 +156,17 @@
 
         // Move inside Tree to inside
         $('#jstree').on("move_node.jstree", function (e, data) {
-
-            my_form_vals = 'admin_funcs=tree_fact_funcs&action=move';
-            my_form_vals += '&id='+data.node.id;
-            my_form_vals += '&pos='+data.position;
-            my_form_vals += '&new_parent='+data.parent;
-            my_form_vals += '&old_parent='+data.old_parent;
-            // alert(my_form_vals);
+            // 拖拽后 改写 拖拽节点的父节点信息写进数据库
+          /*  console.log("data.node.id",data.node.id);
+            console.log("data.position",data.position);
+            console.log("data.parent",data.parent);
+            console.log("data.old_parent",data.old_parent);*/
+            console.log("  移动节点 ",data.node.text);
+            var labelId = data.node.id;
+            var parentLabelId = data.parent == "#"?null:data.parent;
+            // console.log("  labelId ",labelId);
+            // console.log("  parentLabelId ",parentLabelId);
+            moveLabel(labelId,parentLabelId);
         });
 
         $(document).on('dnd_move.vakata', function (e, data) {
