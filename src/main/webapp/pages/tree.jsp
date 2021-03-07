@@ -18,11 +18,15 @@
 
 <script>
     $(document).ready(function() {
+
+        // 右侧页面点击图片时 跳转页面
         $(document).on('click','.imgDiv',function(){
             console.log($(this).attr("id"));
             console.log("原path",$(this).attr("path"));
             var href = "picture/before_edit_picture";
             var path = $(this).attr("path").replaceAll("\\","/");
+            // 解决悬停不消失  关闭悬停的 提示
+            $('.tooltip-show').tooltip('destroy');
             $("#rightPage").load(href+"?path="+path);
             console.log(href+"?path="+path);
         });
@@ -40,7 +44,8 @@
             $("#rightPage").load(labelHref);
         }).on('rename_node.jstree', function (e, data) {
             console.log("node ",data.node);
-
+            // 跳回 列表页面时 悬停再次显示
+            $("[data-toggle='tooltip']").tooltip({html : true,container: 'body' });
             // 更新名称和创建 节点合并
             var labelId= data.node.id;
             var labelName = data.node.text;

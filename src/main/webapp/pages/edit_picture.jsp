@@ -197,7 +197,9 @@
         });
         if('${picture.plabel}'.length>0){
             var labelList = '${picture.plabel}'.split(" ");
-            <%--alert('${picture.plabel}' + "----"+labelList.length);--%>
+            console.log("picture.plabel",'${picture.plabel}',"labelList.length",labelList.length);
+            // 解决 添加后出现多个标签的bug 先清空再添加
+            $("#picTags").empty();
             for (var i = 0; i < labelList.length; i++) {
                 addLabel(labelList[i]);
             }
