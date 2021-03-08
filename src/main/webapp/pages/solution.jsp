@@ -46,9 +46,10 @@
         function onload() {
             // 不加载 不然无法展开所有节点
             // $("#rightPage").load("label/selectByLabel?labelName=花花");
-            $("#rightPage").load("picture/page");
+            // $("#rightPage").load("picture/page");
             var labelHref = "label/getLabelTree";
             $("#leftPage").load(labelHref);
+            // $("#leftPage").load("pages/tree.jsp");
         };
 
     });

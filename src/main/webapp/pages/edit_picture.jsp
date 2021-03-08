@@ -132,7 +132,7 @@
     <div class="row">
         <div class="col-md-6" name = "div2">
             <%--显示照片--%>
-            <div class="imgDiv" @mouseenter="enter()" @mouseleave="left()" style="border: 1px solid yellow">
+            <div class="imgDiv" id='${picture.pid}' @mouseenter="enter()" @mouseleave="left()" style="border: 1px solid yellow">
                 <img id = "myImg"
                      src="${picture.path}"
                      style="height: 100%;width: auto;position:relative;border: 1px solid yellow"
@@ -163,15 +163,17 @@
     </div>
     </div>
 </div>
-<%--保存要传递的值到 主页面--%>
-<input type="hidden" id = "changeLabels" >
+<div class="imgDiv" id='${picture.pid}'>
+    ceshi
+</div>
 </body>
 
 <%-- v-calender 控件--%>
 <script>
+
     $(function () {
         $("[data-toggle='tooltip']").tooltip();
-
+        console.log("edit 页面加载了...")
         // 删除照片标签
         $('body').on('click','.close',function(){
             var deleteLabelName = $(this).next().text();
@@ -335,6 +337,10 @@
                 "json"
             );
         }
+    });
+
+    $(document).ready(function(){
+        reLoadLeftPage();
     });
 </script>
 </html>

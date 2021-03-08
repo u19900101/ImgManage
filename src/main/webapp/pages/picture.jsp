@@ -156,6 +156,79 @@
         };
     </script>
 
+    <script>
+
+
+        <c:forEach var="item" items="${monthsTreeMapListPic}">
+        <c:forEach items="${item.value}" var="picture" >
+        var vm = new Vue({
+            el: '#v_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}',
+            data:{
+                timezone: '',
+                date:  '${picture.pcreatime}',
+                modelConfig: {
+                    type: 'string',
+                    mask: 'YYYY-MM-DD HH:mm:ss', // Uses 'iso' if missing
+                },
+                buttonShow : false,
+            },
+            methods: {
+                deletePicture: function () {
+                    // 函数传递 特殊字符有bug 故  更换获取方式
+                    var existImgPath = $("#myImg${picture.path.replace('\\', '').replace('_', '').replace('.', '')}").attr('src');
+                    // 要replaceAll  下面的则不需要 尬
+                    var divID = existImgPath.replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
+                    $.post(
+                        "http://localhost:8080/pic/picture/ajaxDeletePic",
+                        "existImgPath=" + existImgPath,
+                        function (data) {
+                            if (data.status == 'success') {
+                                $("#" + divID).remove();
+                                success_prompt(data.msg, 1500);
+                            } else if (data.status == 'fail') {
+                                fail_prompt(data.msg, 2500);
+                            } else {
+                                warning_prompt("其他未知错误.....please enjoy debug", 2500);
+                            }
+                        },
+                        "json"
+                    );
+                },
+                enter: function () {
+                    this.buttonShow = true;
+                },
+                left: function () {
+                    this.buttonShow = false;
+                },
+
+            }
+        });
+        vm.$watch('date', function(newValue, oldValue) {
+            if(newValue !="" && oldValue!="" && newValue!=oldValue){
+                var picpath = $("#myImg${picture.path.replace('\\', '').replace('_', '').replace('.', '')}").attr("src");
+                // alert('old is ---' + oldValue + '--- new is ---' + newValue + '---!'+"path is  --"+picpath);
+                $.post(
+                    "http://localhost:8080/pic/picture/ajaxUpdateInfo",
+                    "newCreateTime=" + newValue+
+                    "&picpath=" + picpath,
+                    function (data) {
+                        if (data.status == 'success') {
+                            success_prompt(data.msg, 1500);
+                        } else if (data.status == 'fail') {
+                            fail_prompt(data.msg, 2500);
+                        } else if (data.status == 'unchange') {
+                            //  当名称没有变化时 不显示
+                        } else {
+                            warning_prompt("其他未知错误.....please enjoy debug", 2500);
+                        }
+                    },
+                    "json"
+                );
+            }
+        });
+        </c:forEach>
+        </c:forEach>
+    </script>
 </head>
 <body>
 <%--${monthsTreeMapListPic}--%>
@@ -228,7 +301,7 @@
                                             </div>
                                --%>
                                 <form action="picture/before_edit_picture" method="post" name="${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
-                                    <div id='v_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}'
+                                    <div id='${picture.pid}'
                                          @mouseenter="enter()" @mouseleave="left()"
                                         class="imgDiv" path = "${picture.path}"
                                          style="position:relative;border: 1px solid yellow">
@@ -242,10 +315,6 @@
                                              title="<h5>${picture.pname}</h5>${picture.pcreatime}"
                                              style="height: 100%;width: auto">
 
-                                   <%--     <a href="javascript:document.${picture.path.replace('\\', '').replace('_', '').replace('.', '')}.submit();">
-
-
-                                        </a>--%>
                                         <button v-show = "buttonShow" @click = "deletePicture()" type="button" class="btn btn-default  btn-sm"
                                                 style="position:absolute; left: 48%; top: 90%;"
                                                 data-placement="top"
@@ -304,29 +373,18 @@
                                         </div>
                            --%>
                                 <form action="picture/before_edit_picture" name="${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
-                                    <div id='v_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}'
+                                    <div id='${picture.pid}'
                                          @mouseenter="enter()" @mouseleave="left()"
                                          class="imgDiv" path = "${picture.path}" style="position:relative;border: 1px solid yellow">
                                         <input type="hidden" name="path" value="${picture.path}">
 
-                                        <img id = "myImg${picture.path.replace('\\', '').replace('_', '').replace('.', '')}"
+                                        <img id = "${picture.pid}"
                                              src="${picture.path}"
                                              class="tooltip-show"
                                              data-placement="top"
                                              data-toggle="tooltip"
                                              title="<h5>${picture.pname}</h5>${picture.pcreatime}"
                                              style="height: 100%;width: auto">
-                                     <%--   <img id = "myImg${picture.path.replace('\\', '').replace('_', '').replace('.', '')}"
-                                             src="${picture.path}"
-                                             class="tooltip-show"
-                                             data-placement="top"
-                                             data-toggle="tooltip"
-                                             title="<h5>${picture.pname}</h5>${picture.pcreatime}"
-                                             style="height: 100%;width: auto">--%>
-                                      <%--  <a href="javascript:document.${picture.path.replace('\\', '').replace('_', '').replace('.', '')}.submit();">
-
-
-                                        </a>--%>
                                         <button v-show = "buttonShow" @click = "deletePicture()" type="button" class="btn btn-default  btn-sm"
                                                 style="position:absolute; left: 48%; top: 90%;"
                                                 data-placement="top"
@@ -349,88 +407,21 @@
     </div>
 </div>
 
-<script src="https://apps.bdimg.com/libs/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 <%-- v-calender 控件 有点冗余--%>
-<script>
 
+</body>
+
+<script>
     $(function () {
-         // $("[data-toggle='tooltip']").tooltip();
         // $("[data-toggle='tooltip']").tooltip({html : true,container: 'body' });
-        // $("[data-toggle='tooltip']").tooltip({html : true});
         // 太魔性 自己好了....
         $(".tooltip-show").tooltip({html : true});
         console.log("picture 页面加载了！");
+        // console.log("picture 页面加载了--后！");
     });
 
-    <c:forEach var="item" items="${monthsTreeMapListPic}">
-        <c:forEach items="${item.value}" var="picture" >
-            var vm = new Vue({
-                el: '#v_${picture.path.replace('\\', '').replace('_', '').replace('.', '')}',
-                data:{
-                    timezone: '',
-                    date:  '${picture.pcreatime}',
-                    modelConfig: {
-                        type: 'string',
-                        mask: 'YYYY-MM-DD HH:mm:ss', // Uses 'iso' if missing
-                    },
-                    buttonShow : false,
-                },
-                methods: {
-                    deletePicture: function () {
-                        // 函数传递 特殊字符有bug 故  更换获取方式
-                        var existImgPath = $("#myImg${picture.path.replace('\\', '').replace('_', '').replace('.', '')}").attr('src');
-                        // 要replaceAll  下面的则不需要 尬
-                        var divID = existImgPath.replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
-                        $.post(
-                            "http://localhost:8080/pic/picture/ajaxDeletePic",
-                            "existImgPath=" + existImgPath,
-                            function (data) {
-                                if (data.status == 'success') {
-                                    $("#" + divID).remove();
-                                    success_prompt(data.msg, 1500);
-                                } else if (data.status == 'fail') {
-                                    fail_prompt(data.msg, 2500);
-                                } else {
-                                    warning_prompt("其他未知错误.....please enjoy debug", 2500);
-                                }
-                            },
-                            "json"
-                        );
-                    },
-                    enter: function () {
-                        this.buttonShow = true;
-                    },
-                    left: function () {
-                        this.buttonShow = false;
-                    },
-
-                }
-            });
-            vm.$watch('date', function(newValue, oldValue) {
-                if(newValue !="" && oldValue!="" && newValue!=oldValue){
-                    var picpath = $("#myImg${picture.path.replace('\\', '').replace('_', '').replace('.', '')}").attr("src");
-                    // alert('old is ---' + oldValue + '--- new is ---' + newValue + '---!'+"path is  --"+picpath);
-                    $.post(
-                        "http://localhost:8080/pic/picture/ajaxUpdateInfo",
-                        "newCreateTime=" + newValue+
-                        "&picpath=" + picpath,
-                        function (data) {
-                            if (data.status == 'success') {
-                                success_prompt(data.msg, 1500);
-                            } else if (data.status == 'fail') {
-                                fail_prompt(data.msg, 2500);
-                            } else if (data.status == 'unchange') {
-                                //  当名称没有变化时 不显示
-                            } else {
-                                warning_prompt("其他未知错误.....please enjoy debug", 2500);
-                            }
-                        },
-                        "json"
-                    );
-                }
-            });
-        </c:forEach>
-    </c:forEach>
+    $(document).ready(function(){
+        reLoadLeftPage();
+    });
 </script>
-</body>
 </html>
