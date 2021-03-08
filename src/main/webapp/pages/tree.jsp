@@ -21,6 +21,7 @@
     $(document).ready(function() {
             // 右侧页面点击图片时 跳转页面
             console.log("加载了tree.jsp页面...");
+
             $('#jstree').jstree({
                 'core' : {
                     'check_callback' : function (operation, node, node_parent, node_position, more) {
@@ -47,7 +48,7 @@
              var path = $(this).attr("path").replaceAll("\\","/");
              $("#rightPage").load(href+"?path="+path);
                  // console.log(href+"?path="+path);
-        });
+            });
 
             // 点击时激发
             $('#jstree').on("select_node.jstree", function (e, data) {
@@ -215,6 +216,7 @@
 
 
     function reLoadLeftPage(){
+
         var labelHref = "label/getLabelTree";
         $("#leftPage").load(labelHref);
     }

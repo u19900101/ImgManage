@@ -1,18 +1,14 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%--
-  Created by IntelliJ IDEA.
-  User: liupannnnnnnnnn
-  Date: 2021/2/1
-  Time: 16:42
-  To change this template use File | Settings | File Templates.
---%>
-<%-- 静态包含 base标签、css样式、jQuery文件 --%>
 <%@ include file="/pages/head.jsp"%>
 <html>
 <head>
-    <title>Title</title>
-    <meta charset="utf-8">
+    <%-- 单独引入 为了tooltip正常显示--%>
+    <link rel="stylesheet" href="static/bootstrap-3.3.7/css/bootstrap.min.css">
+    <script src="static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+</head>
+<head>
+
     <%--/*设置div属性*/--%>
     <style>
         /* 单张图片框 */
@@ -28,13 +24,13 @@
             border: 2px solid green;
         }
 
-        .imgDiv{
+        /*.imgDiv{
             width: auto;
             height:300px;
             display:flex;
             align-items:center;
             justify-content:center;
-        }
+        }*/
     </style>
 
     <%-- alter style--%>
@@ -157,7 +153,6 @@
     </script>
 
     <script>
-
 
         <c:forEach var="item" items="${monthsTreeMapListPic}">
         <c:forEach items="${item.value}" var="picture" >
@@ -409,15 +404,17 @@
 
 <%-- v-calender 控件 有点冗余--%>
 
+
+<div style="padding: 100px 100px 10px;">
+    <div href="#" class="tooltip-options" data-toggle="tooltip" data-placement="top" title="<h3>'am Header2 </h3>">Tooltip 方法 options</div>
+</div>
+
 </body>
 
 <script>
     $(function () {
-        // $("[data-toggle='tooltip']").tooltip({html : true,container: 'body' });
-        // 太魔性 自己好了....
-        $(".tooltip-show").tooltip({html : true});
+        $("[data-toggle='tooltip']").tooltip({html : true});
         console.log("picture 页面加载了！");
-        // console.log("picture 页面加载了--后！");
     });
 
     $(document).ready(function(){

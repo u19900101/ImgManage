@@ -163,17 +163,14 @@
     </div>
     </div>
 </div>
-<div class="imgDiv" id='${picture.pid}'>
-    ceshi
-</div>
+
 </body>
 
 <%-- v-calender 控件--%>
 <script>
 
     $(function () {
-        $("[data-toggle='tooltip']").tooltip();
-        console.log("edit 页面加载了...")
+        console.log("edit 页面加载了...");
         // 删除照片标签
         $('body').on('click','.close',function(){
             var deleteLabelName = $(this).next().text();
