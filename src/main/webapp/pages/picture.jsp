@@ -404,19 +404,15 @@
 
 <%-- v-calender 控件 有点冗余--%>
 
-
-<div style="padding: 100px 100px 10px;">
-    <div href="#" class="tooltip-options" data-toggle="tooltip" data-placement="top" title="<h3>'am Header2 </h3>">Tooltip 方法 options</div>
-</div>
-
-</body>
-
 <script>
     $(function () {
         $("[data-toggle='tooltip']").tooltip({html : true});
         console.log("picture 页面加载了！");
     });
-
+    function reLoadLeftPage(){
+        var labelHref = "label/getLabelTree";
+        $("#leftPage").load(labelHref);
+    }
     $(document).ready(function(){
         reLoadLeftPage();
     });

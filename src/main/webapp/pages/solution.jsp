@@ -42,16 +42,15 @@
 
 <script>
     $(function () {
+
         onload();
         function onload() {
-            // 不加载 不然无法展开所有节点
-            // $("#rightPage").load("label/selectByLabel?labelName=花花");
+            // 在picture页面加载tree，解决刚进来时点击出现bug
             $("#rightPage").load("picture/page");
-            var labelHref = "label/getLabelTree";
-            $("#leftPage").load(labelHref);
+            // var labelHref = "label/getLabelTree";
+            // $("#leftPage").load(labelHref);
             // $("#leftPage").load("pages/tree.jsp");
         };
-
     });
 
 </script>

@@ -42,12 +42,12 @@
             // 取消所有选中
 
             $('.imgDiv').on('click',function(){
-            // console.log("原path",$(this).attr("path"),"原 id:",$(this).attr("id"));
-             console.log("点击了图片 即将跳转到 编辑页面....");
-             var href = "picture/before_edit_picture";
-             var path = $(this).attr("path").replaceAll("\\","/");
-             $("#rightPage").load(href+"?path="+path);
-                 // console.log(href+"?path="+path);
+                // console.log("原path",$(this).attr("path"),"原 id:",$(this).attr("id"));
+                 console.log("点击了图片 即将跳转到 编辑页面....");
+                 var href = "picture/before_edit_picture";
+                 var path = $(this).attr("path").replaceAll("\\","/");
+                 $("#rightPage").load(href+"?path="+path);
+                     // console.log(href+"?path="+path);
             });
 
             // 点击时激发
@@ -121,11 +121,8 @@
             $(document).on('mousedown','.imgDiv', function (e) {
                 console.log("mousedown to pic", "id" , this.id);
                 return $.vakata.dnd.start(e, {
-                        'jstree' : true,
-                        'obj' : $(this),
                         'nodes' : [{ id : this.id }] },
                     '<div id="jstree-dnd" class="jstree-default"><i class="jstree-icon jstree-er"></i>' + $(this).text() + '<ins class="jstree-copy" style="display:none;">+</ins></div>');
-
             });
 
 
@@ -214,12 +211,6 @@
             });
             });
 
-
-    function reLoadLeftPage(){
-
-        var labelHref = "label/getLabelTree";
-        $("#leftPage").load(labelHref);
-    }
 
     ///eof document ready
     function addLabel(newlabelId,newlabelName){
