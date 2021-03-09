@@ -27,31 +27,28 @@
                     'check_callback' : function (operation, node, node_parent, node_position, more) {
                         return true;
                     },//eof check callback
-                    /* 'data' : [
-                         { "id" : "labelID_1", "parent" : "#", "text" : "jimi" ,"icon": "glyphicon glyphicon-leaf" ,"tag":1,"href":"label/selectByLabel?labelName=jimi"},
-                         { "id" : "labelID_2", "parent" : "#", "text" : "jingjing" ,"icon": "glyphicon glyphicon-tag", "tag":2,"href":"label/selectByLabel?labelName=jingjing"},
-                         { "id" : "labelID_3", "parent" : "labelID_4", "text" : "rose","tag":3,"href":"label/selectByLabel?labelName=rose"},
-                         { "id" : "labelID_4", "parent" : "#", "text" : "花花","tag":4,"href":"label/selectByLabel?labelName=花花"},
-                     ],*/
                     'data' :${allLabelJson},
                 } ,
                 "plugins" : [ "contextmenu", "dnd"]
             }).on('ready.jstree',function(){
                 $('#jstree').jstree('open_all');
             });//eof jstree
-            // 取消所有选中
+
 
             $('.imgDiv').on('click',function(){
 
                  console.log("点击了图片 即将跳转到 编辑页面....");
                  var href = "picture/before_edit_picture";
                  var picId =$(this).attr("id");
+                 // vue的 id不能纯数字开头
+                 picId = picId.split("_")[1];
                  $("#rightPage").load(href+"?pId="+picId);
 
             });
 
             // 点击时激发
-            $('#jstree').on("select_node.jstree", function (e, data) {
+            $('#jstree')
+                .on("select_node.jstree", function (e, data) {
                 // console.log(data.selected);
                 // console.log("id",data.node.original.id);
                 // console.log("text",data.node.original.text);
@@ -61,12 +58,15 @@
                 // console.log("tag",data.node.original.tag);
                 // var labelHref = "label/selectByLabel?labelName=花花";
                 console.log("在tree.jsp中 点击了标签 ",data.node.text);
-                // 跳回 列表页面时 悬停再次显示
-                // $(".tooltip-show").tooltip({html : true});
-                // console.log("设置了 再次显示悬停");
-                // $("[data-toggle='tooltip']").tooltip({html : true,container: 'body' });
-                var labelHref = data.node.original.href;
-                $("#rightPage").load(labelHref);
+                var labelName = data.node.text;
+                // 当tag数量为 0 时显示 空空如也  label(0)
+                if(labelName.substring(labelName.lastIndexOf("(")+1,labelName.lastIndexOf("(")+2) == "0"){
+                    console.log("空空如也");
+                    $("#rightPage").html("<h1 style='color: red'>空空如也</h1>");
+                }else {
+                    var labelHref = data.node.original.href;
+                    $("#rightPage").load(labelHref);
+                }
             })
                 .on('rename_node.jstree', function (e, data) {
 
@@ -127,7 +127,7 @@
 
 
             $(document).on('dnd_move.vakata', function (e, data) {
-                console.log("dnd_move.vakata 执行了");
+                // console.log("dnd_move.vakata 执行了");
                 data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
                 var t = $(data.event.target);
                 if(!t.closest('.jstree').length) {
@@ -142,14 +142,14 @@
              });
             $(document).on('dnd_start.vakata', function (e, data) {
 
-                console.log("dnd_start 开始拖拽....");
+                // console.log("dnd_start 开始拖拽....");
 
             });
 
 
             $(document).on('dnd_stop.vakata', function (e, data) {
                 var goToChange = false;
-                console.log("dnd_stop  拖拽放下...");
+                // console.log("dnd_stop  拖拽放下...");
                 // 1.拖动标签到照片中
                 if(data.event.target.localName == "img"){
                     var labelId = data.data.nodes[0];

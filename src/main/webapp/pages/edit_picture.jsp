@@ -296,6 +296,7 @@
                     "pId="+pId,
                     function (data) {
                         if (data.status == 'success') {
+                            $("#rightPage").load("picture/page");
                             // $("#" + divID).remove();
                             // success_prompt(data.msg, 1500);
                             // countDown(2);
