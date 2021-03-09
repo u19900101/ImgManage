@@ -42,12 +42,12 @@
             // 取消所有选中
 
             $('.imgDiv').on('click',function(){
-                // console.log("原path",$(this).attr("path"),"原 id:",$(this).attr("id"));
+
                  console.log("点击了图片 即将跳转到 编辑页面....");
                  var href = "picture/before_edit_picture";
-                 var path = $(this).attr("path").replaceAll("\\","/");
-                 $("#rightPage").load(href+"?path="+path);
-                     // console.log(href+"?path="+path);
+                 var picId =$(this).attr("id");
+                 $("#rightPage").load(href+"?pId="+picId);
+
             });
 
             // 点击时激发
@@ -148,22 +148,34 @@
 
 
             $(document).on('dnd_stop.vakata', function (e, data) {
-
+                var goToChange = false;
                 console.log("dnd_stop  拖拽放下...");
-                // console.log(data);
-                // 判断是否是 拖动到了 <img>标签中
+                // 1.拖动标签到照片中
                 if(data.event.target.localName == "img"){
-                    var newLabelId = data.data.nodes[0];
-                    var  newlabelName=data.element.innerText;
-                    console.log(newLabelId);
-                    console.log(newlabelName);
+                    var labelId = data.data.nodes[0];
+                    var labelName=data.element.innerText;
+                    console.log("newLabelId",labelId,"newlabelName",labelName);
                     // img 标签 的 src就是
-                    var picPath = data.event.target.attributes.src.nodeValue.replaceAll("\\","/");
+                    var picId = data.event.target.attributes.id.nodeValue;
+                    // console.log("picId",picId);
                     // console.log(data);
-                    console.log(picPath);
+                    goToChange = true;
+                }
+
+                // 2.将照片拖拽到 标签中
+                if(data.event.target.id.lastIndexOf("_anchor") != -1){
+                    console.log("拖拽图片到标签： ");
+                    var labelId = data.event.target.id.substring(0,data.event.target.id.lastIndexOf("_"));
+                    var picId = data.data.nodes[0].id;
+                    // console.log("picId: ",picId);
+                    var labelName = data.event.target.innerText;
+                    console.log("labelId: ",labelId,"newlabelName: ",labelName.substring(0,labelName.lastIndexOf("(")));
+                    goToChange = true;
+                }
+                if(goToChange){
                     $.post(
                         "http://localhost:8080/pic/label/ajaxAddLabelToPic",
-                        "picPath="+picPath+"&newLabelId="+newLabelId+"&newlabelName="+newlabelName,
+                        "picId="+picId+"&newLabelId="+labelId+"&newlabelName="+labelName,
                         function(data) {
                             if(data.exist){
                                 console.log(" 照片已 存在相同标签不添加");
@@ -172,42 +184,17 @@
                             }else if(data.succeed)
                             {
                                 // 在 右侧页面 添加标签图标
-                                addLabel(data.newLabelId,data.newlabelName);
+                                var newlabelName = data.newlabelName.substring(0,labelName.lastIndexOf("("));
+                                addLabel(data.newLabelId,newlabelName);
                                 // // 在 左侧导航栏 进行Tags的更新
                                 // 无法做到 tag数量实时更新  使用load加载后 不能修改node
-                                var changeLabels = data.changeLabels;
-                                for (var i = 0; i < changeLabels.length; i++) {
-                                    // var node = $('#jstree').jstree("get_node", changeLabels[i].toString());
-                                    // var node = $('#jstree').jstree("get_node","44");
-
-                                    // var node = $('#jstree').jstree(true).get_node('44');
-
-                                    // console.log("node: ",node);
-                                    // var text = "("+(Number(node.tags)+1)+")";
-                                    // console.log("node: ",node[0].innerText);
-                                    // // console.log("node: ",node.text);
-                                    //  console.log("node: ");
-                                    //
-                                    // var node =  { "id" : "44", "parent" : "#", "text" : "Child 1" };
-                                    // $("#jstree").jstree('rename_node', node , "text_NodeName" );
-                                }
                                 reLoadLeftPage();
-                                // console.log("changeLabels: ",);
-                                // updateTags(data.changeLabels,1);
                             };
                         },
                         "json"
                     );
                 }
 
-                // 将照片拖拽到 标签
-                if(data.event.target.id.lastIndexOf("_anchor") != -1){
-                    console.log("拖拽图片到标签： ");
-                    var labelId = data.event.target.id.substring(0,data.event.target.id.lastIndexOf("_"));
-                    var picId = data.data.nodes[0].id;
-                    console.log("labelId: ",labelId);
-                    console.log("picId: ",picId);
-                }
             });
             });
 

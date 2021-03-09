@@ -117,7 +117,7 @@
     ,
     <include refid="Blob_Column_List" />
     from t_pic
-    where path = #{path,jdbcType=VARCHAR}
+    where pid = #{pId,jdbcType=VARCHAR}
   </select>
 
 

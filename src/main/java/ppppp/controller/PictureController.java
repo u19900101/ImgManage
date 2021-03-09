@@ -21,6 +21,8 @@ import java.io.*;
 
 import java.text.ParseException;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 
@@ -386,18 +388,19 @@ public class PictureController {
     }
 
     @RequestMapping(value = "/before_edit_picture")//,method = RequestMethod.POST
-    public String before_edit_picture(String path,Model model){
-        path = path.replace("/", "\\");
-        Picture picture = mapper.selectByPrimaryKey(path);
+    public String before_edit_picture(String pId,Model model){
 
-        //不带后缀名显示
+        Picture picture = mapper.selectByPrimaryKey(pId);
+
+        //不带后缀名显示  将 picture中label属性 从id转化为 name,便于在页面中显示
         String[] split = picture.getPname().split("\\.");
         picture.setPname(split[0]);
         if(picture.getPlabel()!=null && picture.getPlabel().length()>1){
             String[] labels = picture.getPlabel().replace(","," ").trim().split(" ");
+            model.addAttribute("labelIds",picture.getPlabel().replace(","," ").trim());
             String labelsListStr = "";
             for (String label : labels) {
-                labelsListStr +=" " +labelMapper.selectByPrimaryKey(Integer.valueOf(label)).getLabelName();
+                labelsListStr +=" " +labelMapper.selectByPrimaryKey(Integer.valueOf(label)).getLabelName().replace(" ", "");
             }
             picture.setPlabel(labelsListStr);
         }
@@ -435,10 +438,21 @@ public class PictureController {
       // 对相同单个照片进行处理
     @ResponseBody
     @RequestMapping(value = "/ajaxDeletePic",method = RequestMethod.POST)
-    public String ajaxDeletePic(String existImgPath,HttpServletRequest req) throws ParseException, ImageProcessingException, IOException {
+    public String ajaxDeletePic(String pId,HttpServletRequest req) throws ParseException, ImageProcessingException, IOException {
 
         HashMap<String,Object> map = new HashMap<>();
+        // 操作 标签数据库  更新该照片包含的所有 标签
+        Picture picture = mapper.selectByPrimaryKey(pId);
+        if(picture.getPlabel()!= null && picture.getPlabel().length()>1){
+            String [] labelIds = picture.getPlabel().replaceAll(",", " ").trim().split(" ");
+            List<String> labelIdList= Stream.of(labelIds).collect(Collectors.toList());
+            updateRelateLabel(labelIdList,map);
+            if(map.get("msg") != null){
+                return new Gson().toJson(map);
+            }
+        }
 
+        String existImgPath = picture.getPath();
         String absExistImgPath = baseDir+"\\"+existImgPath;
         System.out.println("deleteSingle");
         // 先删除 存在的文件 和 数据库中的内容
@@ -457,6 +471,30 @@ public class PictureController {
             );
         }
         return new Gson().toJson(map);
+    }
+
+    private void updateRelateLabel(List<String> labelIdList, HashMap<String, Object> map) {
+
+        // 直接更新所有标签及其父标签 有且仅有更新一次
+        List handledLabelIds = new ArrayList();
+        for (String labelId : labelIdList) {
+            Label label = labelMapper.selectByPrimaryKey(Integer.valueOf(labelId));
+            while (label != null){
+
+                // 若已更新过就不再更新
+                if(!handledLabelIds.contains(label.getLabelid())){
+                    label.setTags(label.getTags()-1);
+                    int update = labelMapper.updateByPrimaryKey(label);
+                    if(update == 1){
+                        handledLabelIds.add(label.getLabelid());
+                    }else {
+                        map.put("status", "fail");
+                        map.put("msg", "操作失败鸟");
+                    }
+                }
+                label = labelMapper.selectByPrimaryKey(label.getParentid());
+            }
+        }
     }
 
 

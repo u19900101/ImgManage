@@ -169,16 +169,13 @@
             },
             methods: {
                 deletePicture: function () {
-                    // 函数传递 特殊字符有bug 故  更换获取方式
-                    var existImgPath = $("#myImg${picture.path.replace('\\', '').replace('_', '').replace('.', '')}").attr('src');
-                    // 要replaceAll  下面的则不需要 尬
-                    var divID = existImgPath.replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
+                    var pId = '${picture.pid}';
                     $.post(
                         "http://localhost:8080/pic/picture/ajaxDeletePic",
-                        "existImgPath=" + existImgPath,
+                        "pId=" + pId,
                         function (data) {
                             if (data.status == 'success') {
-                                $("#" + divID).remove();
+                                $("#" + pId).remove();
                                 success_prompt(data.msg, 1500);
                             } else if (data.status == 'fail') {
                                 fail_prompt(data.msg, 2500);
@@ -302,7 +299,7 @@
                                          style="position:relative;border: 1px solid yellow">
                                         <input type="hidden" name="path" value="${picture.path}">
 
-                                        <img id = "myImg${picture.path.replace('\\', '').replace('_', '').replace('.', '')}"
+                                        <img id = "${picture.pid}"
                                              src="${picture.path}"
                                              class="tooltip-show"
                                              data-placement="top"

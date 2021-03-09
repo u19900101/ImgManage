@@ -133,7 +133,7 @@
         <div class="col-md-6" name = "div2">
             <%--显示照片--%>
             <div class="imgDiv" id='${picture.pid}' @mouseenter="enter()" @mouseleave="left()" style="border: 1px solid yellow">
-                <img id = "myImg"
+                <img id = "${picture.pid}"
                      src="${picture.path}"
                      style="height: 100%;width: auto;position:relative;border: 1px solid yellow"
                     class="imgDiv">
@@ -172,42 +172,45 @@
     $(function () {
         console.log("edit 页面加载了...");
         // 删除照片标签
-        $('body').on('click','.close',function(){
+
+        $('#picTags').on('click','.close',function(){
+            var deleteLabelId = $(this).next().attr("id");
             var deleteLabelName = $(this).next().text();
-            var picPath = $("#myImg").attr('src');
+            var pId = '${picture.pid}';
+            var picName = '${picture.pname}';
+            console.log("点击x 标签","picName--",picName,"deleteLabelName--",
+                deleteLabelName,"deleteLabelId--",deleteLabelId);
             $.post(
                 "http://localhost:8080/pic/label/ajaxDeletePicLabel",
-                "deleteLabelName=" + deleteLabelName+
-                "&picPath=" + picPath,
+                "deleteLabelId=" + deleteLabelId+
+                "&pId=" + pId,
                 function (data) {
                     if (!data.isDelete) {
                         alert("失败 -- 从数据库删除标签")
                     }else {
-                        // 操作主页面的徽记
-                        $("#changeLabels").val(data.changeLabels);
-                        console.log("edit 页面 点击了删除标签")
-                        var labelHref = "label/getLabelTree";
-                        $("#leftPage").load(labelHref);
-                        // parent.$(window.parent.document).find('#updateTags').click();
+                        console.log("成功 -- 从数据库删除标签")
+                        reLoadLeftPage();
                     }
                 },
                 "json"
             );
         });
+
         if('${picture.plabel}'.length>0){
-            var labelList = '${picture.plabel}'.split(" ");
-            console.log("picture.plabel",'${picture.plabel}',"labelList.length",labelList.length);
+            var labelNameList = '${picture.plabel}'.split(" ");
+            var labelIdList = '${labelIds}'.split(" ");
+            console.log("picture.plabel",'${picture.plabel}',"labelList.length",labelNameList.length);
             // 解决 添加后出现多个标签的bug 先清空再添加
             $("#picTags").empty();
-            for (var i = 0; i < labelList.length; i++) {
-                addLabel(labelList[i]);
+            for (var i = 0; i < labelNameList.length; i++) {
+                addLabel(labelIdList[i],labelNameList[i]);
             }
         }
 
-        function addLabel(newlabelName){
+        function addLabel(newLabelId,newlabelName){
             var html ='<div id="myAlert" class="alert alert-default" style="float:left;width:fit-content;">' +
                 '<span class="close" data-dismiss="alert">&times; </span>' +
-                '<strong id = '+newlabelName+'>'
+                '<strong id = '+newLabelId+'>'
                 + newlabelName + '</strong></div>';
             $("#picTags").append(html);
 
@@ -234,7 +237,7 @@
             changeName: function () {
                 var pname = $("#pname").val();
                 var pictype = $("#pname").attr('pictype');
-                var picpath = $("#myImg").attr('src');
+                var picpath = '${picture.path}';
                 $.post(
                     "http://localhost:8080/pic/picture/ajaxUpdateInfo",
                     "pname=" + pname+
@@ -259,7 +262,7 @@
             },
             changeDesc: function () {
                 var pictype = $("#pname").attr('pictype');
-                var picpath = $("#myImg").attr('src');
+                var picpath = '${picture.path}';
                 var pdesc = $("#pdesc").val();
                 $.post(
                     "http://localhost:8080/pic/picture/ajaxUpdateInfo",
@@ -284,21 +287,24 @@
             },
             deletePicture: function () {
                 // 函数传递 特殊字符有bug 故  更换获取方式
-                var existImgPath = $("#myImg").attr('src');
+                var existImgPath = '${picture.path}';
+                var pId = '${picture.pid}';
                 // 要replaceAll  下面的则不需要 尬
-                var divID = existImgPath.replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
+                // var divID = existImgPath.replaceAll('\\', '').replaceAll('\_', '').replaceAll('\.', '');
                 $.post(
                     "http://localhost:8080/pic/picture/ajaxDeletePic",
-                    "existImgPath=" + existImgPath,
+                    "pId="+pId,
                     function (data) {
                         if (data.status == 'success') {
-                            $("#" + divID).remove();
-                            success_prompt(data.msg, 1500);
-                            countDown(2);
+                            // $("#" + divID).remove();
+                            // success_prompt(data.msg, 1500);
+                            // countDown(2);
+                            console.log("成功-- 删除照片")
                         } else if (data.status == 'fail') {
-                            fail_prompt(data.msg, 2500);
+                            // fail_prompt(data.msg, 2500);
+                            console.log("失败-- 删除照片")
                         } else {
-                            warning_prompt("其他未知错误.....please enjoy debug", 2500);
+                            // warning_prompt("其他未知错误.....please enjoy debug", 2500);
                         }
                     },
                     "json"

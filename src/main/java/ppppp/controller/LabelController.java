@@ -188,12 +188,12 @@ public class LabelController {
 
     @ResponseBody
     @RequestMapping(value = "/ajaxAddLabelToPic",method = RequestMethod.POST)
-    public String ajaxAddLabelToPic(String picPath,Integer newLabelId,String newlabelName) {
+    public String ajaxAddLabelToPic(String picId,Integer newLabelId,String newlabelName) {
         HashMap map = new HashMap();
         ArrayList<Integer> changeLabels = new ArrayList<>();
         int addOrDeleteTagsById = 0;
         // 将字符串从 / 转为 \ 以便查询
-        Picture picture = pictureMapper.selectByPrimaryKey(picPath.replace("/", "\\"));
+        Picture picture = pictureMapper.selectByPrimaryKey(picId);
         if(picture.getPlabel()!=null && picture.getPlabel().length()>1){
             String[] labelsId = picture.getPlabel().replace(","," ").trim().split(" ");
             // 判断原 照片是否已经存在 新增的标签
@@ -222,8 +222,8 @@ public class LabelController {
             map.put("succeed", true);
             map.put("newLabelId", newLabelId);
             // "jimi(111)  --> jimi
-            map.put("newlabelName", newlabelName.substring(0, newlabelName.lastIndexOf("(")));
-            map.put("changeLabels", changeLabels);
+            map.put("newlabelName", newlabelName);
+            // map.put("changeLabels", changeLabels);
         }
 
         return new Gson().toJson(map);
@@ -292,10 +292,10 @@ public class LabelController {
     //删除照片的标签  同时修改徽记数量
     @ResponseBody
     @RequestMapping(value = "/ajaxDeletePicLabel",method = RequestMethod.POST)
-    public String ajaxDeletePicLabel(String picPath,String deleteLabelName) {
+    public String ajaxDeletePicLabel(String pId,Integer deleteLabelId) {
         HashMap map = new HashMap();
-        Picture picture = pictureMapper.selectByPrimaryKey(picPath);
-        Label label = labelMapper.selectByLabelName(deleteLabelName).get(0);
+        Picture picture = pictureMapper.selectByPrimaryKey(pId);
+        Label label = labelMapper.selectByPrimaryKey(deleteLabelId);
         if(label == null || picture.getPlabel().indexOf(label.getLabelid().toString())==-1){
             System.out.println("失败 -- 删除照片标签");
             map.put("isDelete", false);
@@ -305,8 +305,8 @@ public class LabelController {
         // 更新 t_label 修改徽记
         // 若 标签同时包含父标签的id 则不进行级联更新
         ArrayList<Integer> changeLabels = new ArrayList<>();
-        int updateTags = addOrDeleteTagsById(picture.getPlabel(),label.getLabelid(),-1,changeLabels);
-        String replace = picture.getPlabel().replace(label.getLabelid() + ",", "");
+        int updateTags = addOrDeleteTagsById(picture.getPlabel(),deleteLabelId,-1,changeLabels);
+        String replace = picture.getPlabel().replace(deleteLabelId + ",", "");
         if(replace.length()==1){
             replace = "";
         }
@@ -322,7 +322,6 @@ public class LabelController {
         }else {
             System.out.println("成功 -- 删除照片标签");
             map.put("isDelete", true);
-            map.put("changeLabels", changeLabels);
         }
         return new Gson().toJson(map);
     }

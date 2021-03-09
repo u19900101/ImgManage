@@ -21,7 +21,7 @@ public interface PictureMapper {
 
     List<Picture> selectByExample(PictureExample example);
 
-    Picture selectByPrimaryKey(String path);
+    Picture selectByPrimaryKey(String pId);
 
     int updateByExampleSelective(@Param("record") Picture record, @Param("example") PictureExample example);
 
