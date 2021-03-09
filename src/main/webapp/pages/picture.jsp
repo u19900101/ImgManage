@@ -26,48 +26,7 @@
 
     </style>
 
-    <%-- alter style--%>
-    <style>
-        .alert {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            min-width: 200px;
-            margin-left: -100px;
-            z-index: 99999;
-            padding: 15px;
-            border: 1px solid transparent;
-            border-radius: 4px;
-        }
 
-        .alert-success {
-            color: #3c763d;
-            background-color: #dff0d8;
-            border-color: #d6e9c6;
-            font-size: xx-large;
-        }
-
-        .alert-info {
-            color: #31708f;
-            background-color: #d9edf7;
-            border-color: #bce8f1;
-        }
-
-        .alert-warning {
-            color: #8a6d3b;
-            background-color: #fcf8e3;
-            border-color: #faebcc;
-            font-size: xx-large;
-        }
-
-        .alert-danger {
-            color: #a94442;
-            background-color: #f2dede;
-            border-color: #ebccd1;
-            font-size: xx-large;
-        }
-    </style>
     <script type="text/javascript">
         $(function(){
             // 批量操作
@@ -162,11 +121,9 @@
                 <c:set var="index" value="${index+1}" />
                 <%-- 每个月的按钮 --%>
                 <c:if test="${not empty item.value}">
-                    <button type="button" class="btn btn-primary" data-toggle="collapse"
-                            data-target="#${item.key}" style="background: #e3e3e3">
-                        <h2 style="color: chocolate">${item.key}</h2>
-                    </button>
+                    <button class="btn btn-primary"  data-target="#${item.key}" style="background: #e3e3e3"> <h2 style="color: chocolate">${item.key}</h2> </button>
                 </c:if>
+
 
                 <c:if test="${empty item.value}">
                    <h1 style="color: red">暂无照片</h1>
@@ -331,7 +288,6 @@
 </script>
 <script>
     $(function () {
-        $("[data-toggle='tooltip']").tooltip({html : true});
         console.log("picture 页面加载了！");
         <c:forEach var="item" items="${monthsTreeMapListPic}">
             <c:forEach items="${item.value}" var="picture" >
@@ -399,6 +355,14 @@
                 });
             </c:forEach>
         </c:forEach>
+        $("[data-toggle='tooltip']").tooltip({html : true});
+
+        $(".btn").on("click",function () {
+
+            var targetId  = $(this).attr("data-target");
+            console.log(targetId);
+            $(targetId).collapse('toggle');
+        })
     });
     function reLoadLeftPage(){
         var labelHref = "label/getLabelTree";
