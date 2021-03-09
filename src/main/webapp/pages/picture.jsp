@@ -292,6 +292,7 @@
         <c:forEach var="item" items="${monthsTreeMapListPic}">
             <c:forEach items="${item.value}" var="picture" >
                 var vm = new Vue({
+                    // 纯数字id容易出错
                     el: '#v_${picture.pid}',
                     data:{
                         timezone: '',

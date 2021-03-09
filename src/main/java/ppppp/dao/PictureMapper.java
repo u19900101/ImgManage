@@ -11,7 +11,7 @@ public interface PictureMapper {
 
     int deleteByExample(PictureExample example);
 
-    int deleteByPrimaryKey(String path);
+    int deleteByPrimaryKey(String pid);
 
     int insert(Picture record);
 
@@ -21,7 +21,7 @@ public interface PictureMapper {
 
     List<Picture> selectByExample(PictureExample example);
 
-    Picture selectByPrimaryKey(String pId);
+    Picture selectByPrimaryKey(String pid);
 
     int updateByExampleSelective(@Param("record") Picture record, @Param("example") PictureExample example);
 
@@ -33,7 +33,7 @@ public interface PictureMapper {
     int MyUpdateByPrimaryKey(@Param("newPath")String newPath,@Param("record")Picture record);
     int updateByPrimaryKeyWithBLOBs(Picture record);
 
-    int updateByPrimaryKey(String record);
+    int updateByPrimaryKey(Picture picture);
 
     ArrayList<Picture> selectByLabelNameLike(List labelNameList);
 

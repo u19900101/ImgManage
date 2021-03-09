@@ -2,8 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="ppppp.dao.PictureMapper">
   <resultMap id="BaseResultMap" type="ppppp.bean.Picture">
-    <id column="path" jdbcType="VARCHAR" property="path" />
-    <result column="pid" jdbcType="VARCHAR" property="pid" />
+    <id column="pid" jdbcType="VARCHAR" property="pid"/>
+    <result  column="path" jdbcType="VARCHAR" property="path"/>
     <result column="pname" jdbcType="VARCHAR" property="pname" />
     <result column="pcreatime" jdbcType="VARCHAR" property="pcreatime" />
     <result column="GPS_Longitude" jdbcType="VARCHAR" property="gpsLongitude" />
@@ -117,7 +117,7 @@
     ,
     <include refid="Blob_Column_List" />
     from t_pic
-    where pid = #{pId,jdbcType=VARCHAR}
+    where pid = #{pid,jdbcType=VARCHAR}
   </select>
 
 
@@ -146,6 +146,22 @@
       `plabel` LIKE CONCAT('%',#{item},'%')
     </foreach>
   </select>
+  <update id="MyUpdateByPrimaryKey" parameterType="map">
+    update t_pic
+    set path = #{newPath,jdbcType=VARCHAR},
+    pid = #{record.pid,jdbcType=VARCHAR},
+    pname = #{record.pname,jdbcType=VARCHAR},
+    pcreatime = #{record.pcreatime,jdbcType=VARCHAR},
+    GPS_Longitude = #{record.gpsLongitude,jdbcType=VARCHAR},
+    GPS_Latitude = #{record.gpsLatitude,jdbcType=VARCHAR},
+    pwidth = #{record.pwidth,jdbcType=INTEGER},
+    pheight = #{record.pheight,jdbcType=INTEGER},
+    psize = #{record.psize,jdbcType=DOUBLE},
+    plabel = #{record.plabel,jdbcType=VARCHAR},
+    pdesc = #{record.pdesc,jdbcType=LONGVARCHAR}
+    where path = #{record.path,jdbcType=VARCHAR}
+  </update>
+
 
 
 
@@ -155,7 +171,7 @@
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
     delete from t_pic
-    where path = #{path,jdbcType=VARCHAR}
+    where path = #{pid,jdbcType=VARCHAR}
   </delete>
   <delete id="deleteByExample" parameterType="ppppp.bean.PictureExample">
     delete from t_pic
@@ -329,8 +345,8 @@
   <update id="updateByPrimaryKeySelective" parameterType="ppppp.bean.Picture">
     update t_pic
     <set>
-      <if test="pid != null">
-        pid = #{pid,jdbcType=VARCHAR},
+      <if test="path != null">
+        path = #{path,jdbcType=VARCHAR},
       </if>
       <if test="pname != null">
         pname = #{pname,jdbcType=VARCHAR},
@@ -360,11 +376,11 @@
         pdesc = #{pdesc,jdbcType=LONGVARCHAR},
       </if>
     </set>
-    where path = #{path,jdbcType=VARCHAR}
+    where  pid = #{pid,jdbcType=VARCHAR}
   </update>
   <update id="updateByPrimaryKeyWithBLOBs" parameterType="ppppp.bean.Picture">
     update t_pic
-    set pid = #{pid,jdbcType=VARCHAR},
+    set path = #{path,jdbcType=VARCHAR},
       pname = #{pname,jdbcType=VARCHAR},
       pcreatime = #{pcreatime,jdbcType=VARCHAR},
       GPS_Longitude = #{gpsLongitude,jdbcType=VARCHAR},
@@ -374,11 +390,11 @@
       psize = #{psize,jdbcType=DOUBLE},
       plabel = #{plabel,jdbcType=VARCHAR},
       pdesc = #{pdesc,jdbcType=LONGVARCHAR}
-    where path = #{path,jdbcType=VARCHAR}
+    where pid = #{pid,jdbcType=VARCHAR}
   </update>
   <update id="updateByPrimaryKey" parameterType="ppppp.bean.Picture">
     update t_pic
-    set pid = #{pid,jdbcType=VARCHAR},
+    set path = #{path,jdbcType=VARCHAR},
       pname = #{pname,jdbcType=VARCHAR},
       pcreatime = #{pcreatime,jdbcType=VARCHAR},
       GPS_Longitude = #{gpsLongitude,jdbcType=VARCHAR},
@@ -387,21 +403,7 @@
       pheight = #{pheight,jdbcType=INTEGER},
       psize = #{psize,jdbcType=DOUBLE},
       plabel = #{plabel,jdbcType=VARCHAR}
-    where path = #{path,jdbcType=VARCHAR}
+    where pid = #{pid,jdbcType=VARCHAR}
   </update>
-  <update id="MyUpdateByPrimaryKey" parameterType="map">
-    update t_pic
-    set path = #{newPath,jdbcType=VARCHAR},
-    pid = #{record.pid,jdbcType=VARCHAR},
-    pname = #{record.pname,jdbcType=VARCHAR},
-    pcreatime = #{record.pcreatime,jdbcType=VARCHAR},
-    GPS_Longitude = #{record.gpsLongitude,jdbcType=VARCHAR},
-    GPS_Latitude = #{record.gpsLatitude,jdbcType=VARCHAR},
-    pwidth = #{record.pwidth,jdbcType=INTEGER},
-    pheight = #{record.pheight,jdbcType=INTEGER},
-    psize = #{record.psize,jdbcType=DOUBLE},
-    plabel = #{record.plabel,jdbcType=VARCHAR},
-    pdesc = #{record.pdesc,jdbcType=LONGVARCHAR}
-    where path = #{record.path,jdbcType=VARCHAR}
-  </update>
+
 </mapper>

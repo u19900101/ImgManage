@@ -157,6 +157,7 @@
                     console.log("newLabelId",labelId,"newlabelName",labelName);
                     // img 标签 的 src就是
                     var picId = data.event.target.attributes.id.nodeValue;
+                    picId = picId.split("_")[1];
                     // console.log("picId",picId);
                     // console.log(data);
                     goToChange = true;
@@ -167,6 +168,7 @@
                     console.log("拖拽图片到标签： ");
                     var labelId = data.event.target.id.substring(0,data.event.target.id.lastIndexOf("_"));
                     var picId = data.data.nodes[0].id;
+                    picId = picId.split("_")[1];
                     // console.log("picId: ",picId);
                     var labelName = data.event.target.innerText;
                     console.log("labelId: ",labelId,"newlabelName: ",labelName.substring(0,labelName.lastIndexOf("(")));
