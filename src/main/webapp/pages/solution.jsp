@@ -26,7 +26,12 @@
 </head>
 <body>
 <div class="wrapper" id="page">
+
     <div class="left" id = "leftPage" style="border: 1px solid green">
+        <button id="showAllPic">
+            <span class="glyphicon glyphicon-tags" style="font-size:15px;" ></span>
+            查看所有
+        </button>
         <div id="jstree">
 
         </div>
@@ -51,6 +56,10 @@
             // $("#leftPage").load(labelHref);
             // $("#leftPage").load("pages/tree.jsp");
         };
+
+        $("#showAllPic").on("click",function () {
+            onload();
+        })
     });
 
 </script>

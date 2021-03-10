@@ -367,7 +367,7 @@
     });
     function reLoadLeftPage(){
         var labelHref = "label/getLabelTree";
-        $("#leftPage").load(labelHref);
+        $("#jstree").load(labelHref);
     }
     $(document).ready(function(){
         reLoadLeftPage();
