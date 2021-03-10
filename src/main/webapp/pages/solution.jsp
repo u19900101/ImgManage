@@ -40,6 +40,7 @@
 
        <%-- 右侧页面显示区域 --%>
 
+
     </div>
         <%--右边页面点击 删除标签时 更新到主页面 --%>
     <input type="hidden" id="updateTags">
