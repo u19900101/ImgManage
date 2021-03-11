@@ -7,6 +7,11 @@ import org.python.util.PythonInterpreter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author lppppp
@@ -44,6 +49,51 @@ public class java调用python {
         }
 
     }
-//    rectangles[[(2340, 171) (2608, 439)], [(1181, 379) (1449, 647)]
+//
 //    [points[(2357, 292) ... ,points[(1230, 496), (1230, 524), ]]
+    @Test
+    public void TM(){
+        String s = "rectangles[[(2340, 171) (2608, 439)], [(1181, 379) (1449, 647)], [(1181, 379) (1449, 647)]]";
+        String regEx="[\\D]+";
+        String[] cs = s.replaceAll(regEx, " ").trim().split(" ");
+
+        // 每4个一组装进数组中
+        ArrayList<List<Integer>> rect = new ArrayList<>();
+        for (int i = 0; i < cs.length; ) {
+            List<Integer> list = new ArrayList<>();
+            for (int j = 0; j < 4; j++) {
+                if(j == 2 || j == 3){
+                    list.add(Integer.valueOf(cs[i])-Integer.valueOf(cs[i-2]));
+                }else {
+                    list.add(Integer.valueOf(cs[i]));
+                }
+                i++;
+            }
+            rect.add(list);
+        }
+
+        for (List<Integer> integers : rect) {
+            System.out.println(integers.toString());
+        }
+    }
+
+    @Test
+    public void Tkk(){
+        String content = "满39元减2元";
+        //正则表达式，用于匹配非数字串，+号用于匹配出多个非数字串
+        String regEx="[^0-9]+";
+        Pattern pattern = Pattern.compile(regEx);
+        //用定义好的正则表达式拆分字符串，把字符串中的数字留出来
+        String[] cs = pattern.split(content);
+        System.out.println(Arrays.toString(cs));
+    }
+
+    @Test
+    public void T1(){
+        String[] cs = " a, b ; ; c".split("[,;\\s]+");
+        for (String c : cs) {
+            System.out.println(c);
+        }
+        System.out.println(Arrays.toString(cs));
+    }
 }

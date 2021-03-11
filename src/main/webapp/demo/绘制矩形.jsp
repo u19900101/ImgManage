@@ -40,7 +40,7 @@
 
 <script>
 
-    const img = document.getElementById("img")
+    const img = document.getElementById("img");
     // 把图片转base64
     function myFile(file) {
         const imgsize = file.files[0]

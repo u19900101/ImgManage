@@ -5,12 +5,13 @@ import time
 import face_recognition
 import numpy as np
 def getface_dlib(imgpath,landmarkpath):
-    # s = time.time()
+
     img = cv2.imread(imgpath)
+    scale = 3000.0/img.shape[1]
+
     img = cv2.resize(img,(3000,int(img.shape[0]/(img.shape[1])*3000)))
-    # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    print(scale,img.shape[1])
     # 彩色图像识别效果更强一些
-    # img = cv2.resize(img,(800,int(img.shape[0]/img.shape[1]*800)))
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     #人脸分类器
@@ -18,22 +19,25 @@ def getface_dlib(imgpath,landmarkpath):
     # 获取人脸检测器
     predictor = dlib.shape_predictor(landmarkpath)
     dets = detector(gray, 1)
-
-      # 识别人脸特征点，并保存下来
-    faces = dlib.full_object_detections()
-    for det in dets:
-        faces.append(predictor(img, det))
-    # 人脸对齐
-    # images = dlib.get_face_chips(img, faces, size=320)
-    # print("人脸数量为",len(dets))
     print(len(dets))
+    # 识别人脸特征点，并保存下来
+    rectangle = [];
     keypoint = [];
-    for face in dets:
-        shape = predictor(img, face)  # 寻找人脸的68个标定点
-        k = shape.parts()
-        keypoint.append(k)
-    # print("getface_dlib 查找人脸耗时： ",time.time()-s)
-    return dets,keypoint
+    for det in dets:
+        left = det.left()
+        top = det.top()
+        right = det.right()
+        bottom = det.bottom()
+
+        rectangle.append([left,top,right-left,bottom-top])
+        shape = predictor(img, det)  # 寻找人脸的68个标定点
+        pointTemp = []
+        for pt in shape.parts():
+            pointTemp.append([pt.x, pt.y])
+        keypoint.append(pointTemp)
+
+
+    return (np.array(rectangle)/scale).astype(int),(np.array(keypoint)/scale).astype(int)
 def face_encoding(faceimages):
     s = time.time()
     myface_encodings = []
@@ -59,14 +63,16 @@ def getFace(face_encodings,known_face_encodings,known_face_names):
             name = known_face_names[best_match_index]
         face_names.append(name)
     print(" 有人脸",face_names,"人脸与数据库对比耗时： ",time.time()-s)
-# imgpath = "../face/7.jpg";
-# landmarkpath = "D:\\MyJava\\mylifeImg\\src\\main\\java\\ppppp\\python\\shape_predictor_68_face_landmarks.dat";
-#
-# dets,keypoint = getface_dlib(imgpath,landmarkpath)
-if __name__ == '__main__':
-    a = []
-    for i in range(1, len(sys.argv)):
-        a.append(sys.argv[i])
-    dets,keypoint = getface_dlib(a[0],a[1])
-    print(dets)
-    print(keypoint)
+imgpath = "../face/6.jpg";
+landmarkpath = "D:\MyJava\mylifeImg\pythonModule\python\shape_predictor_68_face_landmarks.dat";
+
+dets,keypoint = getface_dlib(imgpath,landmarkpath)
+print(dets)
+print(keypoint)
+# if __name__ == '__main__':
+#     a = []
+#     for i in range(1, len(sys.argv)):
+#         a.append(sys.argv[i])
+#     dets,keypoint = getface_dlib(a[0],a[1])
+#     print(dets)
+#     print(keypoint)
