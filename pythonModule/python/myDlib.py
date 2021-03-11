@@ -2,9 +2,10 @@ import cv2
 import dlib
 import sys
 import time
+import face_recognition
 import numpy as np
 def getface_dlib(imgpath,landmarkpath):
-    s = time.time()
+    # s = time.time()
     img = cv2.imread(imgpath)
     img = cv2.resize(img,(3000,int(img.shape[0]/(img.shape[1])*3000)))
     # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

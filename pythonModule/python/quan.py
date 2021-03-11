@@ -3,6 +3,7 @@ import dlib
 import sys
 import time
 import numpy as np
+import face_recognition
 def getface_dlib(imgpath,landmarkpath):
     s = time.time()
     img = cv2.imread(imgpath)

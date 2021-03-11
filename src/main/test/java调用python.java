@@ -44,25 +44,6 @@ public class java调用python {
         }
 
     }
-
-    @Test
-    public void T3(){
-        // TODO Auto-generated method stub
-        Process proc;
-        try {
-            proc = Runtime.getRuntime().exec("python D:\\MyJava\\mylifeImg\\src\\main\\test\\readImg.py");// 执行py文件
-            //用输入输出流来截取结果
-            BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            String line = null;
-            while ((line = in.readLine()) != null) {
-                System.out.println(line);
-            }
-            in.close();
-            proc.waitFor();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+//    rectangles[[(2340, 171) (2608, 439)], [(1181, 379) (1449, 647)]
+//    [points[(2357, 292) ... ,points[(1230, 496), (1230, 524), ]]
 }
