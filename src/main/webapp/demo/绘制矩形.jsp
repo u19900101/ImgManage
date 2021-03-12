@@ -26,7 +26,7 @@
     ctx.stroke();//绘制边框
 </script>--%>
 
-
+<button id = "getFaceInfo">getFaceInfo</button>
 <div style="display: flex;">
     <canvas id="myCanvas"  width="800"  height="800" style="border:1px solid red;">
         这是浏览器不支持canvas时展示的信息
@@ -56,7 +56,7 @@
         }
     }
 
-    function canvasPart(canvasId,srcImgPath,rect,point,text) {
+    function canvasPart(canvasId,srcImgPath,rects,points,text) {
         var c = document.getElementById(canvasId);
         var cW = $("#"+canvasId).width();
         var ctx = c.getContext("2d");
@@ -71,40 +71,64 @@
             var img_h = img.height;
             // console.log("img_w:",img_w,"img_h:",img_h);
             // console.log("w:",cW,"h:",img_h*cW/img_w);
-
-            ctx.drawImage(img, 0, 0,cW,img_h*cW/img_w);
+            var scale = cW/img_w;
+            ctx.drawImage(img, 0, 0,cW,img_h*scale);
 
             // 添加文字 后面两个数字是坐标
             ctx.font  = "30px sans-serif";
             ctx.fillStyle = '#fc0000';
-            ctx.fillText(text, rect[0]+rect[2]/2-10, rect[1]-10);
+            ctx.fillText(text, 100, 100);
 
-              // 画矩形 前两个数字是坐标, 后面是矩形的宽高 fillRect是填充的
-            ctx.lineWidth = 5;
-            ctx.strokeStyle = '#64e204';
-            ctx.strokeRect(rect[0], rect[1], rect[2], rect[3]);
+            for (var i = 0; i < rects.length; i++) {
+                // 画矩形 前两个数字是坐标, 后面是矩形的宽高 fillRect是填充的
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#64e204';
+                ctx.strokeRect(rects[i][0]*scale, rects[i][1]*scale, rects[i][2]*scale, rects[i][3]*scale);
 
-        //     画圈
-            var r = 3;
-            for (var i=0;i<point.length;i++){
-                ctx.strokeStyle = '#e2d9d9';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(point[i][0],point[i][1],r,0,Math.PI*2,true);
-                ctx.stroke();
+                //  画圈
+                var r = 1;
+                for (var j = 0; j < points[0].length; j++) {
+                    ctx.strokeStyle = '#03e2db';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(points[i][j][0]*scale,points[i][j][1]*scale,r,0,Math.PI*2,true);
+                    // ctx.stroke();// 空心圆
+                    ctx.fillStyle="#69fcd5";
+                    ctx.fill();//画实心圆
+                    // ctx.closePath();
+                }
             }
-
         }
     }
 
-    var point = [[1,1],[10,10],[20,20],[30,30]];
+
+    var faceNum = ${map.faceNum};
+    var rects = ${map.rects};
+    var points = ${map.points};
 
     // 画矩形 前两个数字是坐标, 后面是矩形的宽高
-    var rect = [100, 100, 200, 200];
-    var text = "kkkk";
+
     var canvasId = "myCanvas";
-    var srcImgPath = 'face/7.jpg';
-    canvasPart(canvasId,srcImgPath,rect,point,text);
+    var srcImgPath = 'face/6.jpg';
+    // canvasPart(canvasId,srcImgPath,rect,point,text);
+    canvasPart(canvasId,srcImgPath,rects,points,faceNum);
+    $("#getFaceInfo").on("click",function () {
+
+        $.post(
+            "http://localhost:8080/pic/face/getFace",
+
+            function (data) {
+                var faceNum = data.faceNum;
+                var rects = data.rects;
+                var points = data.points;
+                console.log(faceNum);
+                console.log(rects);
+                console.log(points);
+            },
+            "json"
+        );
+
+    });
 
 </script>
 </body>
