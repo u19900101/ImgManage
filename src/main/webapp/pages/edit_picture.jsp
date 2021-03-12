@@ -14,19 +14,24 @@
             border: 1px solid red;
         }
 
-        .c2{
+     /*   .editImgDiv{
             float: left;
-            width: 60%;
+            !*width: 60%;*!
             height: 600px;
 
-            /* 设置div中的图片居中*/
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            /*为了效果明显，可以将如下边框打开，看一下效果*/
+            !* 设置div中的图片居中*!
+            !*display:flex;*!
+            !*align-items:center;*!
+            !*justify-content:center;*!
+            !*为了效果明显，可以将如下边框打开，看一下效果*!
             border:1px solid red;
-        }
+        }*/
 
+       /* .editImgDiv img{
+            !*width: 100%;*!
+            height: 600px;
+
+        }*/
         .c3{
             float: right;
             border: 1px solid gold;
@@ -128,26 +133,38 @@
         <div id="picTags" class="col-md-10" style="padding-left: 0px; padding-right: 0px;" picPath = ${picture.path} ></div>
     </div>
 
-    <%--显示 照片名称  添加描述 --%>
+    <%--显示 照片  添加描述 --%>
     <div class="row">
-        <div class="col-md-6" name = "div2">
+        <%--显示 照片名称 --%>
+        <div class="col-md-8" name = "div2">
             <%--显示照片--%>
-            <div class="imgDiv" id='${picture.pid}' @mouseenter="enter()" @mouseleave="left()" style="border: 1px solid yellow">
-                <img id = "${picture.pid}"
+            <div class="editImgDiv" id='${picture.pid}' @mouseenter="enter()" @mouseleave="left()" style="border: 1px solid yellow;  height: 500px;width: 500px">
+                <img id = "v_${picture.pid}"
                      src="${picture.path}"
-                     style="height: 100%;width: auto;position:relative;border: 1px solid yellow"
-                    class="imgDiv">
+                     <%-- 宽度自适应  --%>
+                     <%--class="img-responsive"--%>
+                     onload="loadImage(this)">
                 <button v-show = "buttonShow" @click = "deletePicture()" type="button" class="btn btn-default  btn-sm"
-                        style="position:absolute; left: 90%;top: 50%"
+                        style="position:absolute; left: 90%;top: 45%"
                         data-placement="top"
                         data-toggle="tooltip"
                         title="点击删除照片">
                     <span class="glyphicon glyphicon-trash" style="font-size:15px;"></span>
                 </button>
+
+                <button v-show = "buttonShow" @click = "regFace()" type="button" class="btn btn-default  btn-sm"
+                        style="position:absolute; left: 90%;top: 55%"
+                        data-placement="top"
+                        data-toggle="tooltip"
+                        title="识别人脸">
+                    <span class="glyphicon glyphicon-user" style="font-size:15px;"></span>
+                </button>
             </div>
+
+
         </div>
         <%--添加描述--%>
-        <div class="col-md-6">
+        <div class="col-md-4">
           <textarea v-if = "picture.pdesc == '' "
                     @keyup.enter="changeDesc()" @blur = "changeDesc()"
                     class="comments" rows="4" cols="50"
@@ -168,6 +185,39 @@
 
 <%-- v-calender 控件--%>
 <script>
+
+    function loadImage(imgD){
+        var div_width = document.getElementById("${picture.pid}").offsetWidth;
+        var div_height = document.getElementById("${picture.pid}").offsetHeight;
+
+        // 图片地址
+        var img = new Image();
+        img.src = imgD.src;
+
+        var img_w = img.width;
+        var img_h = img.height;
+
+        var scale_w = div_width/img_w;
+
+        var flag = false;
+        if(img_w>div_width){
+            img_w = div_width;
+            img_h = img_h*scale_w;
+            flag = true;
+        }
+
+        var scale_h = div_height/img_h;
+        if(img_h>div_height){
+            img_w = img_w*scale_h;
+            img_h = div_height;
+            flag = true;
+        }
+        if(flag){
+            imgD.height=img_h;
+            imgD.width = img_w;
+        }
+
+    }
 
     $(function () {
         console.log("edit 页面加载了...");
@@ -215,6 +265,7 @@
             $("#picTags").append(html);
 
         };
+        $("[data-toggle='tooltip']").tooltip({html : true});
     });
     var vm = new Vue({
         el: '#app',
@@ -307,6 +358,29 @@
                         } else {
                             // warning_prompt("其他未知错误.....please enjoy debug", 2500);
                         }
+                    },
+                    "json"
+                );
+            },
+            regFace: function () {
+                // 函数传递 特殊字符有bug 故  更换获取方式
+                // 直接取值时会有字符错误
+                var imgPath = $("#v_${picture.pid}").attr("src");
+                // console.log("regFace",imgPath);
+                $.post(
+                    "http://localhost:8080/pic/face/getFace",
+                    "imgPath="+imgPath,
+                    function (data) {
+                        var faceNum = data.faceNum;
+                        if(faceNum>0){
+                            var labelHref = "pages/faceDetect.jsp";
+                            $("#rightPage").load(labelHref);
+                        }
+                      /*  var rects = data.rects;
+                        var points = data.points;
+                        console.log(faceNum);
+                        console.log(rects);
+                        console.log(points);*/
                     },
                     "json"
                 );

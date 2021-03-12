@@ -49,14 +49,6 @@
             // 点击时激发
             $('#jstree')
                 .on("select_node.jstree", function (e, data) {
-                // console.log(data.selected);
-                // console.log("id",data.node.original.id);
-                // console.log("text",data.node.original.text);
-                // console.log("href",data.node.original.href);
-                // // console.log("icon",data.node.original.icon);
-                // console.log("parent",data.node.original.parent);
-                // console.log("tag",data.node.original.tag);
-                // var labelHref = "label/selectByLabel?labelName=花花";
                 console.log("在tree.jsp中 点击了标签 ",data.node.text);
                 var labelName = data.node.text;
                 // 当tag数量为 0 时显示 空空如也  label(0)
@@ -149,17 +141,18 @@
 
             $(document).on('dnd_stop.vakata', function (e, data) {
                 var goToChange = false;
-                // console.log("dnd_stop  拖拽放下...");
+                console.log("dnd_stop  拖拽放下...");
                 // 1.拖动标签到照片中
                 if(data.event.target.localName == "img"){
                     var labelId = data.data.nodes[0];
                     var labelName=data.element.innerText;
-                    console.log("newLabelId",labelId,"newlabelName",labelName);
+
                     // img 标签 的 src就是
                     var picId = data.event.target.attributes.id.nodeValue;
                     picId = picId.split("_")[1];
+                    console.log("newLabelId",labelId,"newlabelName",labelName,"picId",picId);
                     // console.log("picId",picId);
-                    // console.log(data);
+                    console.log(data);
                     goToChange = true;
                 }
 
