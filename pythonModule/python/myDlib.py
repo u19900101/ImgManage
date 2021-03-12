@@ -10,7 +10,7 @@ def getface_dlib(imgpath,landmarkpath):
     scale = 3000.0/img.shape[1]
 
     img = cv2.resize(img,(3000,int(img.shape[0]/(img.shape[1])*3000)))
-    print(scale,img.shape[1])
+    # print(scale,img.shape[1])
     # 彩色图像识别效果更强一些
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
@@ -63,16 +63,17 @@ def getFace(face_encodings,known_face_encodings,known_face_names):
             name = known_face_names[best_match_index]
         face_names.append(name)
     print(" 有人脸",face_names,"人脸与数据库对比耗时： ",time.time()-s)
-imgpath = "../face/6.jpg";
-landmarkpath = "D:\MyJava\mylifeImg\pythonModule\python\shape_predictor_68_face_landmarks.dat";
 
-dets,keypoint = getface_dlib(imgpath,landmarkpath)
-print(dets)
-print(keypoint)
-# if __name__ == '__main__':
-#     a = []
-#     for i in range(1, len(sys.argv)):
-#         a.append(sys.argv[i])
-#     dets,keypoint = getface_dlib(a[0],a[1])
-#     print(dets)
-#     print(keypoint)
+if __name__ == '__main__':
+    a = []
+    for i in range(1, len(sys.argv)):
+        a.append(sys.argv[i])
+    dets,keypoint = getface_dlib(a[0],a[1])
+    print(dets.tolist())
+    print(keypoint.tolist())
+# imgpath = "../face/6.jpg";
+# landmarkpath = "D:\MyJava\mylifeImg\pythonModule\python\shape_predictor_68_face_landmarks.dat";
+# #
+# dets,keypoint = getface_dlib(imgpath,landmarkpath)
+# print(dets.tolist())
+# print(keypoint.tolist())

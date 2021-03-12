@@ -1,3 +1,5 @@
+import com.google.gson.Gson;
+import org.json.JSONArray;
 import org.junit.Test;
 import org.python.core.PyFunction;
 import org.python.core.PyInteger;
@@ -29,9 +31,9 @@ public class java调用python {
     public void T2(){
         // TODO Auto-generated method stub
         String imgpath = "D:\\py\\My_work\\6_27_facebook\\7.jpg";
-        String landmarkpath = "D:\\MyJava\\mylifeImg\\src\\main\\java\\ppppp\\python\\shape_predictor_68_face_landmarks.dat";
+        String landmarkpath = "D:\\MyJava\\mylifeImg\\pythonModule\\python\\shape_predictor_68_face_landmarks.dat";
         try {
-            String pyFilePath = "D:\\MyJava\\mylifeImg\\pythonModule\\python\\quan.py";
+            String pyFilePath = "D:\\MyJava\\mylifeImg\\pythonModule\\python\\myDlib.py";
             String[] args = new String[] { "python",pyFilePath ,imgpath,landmarkpath};
             Process proc = Runtime.getRuntime().exec(args);// 执行py文件
 
@@ -49,8 +51,63 @@ public class java调用python {
         }
 
     }
-//
+//[[297  91  59  59]
+//  [184 237  59  59]
+//  [303 230  59  59]
+//  [420 229  71  71]]
+//    [[[294 110]
+//   [294 117]
+//   [295 124]
+
 //    [points[(2357, 292) ... ,points[(1230, 496), (1230, 524), ]]
+    @Test
+    public void TM3(){
+        String point = "  [[[294 110]  [294 117]  [295 124]] [[294 110]  [294 117]  [295 124]]]";
+        // String regEx="[\\D]+";
+        // String[] cs = s.replaceAll(regEx, " ").trim().split(" ");
+        //
+        // // 每4个一组装进数组中
+        // int [][][] point = new int[cs.length/3/2][3][2];
+        //
+        // for (int i = 0; i < point.length;i++ ) {
+        //
+        //     for (int j = 0; j < point[0].length; j++) {
+        //         point[i][j][0] = Integer.valueOf(cs[i*point[0].length*point[0][0].length+j*2]);
+        //         point[i][j][1] = Integer.valueOf(cs[i*point[0].length*point[0][0].length+j*2+1]);
+        //     }
+        // }
+        // // System.out.println( new Gson().toJson(s));
+        // System.out.println( new Gson().toJson(point));
+        String s2 = point.replaceAll("\\s+", " ").trim().replaceAll(" ", ",");
+        System.out.println(s2);
+
+        String rect = "[[297  91  59  59] [184 237  59  59] [303 230  59  59] [420 229  71  71]]";
+        rect = rect.replaceAll("\\s+", " ").trim().replaceAll(" ", ",");
+        System.out.println(rect);
+        // String s1 = new Gson().toJson(s2);
+        // System.out.println(s1);
+    }
+    @Test
+    public void TM2(){
+        String s = "[[297  91  59  59] [184 237  59  59] [303 230  59  59] [420 229  71  71]]";
+        String regEx="[\\D]+";
+        String[] cs = s.replaceAll(regEx, " ").trim().split(" ");
+
+        // 每4个一组装进数组中
+        ArrayList<List<Integer>> rect = new ArrayList<>();
+        for (int i = 0; i < cs.length; ) {
+            List<Integer> list = new ArrayList<>();
+            for (int j = 0; j < 4; j++) {
+                list.add(Integer.valueOf(cs[i]));
+                i++;
+            }
+            rect.add(list);
+        }
+
+        for (List<Integer> integers : rect) {
+            System.out.println(integers.toString());
+        }
+    }
     @Test
     public void TM(){
         String s = "rectangles[[(2340, 171) (2608, 439)], [(1181, 379) (1449, 647)], [(1181, 379) (1449, 647)]]";
