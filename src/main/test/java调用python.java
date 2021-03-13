@@ -1,30 +1,43 @@
-import com.google.gson.Gson;
-import org.json.JSONArray;
 import org.junit.Test;
-import org.python.core.PyFunction;
-import org.python.core.PyInteger;
-import org.python.core.PyObject;
-import org.python.util.PythonInterpreter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author lppppp
  * @create 2021-03-11 9:17
  */
 public class java调用python {
+
     @Test
     public void T(){
-        PythonInterpreter interpreter = new PythonInterpreter();
-        interpreter.exec("a=[5,2,3,9,4,0]; ");
-        interpreter.exec("print(sorted(a));");  //此处python语句是3.x版本的语法
+        String s = "123kkk";
+        System.out.println(Arrays.toString(s.split("\\d{2}")));
+    }
+    @Test
+    public void T_传参(){
+        // TODO Auto-generated method stub
+        String imgpath = "D:\\MyJava\\mylifeImg\\pythonModule\\face\\d\\9.jpg";
+        try {
+            String pyFilePath = "D:\\MyJava\\mylifeImg\\pythonModule\\python\\getFaceInfo.py";
+            String[] args = new String[] { "python",pyFilePath ,imgpath};
+            Process proc = Runtime.getRuntime().exec(args);// 执行py文件
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            String line = null;
+            while ((line = in.readLine()) != null) {
+                System.out.println(line);
+            }
+            in.close();
+            proc.waitFor();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Test
@@ -51,106 +64,5 @@ public class java调用python {
         }
 
     }
-//[[297  91  59  59]
-//  [184 237  59  59]
-//  [303 230  59  59]
-//  [420 229  71  71]]
-//    [[[294 110]
-//   [294 117]
-//   [295 124]
 
-//    [points[(2357, 292) ... ,points[(1230, 496), (1230, 524), ]]
-    @Test
-    public void TM3(){
-        String point = "  [[[294 110]  [294 117]  [295 124]] [[294 110]  [294 117]  [295 124]]]";
-        // String regEx="[\\D]+";
-        // String[] cs = s.replaceAll(regEx, " ").trim().split(" ");
-        //
-        // // 每4个一组装进数组中
-        // int [][][] point = new int[cs.length/3/2][3][2];
-        //
-        // for (int i = 0; i < point.length;i++ ) {
-        //
-        //     for (int j = 0; j < point[0].length; j++) {
-        //         point[i][j][0] = Integer.valueOf(cs[i*point[0].length*point[0][0].length+j*2]);
-        //         point[i][j][1] = Integer.valueOf(cs[i*point[0].length*point[0][0].length+j*2+1]);
-        //     }
-        // }
-        // // System.out.println( new Gson().toJson(s));
-        // System.out.println( new Gson().toJson(point));
-        String s2 = point.replaceAll("\\s+", " ").trim().replaceAll(" ", ",");
-        System.out.println(s2);
-
-        String rect = "[[297  91  59  59] [184 237  59  59] [303 230  59  59] [420 229  71  71]]";
-        rect = rect.replaceAll("\\s+", " ").trim().replaceAll(" ", ",");
-        System.out.println(rect);
-        // String s1 = new Gson().toJson(s2);
-        // System.out.println(s1);
-    }
-    @Test
-    public void TM2(){
-        String s = "[[297  91  59  59] [184 237  59  59] [303 230  59  59] [420 229  71  71]]";
-        String regEx="[\\D]+";
-        String[] cs = s.replaceAll(regEx, " ").trim().split(" ");
-
-        // 每4个一组装进数组中
-        ArrayList<List<Integer>> rect = new ArrayList<>();
-        for (int i = 0; i < cs.length; ) {
-            List<Integer> list = new ArrayList<>();
-            for (int j = 0; j < 4; j++) {
-                list.add(Integer.valueOf(cs[i]));
-                i++;
-            }
-            rect.add(list);
-        }
-
-        for (List<Integer> integers : rect) {
-            System.out.println(integers.toString());
-        }
-    }
-    @Test
-    public void TM(){
-        String s = "rectangles[[(2340, 171) (2608, 439)], [(1181, 379) (1449, 647)], [(1181, 379) (1449, 647)]]";
-        String regEx="[\\D]+";
-        String[] cs = s.replaceAll(regEx, " ").trim().split(" ");
-
-        // 每4个一组装进数组中
-        ArrayList<List<Integer>> rect = new ArrayList<>();
-        for (int i = 0; i < cs.length; ) {
-            List<Integer> list = new ArrayList<>();
-            for (int j = 0; j < 4; j++) {
-                if(j == 2 || j == 3){
-                    list.add(Integer.valueOf(cs[i])-Integer.valueOf(cs[i-2]));
-                }else {
-                    list.add(Integer.valueOf(cs[i]));
-                }
-                i++;
-            }
-            rect.add(list);
-        }
-
-        for (List<Integer> integers : rect) {
-            System.out.println(integers.toString());
-        }
-    }
-
-    @Test
-    public void Tkk(){
-        String content = "满39元减2元";
-        //正则表达式，用于匹配非数字串，+号用于匹配出多个非数字串
-        String regEx="[^0-9]+";
-        Pattern pattern = Pattern.compile(regEx);
-        //用定义好的正则表达式拆分字符串，把字符串中的数字留出来
-        String[] cs = pattern.split(content);
-        System.out.println(Arrays.toString(cs));
-    }
-
-    @Test
-    public void T1(){
-        String[] cs = " a, b ; ; c".split("[,;\\s]+");
-        for (String c : cs) {
-            System.out.println(c);
-        }
-        System.out.println(Arrays.toString(cs));
-    }
 }

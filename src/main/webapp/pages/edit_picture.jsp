@@ -14,18 +14,18 @@
             border: 1px solid red;
         }
 
-     /*   .editImgDiv{
+        .editImgDiv{
             float: left;
-            !*width: 60%;*!
-            height: 600px;
 
-            !* 设置div中的图片居中*!
-            !*display:flex;*!
-            !*align-items:center;*!
-            !*justify-content:center;*!
-            !*为了效果明显，可以将如下边框打开，看一下效果*!
+            height: 500px;
+            width: 500px;
+            /* 设置div中的图片居中*/
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            /*为了效果明显，可以将如下边框打开，看一下效果*/
             border:1px solid red;
-        }*/
+        }
 
        /* .editImgDiv img{
             !*width: 100%;*!
@@ -138,7 +138,7 @@
         <%--显示 照片名称 --%>
         <div class="col-md-8" name = "div2">
             <%--显示照片--%>
-            <div class="editImgDiv" id='${picture.pid}' @mouseenter="enter()" @mouseleave="left()" style="border: 1px solid yellow;  height: 500px;width: 500px">
+            <div class="editImgDiv" id='${picture.pid}' @mouseenter="enter()" @mouseleave="left()">
                 <img id = "v_${picture.pid}"
                      src="${picture.path}"
                      <%-- 宽度自适应  --%>
