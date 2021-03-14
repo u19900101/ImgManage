@@ -27,15 +27,17 @@ def init(imgpath):
     faceNum = len(face_locations)
     faceDic = {}
     faceDic['faceNum'] = faceNum
-    faceDic['face_locations'] = (np.array(rectangle)/scale).astype(int)
-    faceDic['face_landmarks'] = (np.array(keypoint)/scale).astype(int)
-    faceDic['face_encodings'] = face_encodings
-    faceDic['face_id'] = getFaceIndex(face_encodings)
-    print(faceNum)
-    print(faceDic['face_locations'].tolist())
+    faceDic['face_locations'] = (np.array(rectangle)/scale).astype(int).tolist()
+    faceDic['face_landmarks'] = (np.array(keypoint)/scale).astype(int).tolist()
+    faceDic['face_encodings'] = np.asarray(face_encodings).tolist()
+    faceDic['face_ids'] = getFaceIndex(face_encodings)
+    # pic_id,face_num,locations,face_ids,landmarks
+    print(faceDic['faceNum'])
+    print([a for a in  faceDic['face_locations']])
+    print(faceDic['face_ids'])
+    print([a for a in  faceDic['face_landmarks']])
+    print([a for a in  faceDic['face_encodings']])
 
-    print(np.asarray(face_encodings).flatten())
-    print(faceDic['face_id'])
 
     # return faceDic
 def getFaceIndex(face_encodings):
