@@ -12,7 +12,8 @@ def strToList(str,y):
 if __name__ == '__main__':
     res = []
     for i in range(1, len(sys.argv)):
-        res.append(strToList(sys.argv[i],3))
-    face_encodings = res[0]
-    face_to_compare = res[1][0]
-    print(face_encodings,face_to_compare)
+        res.append(strToList(sys.argv[i],4))
+    print(res[0][0]+22)
+    # face_encodings = res[0]
+    # face_to_compare = res[1][0]
+    # print(face_encodings,face_to_compare)

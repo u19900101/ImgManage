@@ -140,6 +140,29 @@ public class java调用python {
     }
 
     @Test
+    public void T_将数据从数据库取出传递给python(){
+        String sql = "select * from t_face_pic";
+        ArrayList<HashMap> hashMaps = mysqlSelect(sql);
+        HashMap map = hashMaps.get(0);
+        String locations = (String) map.get("locations");
+        System.out.println(locations);
+        try {
+            String pyFilePath = "D:\\MyJava\\mylifeImg\\pythonModule\\python\\t.py";
+            String[] args = new String[]{"python", pyFilePath, locations};
+            Process proc = Runtime.getRuntime().exec(args);// 执行py文件
+            BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            String line = null;
+
+            while ((line = in.readLine()) != null) {
+               System.out.println(line);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+    @Test
     public void T_传参(){
         // TODO Auto-generated method stub
         String imgpath = "D:\\MyJava\\mylifeImg\\pythonModule\\face\\d\\9.jpg";
