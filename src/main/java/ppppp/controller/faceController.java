@@ -1,15 +1,26 @@
 package ppppp.controller;
 
 import com.google.gson.Gson;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import ppppp.bean.Face;
+import ppppp.bean.FacePictureWithBLOBs;
+import ppppp.bean.Label;
+import ppppp.dao.FaceMapper;
+import ppppp.dao.FacePictureMapper;
+import ppppp.dao.LabelMapper;
+import ppppp.dao.PictureMapper;
+import ppppp.util.MyUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,112 +32,160 @@ import java.util.List;
 @Controller
 @RequestMapping("/face")
 public class faceController {
-    @ResponseBody
-    @RequestMapping("/t")
-    public String test(){
-       return T_select();
-    }
+    String baseDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT\\";
+    @Autowired
+    LabelMapper labelMapper;
+    @Autowired
+    PictureMapper pictureMapper;
 
-    public String T_select(){
-        String sql = "select * from t_face_pic";
-        ArrayList<HashMap> hashMaps = mysqlSelect(sql);
-        return new Gson().toJson(hashMaps);
-    }
-    public ArrayList<HashMap>  mysqlSelect(String sql){
-        ResultSet rs = null;
-        String url = "jdbc:mysql://localhost:3306/t_imgs?useUnicode=true&characterEncoding=UTF-8&serverTimezone=CTT";//输入数据库名test
-        String user = "root";//用户名
-        String password = "kk";//密码
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ArrayList<HashMap> mapList = new ArrayList<>();
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");//指定连接类型
-            conn = DriverManager.getConnection(url, user, password);//获取连接
-            ps = conn.prepareStatement(sql);//准备执行语句
-
-            //显示数据
-
-            rs = ps.executeQuery();//执行语句
-            List<String> colNames = getColNames(rs);
-            rs = ps.executeQuery();//执行语句
-            while(rs.next()){
-                HashMap map = new HashMap<>();
-                for (int i = 0; i < colNames.size(); i++) {
-                    map.put(colNames.get(i),rs.getObject(colNames.get(i)));
-                }
-                mapList.add(map);
-            }
-        }
-        catch (Exception e) {
-            //关闭连接
-            try {
-                rs.close();
-                conn.close();
-                ps.close();
-            } catch (SQLException e1) {
-                e1.printStackTrace();
-            }
-
-        }
-        return mapList;
-    }
-    private static List<String> getColNames(ResultSet rs) throws SQLException {
-        ResultSetMetaData metaData = rs.getMetaData();
-        int count = metaData.getColumnCount();
-        // System.out.println("getCatalogName(int column) 获取指定列的表目录名称。"+metaData.getCatalogName(1));
-        // System.out.println("getColumnClassName(int column) 构造其实例的 Java 类的完全限定名称。"+metaData.getColumnClassName(1));
-        // System.out.println("getColumnCount()  返回此 ResultSet 对象中的列数。"+metaData.getColumnCount());
-        // System.out.println("getColumnDisplaySize(int column) 指示指定列的最大标准宽度，以字符为单位. "+metaData.getColumnDisplaySize(1));
-        // System.out.println("getColumnLabel(int column) 获取用于打印输出和显示的指定列的建议标题。 "+metaData.getColumnLabel(1));
-        // System.out.println("getColumnName(int column)  获取指定列的名称。"+metaData.getColumnName(1));
-        // System.out.println("getColumnType(int column) 获取指定列的 SQL 类型。 "+metaData.getColumnType(1));
-        // System.out.println("getColumnTypeName(int column) 获取指定列的数据库特定的类型名称。 "+metaData.getColumnTypeName(1));
-        // System.out.println("getPrecision(int column)  获取指定列的指定列宽。 "+metaData.getPrecision(1));
-        // System.out.println("getScale(int column) 获取指定列的小数点右边的位数。 "+metaData.getScale(1));
-        // System.out.println("getSchemaName(int column) 获取指定列的表模式。 "+metaData.getSchemaName(1));
-        // System.out.println("getTableName(int column) 获取指定列的名称。 "+metaData.getTableName(1));
-        List<String> colNameList = new ArrayList<String>();
-        for(int i = 1; i<=count; i++){
-            colNameList.add(metaData.getColumnName(i));
-        }
-        // System.out.println(colNameList);
-//		rs.close();
-        rs.first();
-        return colNameList;
-    }
 
     @ResponseBody
     @RequestMapping("/getFace")
     public String getFace(String imgPath,HttpServletRequest request){
-        // String imgpath = "D:\\MyJava\\mylifeImg\\pythonModule\\face\\6.jpg";
-        String baseDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT\\";
-        String landmarkpath = "D:\\MyJava\\mylifeImg\\pythonModule\\python\\shape_predictor_68_face_landmarks.dat";
         HashMap map = new HashMap();
-        try {
-            String pyFilePath = "D:\\MyJava\\mylifeImg\\pythonModule\\python\\myDlib.py";
-            String[] args = new String[] { "python",pyFilePath ,baseDir+imgPath,landmarkpath};
-            Process proc = Runtime.getRuntime().exec(args);// 执行py文件
 
+        ArrayList<HashMap> hashMaps = null;
+        List face_encoding = new ArrayList();
+        List face_name_id = new ArrayList();
+        for (HashMap hashMap : hashMaps) {
+            face_encoding.add(hashMap.get("face_encoding"));
+            face_name_id.add(hashMap.get("face_name_id"));
+        }
+
+        String known_face_encodings = face_encoding.toString();
+        String known_face_ids = face_name_id.toString();
+        System.out.println(known_face_encodings);
+        System.out.println(known_face_ids);
+        try {
+            String pyFilePath = "D:\\MyJava\\mylifeImg\\pythonModule\\python\\getFaceInfo.py";
+            String imgpath =  baseDir+imgPath;
+
+            String[] args = new String[]{"python", pyFilePath, imgpath,known_face_encodings,known_face_ids};
+            Process proc = Runtime.getRuntime().exec(args);// 执行py文件
+            BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            String line = null;
+            //     print(faceDic['faceNum'])
+            //     print([a for a in  faceDic['face_locations']])
+            //     print(faceDic['face_ids'])
+            //     print([a for a in  faceDic['face_landmarks']])
+            //     print([a for a in  faceDic['face_encodings']])
+            if ((line = in.readLine()) != null) {
+                map.put("faceNum", line);
+                System.out.println(line);
+            }
+            if ((line = in.readLine()) != null) {
+                map.put("face_locations", line);
+                System.out.println(line);
+            }
+            if ((line = in.readLine()) != null) {
+                //将 face_ids 转化为 name
+                map.put("face_ids", line);
+                System.out.println(line);
+            }
+            if ((line = in.readLine()) != null) {
+                map.put("face_landmarks", line);
+                System.out.println(line);
+            }
+            if ((line = in.readLine()) != null) {
+                map.put("face_encodings", line);
+                System.out.println(line);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        request.getSession().setAttribute("map", map);
+        return  new Gson().toJson(map);
+    }
+
+
+    public LabelMapper getLabelMapper(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
+        return context.getBean(LabelMapper.class);
+    }
+
+    public FaceMapper getFaceMapper(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
+        return context.getBean(FaceMapper.class);
+    }
+    public FacePictureMapper getFacePictureMapper(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
+        return context.getBean(FacePictureMapper.class);
+    }
+
+
+    @Test
+    public void T(){
+       init();
+    }
+    // @RequestMapping("/init")
+    public void init(){
+        String imgAbsPath= "D:\\MyJava\\mylifeImg\\pythonModule\\face\\d\\9.jpg";
+        String pyAbsFilePath = "D:\\MyJava\\mylifeImg\\pythonModule\\python\\init.py";
+        init(pyAbsFilePath, imgAbsPath);
+    }
+//    用一张照片初始化数据库
+    public void init(String pyAbsFilePath,String imgAbsPath){
+        try {
+            String[] args = new String[] { "python",pyAbsFilePath ,imgAbsPath};
+            Process proc = Runtime.getRuntime().exec(args);// 执行py文件
             BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
             String line = null;
 
-            line = in.readLine();
-            if(line != null){
-                map.put("faceNum", Integer.valueOf(line));
-                line = in.readLine();
+            // 1.初始化 t_face
+            List  face_encodings = new ArrayList<>();
+            String  face_landmarks = null;
+            String  face_locations = null;
+            String[]   face_name_ids = null;
+            List<Integer> face_name_ids_List = new ArrayList();
+
+            String faceNum = null;
+
+            if ((line = in.readLine()) != null) {
+
+                face_name_ids = line.replace(" ","").replace("[", "").replace("]", "").replace(",", " ").trim().split(" ");
+                // 初始化 人脸标签库 得到人脸 id
+                for (String name_id : face_name_ids) {
+                    Label label = new Label("faceName_" + name_id);
+                    int insert = getLabelMapper().insert(label);
+                    if(insert != 1){
+                        System.out.println("初始化失败");
+                        return;
+                    }
+                    face_name_ids_List.add(label.getLabelid());
+                }
             }
 
-            if(line != null){
-                // map.put("rects", line.replaceAll("\\s+", " ").trim().replaceAll(" ", ","));
-                map.put("rects", line.trim().replaceAll(" ", ""));
-                line = in.readLine();
+            if ((line = in.readLine()) != null) {
+                face_encodings = MyUtils.strToList(line,128);
             }
 
-            if(line != null){
-                // map.put("points", line.replaceAll("\\s+", " ").trim().replaceAll(" ", ","));
-                map.put("points", line.trim().replaceAll(" ", ""));
+            if ((line = in.readLine()) != null) {
+                faceNum = line;
             }
+
+            if ((line = in.readLine()) != null) {
+                face_locations = line;
+            }
+            if ((line = in.readLine()) != null) {
+                face_landmarks = line;
+            }
+
+            // 1.face_id	2.face_name_id	3.face_code	 4.pic_id
+            for (int i = 0; i < Integer.valueOf(faceNum); i++) {
+                getFaceMapper().insert(new Face(face_name_ids_List.get(i), imgAbsPath, (String) face_encodings.get(i)));
+            }
+
+            // 2.初始化 t_face_pic
+            FacePictureWithBLOBs facePicture = new FacePictureWithBLOBs(imgAbsPath, Integer.valueOf(faceNum), face_name_ids_List.toString(), face_locations, face_landmarks);
+
+            int insert = getFacePictureMapper().insert(facePicture);
+            if(insert != 1){
+                System.out.println("初始化失败....");
+            }else {
+                System.out.println("初始化成功....");
+            }
+
             in.close();
             proc.waitFor();
         } catch (IOException e) {
@@ -134,9 +193,6 @@ public class faceController {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        map.put("imgPath", imgPath.replaceAll("\\\\", "/"));
-        request.getSession().setAttribute("map", map);
-        return  new Gson().toJson(map);
-    }
 
+}
 }

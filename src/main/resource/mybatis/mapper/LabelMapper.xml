@@ -160,7 +160,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="ppppp.bean.Label">
+  <insert id="insert" parameterType="ppppp.bean.Label" useGeneratedKeys="true" keyProperty="labelid">
     insert into t_label (labelId, label_name, parentId, 
       parent_name, tags, href, 
       icon)
@@ -168,7 +168,7 @@
       #{parentName,jdbcType=VARCHAR}, #{tags,jdbcType=INTEGER}, #{href,jdbcType=VARCHAR}, 
       #{icon,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="ppppp.bean.Label">
+  <insert id="insertSelective" parameterType="ppppp.bean.Label" useGeneratedKeys="true" keyProperty="labelid">
     insert into t_label
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="labelid != null">

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ppppp.dao.FacePictureMapper">
+  <resultMap id="BaseResultMap" type="ppppp.bean.FacePicture">
+    <id column="pic_id" jdbcType="VARCHAR" property="picId" />
+    <result column="face_num" jdbcType="INTEGER" property="faceNum" />
+    <result column="face_ids" jdbcType="VARCHAR" property="faceIds" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="ppppp.bean.FacePictureWithBLOBs">
+    <result column="locations" jdbcType="LONGVARCHAR" property="locations" />
+    <result column="landmarks" jdbcType="LONGVARCHAR" property="landmarks" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    pic_id, face_num, face_ids
+  </sql>
+  <sql id="Blob_Column_List">
+    locations, landmarks
+  </sql>
+  <select id="selectByExampleWithBLOBs" parameterType="ppppp.bean.FacePictureExample" resultMap="ResultMapWithBLOBs">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_face_pic
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExample" parameterType="ppppp.bean.FacePictureExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_face_pic
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_face_pic
+    where pic_id = #{picId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from t_face_pic
+    where pic_id = #{picId,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="ppppp.bean.FacePictureExample">
+    delete from t_face_pic
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="ppppp.bean.FacePictureWithBLOBs">
+    insert into t_face_pic (pic_id, face_num, face_ids, 
+      locations, landmarks)
+    values (#{picId,jdbcType=VARCHAR}, #{faceNum,jdbcType=INTEGER}, #{faceIds,jdbcType=VARCHAR}, 
+      #{locations,jdbcType=LONGVARCHAR}, #{landmarks,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="ppppp.bean.FacePictureWithBLOBs">
+    insert into t_face_pic
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="picId != null">
+        pic_id,
+      </if>
+      <if test="faceNum != null">
+        face_num,
+      </if>
+      <if test="faceIds != null">
+        face_ids,
+      </if>
+      <if test="locations != null">
+        locations,
+      </if>
+      <if test="landmarks != null">
+        landmarks,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="picId != null">
+        #{picId,jdbcType=VARCHAR},
+      </if>
+      <if test="faceNum != null">
+        #{faceNum,jdbcType=INTEGER},
+      </if>
+      <if test="faceIds != null">
+        #{faceIds,jdbcType=VARCHAR},
+      </if>
+      <if test="locations != null">
+        #{locations,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="landmarks != null">
+        #{landmarks,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="ppppp.bean.FacePictureExample" resultType="java.lang.Long">
+    select count(*) from t_face_pic
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_face_pic
+    <set>
+      <if test="record.picId != null">
+        pic_id = #{record.picId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.faceNum != null">
+        face_num = #{record.faceNum,jdbcType=INTEGER},
+      </if>
+      <if test="record.faceIds != null">
+        face_ids = #{record.faceIds,jdbcType=VARCHAR},
+      </if>
+      <if test="record.locations != null">
+        locations = #{record.locations,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="record.landmarks != null">
+        landmarks = #{record.landmarks,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map">
+    update t_face_pic
+    set pic_id = #{record.picId,jdbcType=VARCHAR},
+      face_num = #{record.faceNum,jdbcType=INTEGER},
+      face_ids = #{record.faceIds,jdbcType=VARCHAR},
+      locations = #{record.locations,jdbcType=LONGVARCHAR},
+      landmarks = #{record.landmarks,jdbcType=LONGVARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_face_pic
+    set pic_id = #{record.picId,jdbcType=VARCHAR},
+      face_num = #{record.faceNum,jdbcType=INTEGER},
+      face_ids = #{record.faceIds,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="ppppp.bean.FacePictureWithBLOBs">
+    update t_face_pic
+    <set>
+      <if test="faceNum != null">
+        face_num = #{faceNum,jdbcType=INTEGER},
+      </if>
+      <if test="faceIds != null">
+        face_ids = #{faceIds,jdbcType=VARCHAR},
+      </if>
+      <if test="locations != null">
+        locations = #{locations,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="landmarks != null">
+        landmarks = #{landmarks,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where pic_id = #{picId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="ppppp.bean.FacePictureWithBLOBs">
+    update t_face_pic
+    set face_num = #{faceNum,jdbcType=INTEGER},
+      face_ids = #{faceIds,jdbcType=VARCHAR},
+      locations = #{locations,jdbcType=LONGVARCHAR},
+      landmarks = #{landmarks,jdbcType=LONGVARCHAR}
+    where pic_id = #{picId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="ppppp.bean.FacePicture">
+    update t_face_pic
+    set face_num = #{faceNum,jdbcType=INTEGER},
+      face_ids = #{faceIds,jdbcType=VARCHAR}
+    where pic_id = #{picId,jdbcType=VARCHAR}
+  </update>
+</mapper>

@@ -1,4 +1,3 @@
-import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 import org.junit.Test;
 
@@ -7,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,11 +16,7 @@ import java.util.List;
  */
 public class java调用python {
 
-    @Test
-    public void T_传字符串数组给python(){
-        String s = "[[1019, 1538, 666, 665], [1401, 958, 799, 799]]";
 
-    }
     public void  mysql(String sql,List argsList){
         boolean rs = false;
         String url = "jdbc:mysql://localhost:3306/t_imgs?useUnicode=true&characterEncoding=UTF-8&serverTimezone=CTT";//输入数据库名test
@@ -141,14 +137,24 @@ public class java调用python {
 
     @Test
     public void T_将数据从数据库取出传递给python(){
-        String sql = "select * from t_face_pic";
+        String sql = "select * from t_face";
         ArrayList<HashMap> hashMaps = mysqlSelect(sql);
-        HashMap map = hashMaps.get(0);
-        String locations = (String) map.get("locations");
-        System.out.println(locations);
+        List face_encoding = new ArrayList();
+        List face_name_id = new ArrayList();
+        for (HashMap hashMap : hashMaps) {
+            face_encoding.add(hashMap.get("face_encoding"));
+            face_name_id.add(hashMap.get("face_name_id"));
+        }
+
+        String known_face_encodings = face_encoding.toString();
+        String known_face_ids = face_name_id.toString();
+        System.out.println(known_face_encodings);
+        System.out.println(known_face_ids);
         try {
-            String pyFilePath = "D:\\MyJava\\mylifeImg\\pythonModule\\python\\t.py";
-            String[] args = new String[]{"python", pyFilePath, locations};
+            String pyFilePath = "D:\\MyJava\\mylifeImg\\pythonModule\\python\\getFaceInfo.py";
+            String imgpath =  "D:\\MyJava\\mylifeImg\\pythonModule\\face\\d\\9.jpg";
+
+            String[] args = new String[]{"python", pyFilePath, imgpath,known_face_encodings,known_face_ids};
             Process proc = Runtime.getRuntime().exec(args);// 执行py文件
             BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
             String line = null;
@@ -162,6 +168,93 @@ public class java调用python {
         }
 
     }
+
+
+    @Test
+    public void T_初始化写进(){
+        String pyFilePath = "D:\\MyJava\\mylifeImg\\pythonModule\\python\\init.py";
+        String imgpath = "D:\\MyJava\\mylifeImg\\pythonModule\\face\\d\\9.jpg";
+        try {
+
+            String[] args = new String[] { "python",pyFilePath ,imgpath};
+            Process proc = Runtime.getRuntime().exec(args);// 执行py文件
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            String line = null;
+
+            // 1.初始化 t_face
+            List  face_encodings = new ArrayList<>();
+            String  face_landmarks = null;
+            String  face_locations = null;
+            String[]   face_name_ids = null;
+            String    face_name_ids_temp = null;
+
+            String faceNum = null;
+
+            if ((line = in.readLine()) != null) {
+                face_name_ids_temp = line;
+               face_name_ids = line.replace(" ","").replace("[", "").replace("]", "").replace(",", " ").trim().split(" ");
+                System.out.println(face_name_ids_temp);
+            }
+
+           /* if ((line = in.readLine()) != null) {
+                face_encodings = strToList(line,128);
+            }
+
+            if ((line = in.readLine()) != null) {
+                faceNum = line;
+            }
+
+            if ((line = in.readLine()) != null) {
+                face_locations = line;
+            }
+            if ((line = in.readLine()) != null) {
+                face_landmarks = line;
+            }
+
+            // 1.face_id	2.face_name_id	3.face_code	 4.pic_id
+            String s = "INSERT INTO  t_face (face_name_id,face_encoding,pic_id) " +
+                    "VALUES(?,?,?)";
+            for (int i = 0; i < Integer.valueOf(faceNum); i++) {
+                List  list = new ArrayList<>();
+                list.add(Integer.valueOf(face_name_ids[i]));
+                list.add(face_encodings.get(i));
+                list.add(imgpath);
+                mysql(s,list);
+            }
+
+            // 2.初始化 t_face_pic
+            List  list = new ArrayList<>();
+            list.add(imgpath);
+            list.add(faceNum);
+            list.add(face_locations);
+            list.add(face_name_ids_temp);
+            list.add(face_landmarks);
+
+            String s2 = "INSERT INTO  t_face_pic (pic_id,face_num,locations,face_ids,landmarks) " +
+                    "VALUES(?,?,?,?,?)";
+            mysql(s2,list);*/
+
+            in.close();
+            proc.waitFor();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private List strToList(String line, int col) {
+        List  list = new ArrayList<>();
+        String[] split = line.replace(" ","").replace("[", "").replace("]", "").replace(",", " ").trim().split(" ");
+        List<String> stringList = Arrays.asList(split);
+        for (int i = 0; i < split.length / col; i++) {
+            list.add(stringList.subList(i*col, (i+1)*col).toString());
+        }
+        return list;
+    }
+
     @Test
     public void T_传参(){
         // TODO Auto-generated method stub
@@ -174,11 +267,6 @@ public class java调用python {
             BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
             String line = null;
 
-            //faceNum 2
-            //locations [[1019, 1538, 666, 665], [1401, 958, 799, 799]]
-            //face_code [-0.022834885865449905, -0.013802939094603062, 0  128维
-            //face_ids   [0, 1]
-            //landmarks
             List  list = new ArrayList<>();
 
             list.add(imgpath);
@@ -190,30 +278,20 @@ public class java调用python {
             if ((line = in.readLine()) != null) {
                 list.add(line);
                 System.out.println(line);
-                // String locations = "{'locations':'"+line+"'}";
-                // JSONObject json = JSONObject.parseObject(locations);
-
             }
 
             if ((line = in.readLine()) != null) {
                 list.add(line);
                 System.out.println(line);
-                // String face_ids = "{'face_ids':'"+line+"'}";
-                // JSONObject json = JSONObject.parseObject(face_ids);
-                // list.add(json);
             }
 
             if ((line = in.readLine()) != null) {
                 list.add(line);
                 System.out.println(line);
-                // String landmarks = "{'landmarks':'"+line+"'}";
-                // JSONObject json = JSONObject.parseObject(landmarks);
-                // list.add(json);
             }
             if ((line = in.readLine()) != null) {
                 String locations = "{'face_code':'"+line+"'}";
                 System.out.println(line);
-                // list.add(locations);
             }
             // 2.将信息存进 t_face_pic
             //pic_face
@@ -241,9 +319,10 @@ public class java调用python {
 
     @Test
     public void T_json(){
-        String locations = "{'locations':'line'}";
-        JSONObject json = JSONObject.parseObject(locations);
-        System.out.println(json);
+        String line = "[[[294, 110], [295, 117], [295, 124], ";
+        List list = strToList(line, 3);
+        System.out.println(list);
+
     }
     @Test
     public void T2(){

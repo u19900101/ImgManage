@@ -46,7 +46,9 @@
 
 	<!-- 指定要逆向分析哪些表：根据表要创建javaBean -->
       <!--<table tableName="t_pic" domainObjectName="Picture"></table>-->
-      <table tableName="t_label" domainObjectName="Label"></table>
+      <!--<table tableName="t_label" domainObjectName="Label"></table>-->
+      <table tableName="t_face" domainObjectName="Face"></table>
+      <table tableName="t_face_pic" domainObjectName="FacePicture"></table>
   </context>
 
 </generatorConfiguration>

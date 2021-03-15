@@ -23,6 +23,12 @@ public class Label {
         this.tags = tags;
         this.href = href;
     }
+    // 初始化 人脸标签
+    public Label(String labelName) {
+        this.labelName = labelName;
+        this.tags = 1;
+        this.href = "label/selectByLabel?labelName="+labelName;
+    }
 
     public Label(String labelName, Integer parentid, String parentName, Integer tags, String href) {
         this.labelName = labelName;
