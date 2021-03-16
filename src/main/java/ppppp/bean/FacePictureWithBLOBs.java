@@ -9,6 +9,17 @@ public class FacePictureWithBLOBs extends FacePicture {
         super(picId, faceNum, faceIds);
     }
 
+    @Override
+    public String toString() {
+        return "FacePictureWithBLOBs{" +
+                "picId='" + super.getPicId() + '\'' +
+                ", faceNum=" + super.getFaceNum() +
+                ", faceIds='" + super.getFaceIds() + '\'' +
+                "locations='" + locations + '\'' +
+                ", landmarks='" + landmarks + '\'' +
+                '}';
+    }
+
     public FacePictureWithBLOBs(String picId, Integer faceNum, String faceIds, String locations, String landmarks) {
         super(picId, faceNum, faceIds);
         this.locations = locations;

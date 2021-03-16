@@ -39,4 +39,13 @@ public class FacePicture {
     public void setFaceIds(String faceIds) {
         this.faceIds = faceIds == null ? null : faceIds.trim();
     }
+
+    @Override
+    public String toString() {
+        return "FacePicture{" +
+                "picId='" + picId + '\'' +
+                ", faceNum=" + faceNum +
+                ", faceIds='" + faceIds + '\'' +
+                '}';
+    }
 }

@@ -1,9 +1,10 @@
 package ppppp.dao;
 
-import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import ppppp.bean.Face;
 import ppppp.bean.FaceExample;
+
+import java.util.List;
 
 public interface FaceMapper {
     long countByExample(FaceExample example);
@@ -33,4 +34,8 @@ public interface FaceMapper {
     int updateByPrimaryKeyWithBLOBs(Face record);
 
     int updateByPrimaryKey(Face record);
+
+//    自己写的
+    List<Face> selectAllFaceEncoding();
+
 }

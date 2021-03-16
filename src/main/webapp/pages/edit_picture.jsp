@@ -366,10 +366,11 @@
                 // 函数传递 特殊字符有bug 故  更换获取方式
                 // 直接取值时会有字符错误
                 var imgPath = $("#v_${picture.pid}").attr("src");
-                // console.log("regFace",imgPath);
+                var pId = "${picture.pid}";
+                console.log("regFace",imgPath);
                 $.post(
                     "http://localhost:8080/pic/face/getFace",
-                    "imgPath="+imgPath,
+                    "pId="+pId+"&imgPath="+imgPath,
                     function (data) {
                         var faceNum = data.faceNum;
                         if(faceNum>0){

@@ -76,15 +76,14 @@ def getFaceInfo(imgpath,known_face_encodings,known_face_ids):
     faceDic['face_landmarks'] = (np.array(keypoint)/scale).astype(int).tolist()
     faceDic['face_encodings'] = np.asarray(face_encodings).tolist()
 
-
     # 与数据库比对  得到人脸 id  新人脸就在原有人脸最大id上+1，得到新id
-    faceDic['face_ids'] = getFaceIndex(known_face_encodings,known_face_ids,face_encodings)
+    faceDic['face_name_ids'] = getFaceIndex(known_face_encodings,known_face_ids,face_encodings)
     # pic_id,face_num,locations,face_ids,landmarks
-
-    print([a for a in  faceDic['face_locations']])
-    print(faceDic['face_ids'])
-    print([a for a in  faceDic['face_landmarks']])
+    print(faceDic['face_name_ids'])
     print([a for a in  faceDic['face_encodings']])
+    print([a for a in  faceDic['face_locations']])
+    print([a for a in  faceDic['face_landmarks']])
+
 
 
     # return faceDic

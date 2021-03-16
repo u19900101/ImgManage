@@ -73,6 +73,27 @@
   <sql id="Blob_Column_List">
     face_encoding
   </sql>
+  <!--自己写的-->
+  <select id="selectAllFaceEncoding" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_face
+  </select>
+
+
+
+
+
+
+
+
+
+
+
+
+
   <select id="selectByExampleWithBLOBs" parameterType="ppppp.bean.FaceExample" resultMap="ResultMapWithBLOBs">
     select
     <if test="distinct">

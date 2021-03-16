@@ -66,12 +66,15 @@
             }
         }
     }
+
+
     var canvasId = "myCanvas";
-    var faceNum = "${map.faceNum}";
-    var rects = ${map.rects};
-    var points = ${map.points};
+    var faceNum = "${facePicture.faceNum}";
+    var rects = ${facePicture.locations};
+    var points = ${facePicture.landmarks};
+    var faceNames = ${facePicture.faceIds};
     // var srcImgPath = 'face/6.jpg';
-    var srcImgPath = "${map.imgPath}";
+    var srcImgPath = "${facePicture.picId}";
 
     console.log( srcImgPath);
     canvasPart(canvasId,srcImgPath,rects,points,faceNum);

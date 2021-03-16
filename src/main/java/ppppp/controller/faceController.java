@@ -7,10 +7,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ppppp.bean.Face;
 import ppppp.bean.FacePictureWithBLOBs;
 import ppppp.bean.Label;
+import ppppp.bean.Picture;
 import ppppp.dao.FaceMapper;
 import ppppp.dao.FacePictureMapper;
 import ppppp.dao.LabelMapper;
@@ -37,59 +39,136 @@ public class faceController {
     LabelMapper labelMapper;
     @Autowired
     PictureMapper pictureMapper;
+    @Autowired
+    FaceMapper faceMapper;
+    @Autowired
+    FacePictureMapper facePictureMapper;
+
 
 
     @ResponseBody
-    @RequestMapping("/getFace")
-    public String getFace(String imgPath,HttpServletRequest request){
+    @RequestMapping(value = "/getFace",method = RequestMethod.POST)
+    public String getFace(String imgPath,String pId,HttpServletRequest request){
         HashMap map = new HashMap();
+        // 查看当前照片是否已经经过检测（判断图片路径）
+        // String imgAbsPath= "D:\\MyJava\\mylifeImg\\pythonModule\\face\\d\\9.jpg";
+        String imgAbsPath =  baseDir+imgPath;
+        FacePictureWithBLOBs facePicture = getFacePictureMapper().selectByPrimaryKey(imgAbsPath);
+        if(facePicture != null){
+            System.out.println("该照片已进行过人脸检测");
 
-        ArrayList<HashMap> hashMaps = null;
-        List face_encoding = new ArrayList();
-        List face_name_id = new ArrayList();
-        for (HashMap hashMap : hashMaps) {
-            face_encoding.add(hashMap.get("face_encoding"));
-            face_name_id.add(hashMap.get("face_name_id"));
+            /*map.put("faceNum", facePicture.getFaceNum());
+            map.put("face_locations", facePicture.getLocations());
+            map.put("face_ids", facePicture.getFaceIds());
+            map.put("face_landmarks", facePicture.getLandmarks());
+            request.getSession().setAttribute("map", map);*/
+            // 将faceIds
+            request.getSession().setAttribute("facePicture", facePicture);
+
+            String[] faceIds = facePicture.getFaceIds().replace("[", "").replace("]","").replace(" ", "").split(",");
+            ArrayList faceNames = new ArrayList<>();
+            for (String faceId : faceIds) {
+                Label label = labelMapper.selectByPrimaryKey(Integer.valueOf(faceId));
+                faceNames.add(label.getLabelName());
+            }
+            map.put("facePicture", facePicture);
+            map.put("faceNames", faceNames);
+            return  new Gson().toJson(map);
         }
 
+        List face_encoding = new ArrayList();
+        List face_name_id = new ArrayList();
+        List<Face> faces = getFaceMapper().selectAllFaceEncoding();
+        for (Face face : faces) {
+            face_encoding.add(face.getFaceEncoding());
+            face_name_id.add(face.getFaceNameId());
+        }
         String known_face_encodings = face_encoding.toString();
         String known_face_ids = face_name_id.toString();
-        System.out.println(known_face_encodings);
-        System.out.println(known_face_ids);
         try {
             String pyFilePath = "D:\\MyJava\\mylifeImg\\pythonModule\\python\\getFaceInfo.py";
-            String imgpath =  baseDir+imgPath;
 
-            String[] args = new String[]{"python", pyFilePath, imgpath,known_face_encodings,known_face_ids};
+
+            String[] args = new String[]{"python", pyFilePath, imgAbsPath,known_face_encodings,known_face_ids};
             Process proc = Runtime.getRuntime().exec(args);// 执行py文件
             BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
             String line = null;
-            //     print(faceDic['faceNum'])
-            //     print([a for a in  faceDic['face_locations']])
-            //     print(faceDic['face_ids'])
-            //     print([a for a in  faceDic['face_landmarks']])
-            //     print([a for a in  faceDic['face_encodings']])
+
+            // 1.初始化 t_face
+            List  face_encodings = new ArrayList<>();
+            String  face_landmarks = null;
+            String  face_locations = null;
+            String[]   face_name_ids = null;
+            List<Integer> face_name_ids_List = new ArrayList();
+
+            String faceNum = null;
+
             if ((line = in.readLine()) != null) {
-                map.put("faceNum", line);
-                System.out.println(line);
+                faceNum = line;
+            }else {
+                System.out.println("未检测到人脸");
+                return "未检测到人脸";
+            }
+
+            if ((line = in.readLine()) != null) {
+
+                face_name_ids = line.replace(" ","").replace("[", "").replace("]", "").replace(",", " ").trim().split(" ");
+                // 初始化 人脸标签库 得到人脸 id
+                for (String name_id : face_name_ids) {
+                    Integer labelId =Integer.valueOf(name_id);
+                    Label label1 = labelMapper.selectByPrimaryKey(labelId);
+                    if(label1 == null){
+                        // 新的人脸 创建 label
+                        Label label = new Label("faceName_" + name_id);
+                        int insert = labelMapper.insert(label);
+                        if(insert != 1){
+                            System.out.println("失败--插入人脸到t_label");
+                            return "失败--插入人脸到t_label";
+                        }
+                        labelId = label.getLabelid();
+                    }else {
+                        // 已存在的人脸 数量+1
+                        label1.setTags(label1.getTags()+1);
+                        int insert = labelMapper.updateByPrimaryKey(label1);
+                        Picture picture = pictureMapper.selectByPrimaryKey(pId);
+                        picture.setPlabel(picture.getPlabel() == null || picture.getPlabel().length()<=1?","+labelId+",":picture.getPlabel()+labelId+",");
+                        // 1.更新 t_pic 表
+                        // 不存在标签 向数据库中插入该标签
+                        int updatePic = pictureMapper.updateByPrimaryKeySelective(picture);
+
+                        if(insert != 1 || updatePic != 1){
+                            System.out.println("失败--插入人脸到t_label");
+                            return "失败--插入人脸到t_label";
+                        }
+                    }
+                    face_name_ids_List.add(labelId);
+                }
             }
             if ((line = in.readLine()) != null) {
-                map.put("face_locations", line);
-                System.out.println(line);
+                face_encodings = MyUtils.strToList(line,128);
             }
             if ((line = in.readLine()) != null) {
-                //将 face_ids 转化为 name
-                map.put("face_ids", line);
-                System.out.println(line);
+                face_locations = line;
             }
             if ((line = in.readLine()) != null) {
-                map.put("face_landmarks", line);
-                System.out.println(line);
+                face_landmarks = line;
             }
-            if ((line = in.readLine()) != null) {
-                map.put("face_encodings", line);
-                System.out.println(line);
+
+            // 1.face_id	2.face_name_id	3.face_code	 4.pic_id
+            for (int i = 0; i < Integer.valueOf(faceNum); i++) {
+                faceMapper.insert(new Face(face_name_ids_List.get(i), imgPath, (String) face_encodings.get(i)));
             }
+
+            // 2.插入到 t_face_pic
+            FacePictureWithBLOBs facePicture2 = new FacePictureWithBLOBs(imgPath, Integer.valueOf(faceNum), face_name_ids_List.toString(), face_locations, face_landmarks);
+
+            int insert = facePictureMapper.insert(facePicture2);
+            if(insert != 1){
+                System.out.println("失败....插入到 t_face_pic");
+            }else {
+                System.out.println("成功....插入到 t_face_pic");
+            }
+
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -99,28 +178,23 @@ public class faceController {
     }
 
 
-    public LabelMapper getLabelMapper(){
-        ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
-        return context.getBean(LabelMapper.class);
-    }
 
-    public FaceMapper getFaceMapper(){
-        ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
-        return context.getBean(FaceMapper.class);
-    }
-    public FacePictureMapper getFacePictureMapper(){
-        ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
-        return context.getBean(FacePictureMapper.class);
-    }
 
 
     @Test
     public void T(){
-       init();
+       // init();
+
     }
-    // @RequestMapping("/init")
+    @RequestMapping("/init")
     public void init(){
         String imgAbsPath= "D:\\MyJava\\mylifeImg\\pythonModule\\face\\d\\9.jpg";
+        FacePictureWithBLOBs facePicture = getFacePictureMapper().selectByPrimaryKey(imgAbsPath);
+        if(facePicture != null){
+            System.out.println("该照片已进行过人脸检测");
+            System.out.println(facePicture);
+            return;
+        }
         String pyAbsFilePath = "D:\\MyJava\\mylifeImg\\pythonModule\\python\\init.py";
         init(pyAbsFilePath, imgAbsPath);
     }
@@ -140,7 +214,9 @@ public class faceController {
             List<Integer> face_name_ids_List = new ArrayList();
 
             String faceNum = null;
-
+            if ((line = in.readLine()) != null) {
+                faceNum = line;
+            }
             if ((line = in.readLine()) != null) {
 
                 face_name_ids = line.replace(" ","").replace("[", "").replace("]", "").replace(",", " ").trim().split(" ");
@@ -155,15 +231,9 @@ public class faceController {
                     face_name_ids_List.add(label.getLabelid());
                 }
             }
-
             if ((line = in.readLine()) != null) {
                 face_encodings = MyUtils.strToList(line,128);
             }
-
-            if ((line = in.readLine()) != null) {
-                faceNum = line;
-            }
-
             if ((line = in.readLine()) != null) {
                 face_locations = line;
             }
@@ -193,6 +263,19 @@ public class faceController {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
 
-}
+
+    public LabelMapper getLabelMapper(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
+        return context.getBean(LabelMapper.class);
+    }
+    public FaceMapper getFaceMapper(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
+        return context.getBean(FaceMapper.class);
+    }
+    public FacePictureMapper getFacePictureMapper(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
+        return context.getBean(FacePictureMapper.class);
+    }
 }

@@ -44,7 +44,7 @@ def init(imgpath):
     faceNum = len(face_locations)
 
     faceDic['faceNum'] = faceNum
-
+    print(faceDic['faceNum'])
     if(faceNum == 0):
         print("faceNum is 0")
         return
@@ -55,7 +55,6 @@ def init(imgpath):
 
     print(faceDic['face_name_ids'])
     print([a for a in  faceDic['face_encodings']])
-    print(faceDic['faceNum'])
     print([a for a in  faceDic['face_locations']])
     print([a for a in  faceDic['face_landmarks']])
 if __name__ == '__main__':
