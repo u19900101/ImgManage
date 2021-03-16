@@ -209,7 +209,7 @@
                 <c:if test="${not index.equals(1)}">
                     <div id="${item.key}" class="collapse">
                         <c:forEach items="${item.value}" var="picture" >
-                            <div class="c1" id='v_${picture.pid}'>
+                            <div class="c1"  id='v_${picture.pid}'>
                                     <%--    <div  style="border: 1px solid brown;float: right">
                                             <v-date-picker class="inline-block h-full" v-model="date" mode="time" is24hr :minute-increment="5"  :model-config="modelConfig" is-required>
                                                 <template v-slot="{ inputValue, togglePopover }">
@@ -247,21 +247,24 @@
                                             </v-date-picker>
                                         </div>
                            --%>
-                                <form action="picture/before_edit_picture" name="${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
+                                <form action="picture/before_edit_picture" method="post" name="${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
+
                                     <div id='labelDown_${picture.pid}'
                                          @mouseenter="enter()" @mouseleave="left()"
-                                         class="labelDown" path = "${picture.path}" style="position:relative;border: 1px solid yellow">
+                                         class="labelDown"
+                                         path = "${picture.path}"
+                                         style="position:relative;border: 1px solid yellow">
                                         <input type="hidden" name="path" value="${picture.path}">
-                                        <a href="#" class="thumbnail">
+
                                         <img
-                                            id='img_${picture.pid}'
-                                             src="${picture.path}"
-                                             class="tooltip-show"
-                                             data-placement="top"
-                                             data-toggle="tooltip"
-                                             title="<h5>${picture.pname}</h5>${picture.pcreatime}"
-                                             style="height: 100%;width: auto">
-                                        </a>
+                                                id='img_${picture.pid}'
+                                                src="${picture.path}"
+                                                class="tooltip-show"
+                                                data-placement="top"
+                                                data-toggle="tooltip"
+                                                title="<h5>${picture.pname}</h5>${picture.pcreatime}"
+                                                style="height: 100%;width: auto">
+
                                         <button v-show = "buttonShow" @click = "deletePicture(event)" type="button" class="btn btn-default  btn-sm"
                                                 style="position:absolute; left: 48%; top: 90%;"
                                                 data-placement="top"
@@ -318,12 +321,10 @@
                                 function (data) {
                                     if (data.status == 'success') {
                                         $("#v_" + pId).remove();
-                                        // success_prompt(data.msg, 1500);
+                                        reLoadLeftPage();
                                     } else if (data.status == 'fail') {
-                                        fail_prompt(data.msg, 2500);
-                                    } else {
-                                        warning_prompt("其他未知错误.....please enjoy debug", 2500);
-                                    }
+                                        console.log("删除失败");
+                                        }
                                 },
                                 "json"
                             );
@@ -373,9 +374,11 @@
     });
     function reLoadLeftPage(){
         var labelHref = "label/getLabelTree";
+
         $("#jstree").load(labelHref);
     }
     $(document).ready(function(){
+
         reLoadLeftPage();
     });
 </script>

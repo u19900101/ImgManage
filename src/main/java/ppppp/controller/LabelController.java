@@ -318,6 +318,10 @@ public class LabelController {
         String replace = picture.getPlabel().replace(deleteLabelId + ",", "");
         if(replace.length()==1){
             replace = "";
+        //    将 undefined 标签数量 +1
+            Label undefined = labelMapper.selectByPrimaryKey(-1);
+            undefined.setTags(undefined.getTags()+1);
+            labelMapper.updateByPrimaryKey(undefined);
         }
         picture.setPlabel(replace);
 

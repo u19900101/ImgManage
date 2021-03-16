@@ -32,7 +32,7 @@
                 "plugins" : [ "contextmenu", "dnd"]
             }).on('ready.jstree',function(){
                 $('#jstree').jstree('open_all');
-            });//eof jstree
+            });
 
 
             $('.c1').on('click',function(){
@@ -52,7 +52,7 @@
                 //     console.log(e,data);
                     // 右键时 data.event.type = contextmenu
                     if('click'==data.event.type){
-                        console.log("左击");
+
                         var labelName = data.node.text;
                         // 当tag数量为 0 时显示 空空如也  label(0)
                         if(labelName.substring(labelName.lastIndexOf("(")+1,labelName.lastIndexOf("(")+2) == "0"){
@@ -60,7 +60,11 @@
                             $("#rightPage").html("<h1 style='color: red'>空空如也</h1>");
                         }else {
                             var labelHref = data.node.original.href;
+                            console.log("左击","labelHref",labelHref);
+                            // 二次加载树之前 对树进行清空  不然 一直死循环 执行前一次的点击
+                            $('#jstree').data('jstree', false).empty();
                             $("#rightPage").load(labelHref);
+
                         }
                     }
                    })
@@ -98,7 +102,6 @@
                 // update_item('new', data.node.parent, 0, data.node.text);
                 // console.log("create_node ",data.node);
             });
-            ;
 
             // Move inside Tree to inside
             $('#jstree').on("move_node.jstree", function (e, data) {
