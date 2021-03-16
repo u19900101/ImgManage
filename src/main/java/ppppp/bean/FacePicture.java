@@ -16,6 +16,10 @@ public class FacePicture {
     public FacePicture() {
     }
 
+    public FacePicture(String picId) {
+        this.picId = picId;
+    }
+
     public String getPicId() {
         return picId;
     }

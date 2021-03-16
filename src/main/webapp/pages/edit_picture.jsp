@@ -141,8 +141,7 @@
             <div class="editImgDiv" id='${picture.pid}' @mouseenter="enter()" @mouseleave="left()">
                 <img id = "v_${picture.pid}"
                      src="${picture.path}"
-                     <%-- 宽度自适应  --%>
-                     <%--class="img-responsive"--%>
+                     class="labelDown"
                      onload="loadImage(this)">
                 <button v-show = "buttonShow" @click = "deletePicture()" type="button" class="btn btn-default  btn-sm"
                         style="position:absolute; left: 90%;top: 45%"
@@ -373,15 +372,15 @@
                     "pId="+pId+"&imgPath="+imgPath,
                     function (data) {
                         var facePicture = data.facePicture;
-                        if(facePicture){
+                        console.log("facePicture",facePicture);
+                        if(facePicture != 0){
+                            console.log("进入跳转");
                             var labelHref = "pages/faceDetect.jsp";
                             $("#rightPage").load(labelHref);
+                        }else {
+                            console.log("未检测到人脸");
+                            alert("未检测到人脸");
                         }
-                      /*  var rects = data.rects;
-                        var points = data.points;
-                        console.log(faceNum);
-                        console.log(rects);
-                        console.log(points);*/
                     },
                     "json"
                 );

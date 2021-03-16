@@ -63,7 +63,11 @@ public class faceController {
             map.put("face_landmarks", facePicture.getLandmarks());
             request.getSession().setAttribute("map", map);*/
             // 将faceIds
+            if(facePicture.getFaceIds() == null){
+                map.put("facePicture", 0);
 
+                return  new Gson().toJson(map);
+            }
 
             String[] faceIds = facePicture.getFaceIds().replace("[", "").replace("]","").replace(" ", "").split(",");
             ArrayList<String> faceNames = new ArrayList<>();
@@ -106,10 +110,21 @@ public class faceController {
             String faceNum = null;
 
             if ((line = in.readLine()) != null) {
+                if(Integer.valueOf(line) == 0){
+                    System.out.println("未检测到人脸");
+                    // 2.插入到 t_face_pic
+                    FacePictureWithBLOBs facePicture2 = new FacePictureWithBLOBs(imgPath);
+
+                    int insert = facePictureMapper.insert(facePicture2);
+                    if(insert != 1){
+                        System.out.println("失败....插入到 t_face_pic");
+                    }else {
+                        System.out.println("成功....插入到 t_face_pic");
+                    }
+
+                    return "未检测到人脸";
+                }
                 faceNum = line;
-            }else {
-                System.out.println("未检测到人脸");
-                return "未检测到人脸";
             }
 
             if ((line = in.readLine()) != null) {

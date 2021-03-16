@@ -35,7 +35,7 @@
             });//eof jstree
 
 
-            $('.imgDiv').on('click',function(){
+            $('.c1').on('click',function(){
 
                  console.log("点击了图片 即将跳转到 编辑页面....");
                  var href = "picture/before_edit_picture";
@@ -116,20 +116,18 @@
             });
 
             // 将图片拖拽到标签
-            $(document).on('mousedown','.imgDiv', function (e) {
+            $(document).on('mousedown','.labelDown', function (e) {
                 console.log("mousedown to pic", "id" , this.id);
                 return $.vakata.dnd.start(e, {
                         'nodes' : [{ id : this.id }] },
                     '<div id="jstree-dnd" class="jstree-default"><i class="jstree-icon jstree-er"></i>' + $(this).text() + '<ins class="jstree-copy" style="display:none;">+</ins></div>');
             });
-
-
             $(document).on('dnd_move.vakata', function (e, data) {
                 // console.log("dnd_move.vakata 执行了");
                 data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
                 var t = $(data.event.target);
                 if(!t.closest('.jstree').length) {
-                    if(t.closest('.imgDiv').length) {
+                    if(t.closest('.labelDown').length) {
                         data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
                     }
                     else {
@@ -143,8 +141,6 @@
                 // console.log("dnd_start 开始拖拽....");
 
             });
-
-
             $(document).on('dnd_stop.vakata', function (e, data) {
                 var goToChange = false;
                 console.log("dnd_stop  拖拽放下...");
@@ -161,7 +157,7 @@
                     console.log(data);
                     goToChange = true;
                 }
-
+                console.log(data);
                 // 2.将照片拖拽到 标签中
                 if(data.event.target.id.lastIndexOf("_anchor") != -1){
                     console.log("拖拽图片到标签： ");
@@ -170,7 +166,7 @@
                     picId = picId.split("_")[1];
                     // console.log("picId: ",picId);
                     var labelName = data.event.target.innerText;
-                    console.log("labelId: ",labelId,"newlabelName: ",labelName.substring(0,labelName.lastIndexOf("(")));
+                    console.log("labelId: ",labelId,"newlabelName: ",labelName.substring(0,labelName.lastIndexOf("(")),"picId: ",picId);
                     goToChange = true;
                 }
                 if(goToChange){

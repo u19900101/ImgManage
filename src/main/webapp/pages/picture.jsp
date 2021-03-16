@@ -134,7 +134,7 @@
                 <c:if test="${index.equals(1)}">
                     <div id="${item.key}" class="collapse in">
                         <c:forEach items="${item.value}" var="picture" >
-                            <div class="c1" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
+                            <div class="c1"  id='v_${picture.pid}'>
                                         <%--    <div  style="border: 1px solid brown;float: right">
                                                 <v-date-picker class="inline-block h-full" v-model="date" mode="time" is24hr :minute-increment="5"  :model-config="modelConfig" is-required>
                                                     <template v-slot="{ inputValue, togglePopover }">
@@ -174,13 +174,15 @@
                                --%>
                                 <form action="picture/before_edit_picture" method="post" name="${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
 
-                                    <div id='v_${picture.pid}'
+                                    <div id='labelDown_${picture.pid}'
                                          @mouseenter="enter()" @mouseleave="left()"
-                                        class="imgDiv" path = "${picture.path}"
+                                         class="labelDown"
+                                         path = "${picture.path}"
                                          style="position:relative;border: 1px solid yellow">
                                         <input type="hidden" name="path" value="${picture.path}">
 
                                         <img
+                                             id='img_${picture.pid}'
                                              src="${picture.path}"
                                              class="tooltip-show"
                                              data-placement="top"
@@ -207,7 +209,7 @@
                 <c:if test="${not index.equals(1)}">
                     <div id="${item.key}" class="collapse">
                         <c:forEach items="${item.value}" var="picture" >
-                            <div class="c1" id = "${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
+                            <div class="c1" id='v_${picture.pid}'>
                                     <%--    <div  style="border: 1px solid brown;float: right">
                                             <v-date-picker class="inline-block h-full" v-model="date" mode="time" is24hr :minute-increment="5"  :model-config="modelConfig" is-required>
                                                 <template v-slot="{ inputValue, togglePopover }">
@@ -246,12 +248,13 @@
                                         </div>
                            --%>
                                 <form action="picture/before_edit_picture" name="${picture.path.replace('\\', '').replace('_', '').replace('.', '')}">
-                                    <div id='v_${picture.pid}'
+                                    <div id='labelDown_${picture.pid}'
                                          @mouseenter="enter()" @mouseleave="left()"
-                                         class="imgDiv" path = "${picture.path}" style="position:relative;border: 1px solid yellow">
+                                         class="labelDown" path = "${picture.path}" style="position:relative;border: 1px solid yellow">
                                         <input type="hidden" name="path" value="${picture.path}">
 
                                         <img
+                                            id='img_${picture.pid}'
                                              src="${picture.path}"
                                              class="tooltip-show"
                                              data-placement="top"

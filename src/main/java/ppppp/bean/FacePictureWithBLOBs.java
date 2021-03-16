@@ -9,6 +9,10 @@ public class FacePictureWithBLOBs extends FacePicture {
         super(picId, faceNum, faceIds);
     }
 
+    public FacePictureWithBLOBs(String picId) {
+        super(picId);
+    }
+
     @Override
     public String toString() {
         return "FacePictureWithBLOBs{" +
