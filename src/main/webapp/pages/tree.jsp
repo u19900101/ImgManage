@@ -49,46 +49,52 @@
             // 点击时激发
             $('#jstree')
                 .on("select_node.jstree", function (e, data) {
-                console.log("在tree.jsp中 点击了标签 ",data.node.text);
-                var labelName = data.node.text;
-                // 当tag数量为 0 时显示 空空如也  label(0)
-                if(labelName.substring(labelName.lastIndexOf("(")+1,labelName.lastIndexOf("(")+2) == "0"){
-                    console.log("空空如也");
-                    $("#rightPage").html("<h1 style='color: red'>空空如也</h1>");
-                }else {
-                    var labelHref = data.node.original.href;
-                    $("#rightPage").load(labelHref);
-                }
-            })
+                //     console.log(e,data);
+                    // 右键时 data.event.type = contextmenu
+                    if('click'==data.event.type){
+                        console.log("左击");
+                        var labelName = data.node.text;
+                        // 当tag数量为 0 时显示 空空如也  label(0)
+                        if(labelName.substring(labelName.lastIndexOf("(")+1,labelName.lastIndexOf("(")+2) == "0"){
+                            console.log("空空如也");
+                            $("#rightPage").html("<h1 style='color: red'>空空如也</h1>");
+                        }else {
+                            var labelHref = data.node.original.href;
+                            $("#rightPage").load(labelHref);
+                        }
+                    }
+                   })
                 .on('rename_node.jstree', function (e, data) {
+                    console.log("进入 rename_node");
+                    // 更新名称和创建 节点合并
+                    var labelId= data.node.id;
+                    var labelName = data.node.text;
+                    // console.log("  labelId ",labelId,"type",typeof labelId);
+                    // console.log("  Number(labelId) ",Number(labelId),"type",typeof Number(labelId));
 
-                // 更新名称和创建 节点合并
-                var labelId= data.node.id;
-                var labelName = data.node.text;
-                // console.log("  labelId ",labelId,"type",typeof labelId);
-                // console.log("  Number(labelId) ",Number(labelId),"type",typeof Number(labelId));
-
-                if(isNaN(Number(labelId))){
-                    console.log(" 创建节点 ",data.node.text);
-                    var parentLabelId = data.node.parent;
-                    console.log("labelName ",labelName);
-                    console.log("parentLabelId ",parentLabelId);
-                    if(parentLabelId == '#') {
-                        // 创建 根节点
-                        parentLabelId = null;
-                    };
-                    createLabel(labelName,parentLabelId);
-                }else {
-                    console.log("  更新节点 ",data.node.text);
-                    editLabel(labelId,labelName);
-                }
-
-            })
+                    if(isNaN(Number(labelId))){
+                        console.log(" 创建节点 ",data.node.text);
+                        var parentLabelId = data.node.parent;
+                        console.log("labelName ",labelName);
+                        console.log("parentLabelId ",parentLabelId);
+                        if(parentLabelId == '#') {
+                            // 创建 根节点
+                            parentLabelId = null;
+                        };
+                        createLabel(labelName,parentLabelId);
+                    }else {
+                        console.log("  更新节点 ",data.node.text);
+                        editLabel(labelId,labelName);
+                    }})
                 .on('delete_node.jstree', function (e, data) {
+
+                    console.log("进入 delete_node 中");
                     console.log("delete_node ",data.node);
                     deleteLabel(data.node.id);
-                    reLoadLeftPage();
-            }).on('create_node.jstree', function (e, data) {
+                    console.log("delete_node 执行结束");
+                    // reLoadLeftPage();
+                })
+                .on('create_node.jstree', function (e, data) {
                 // update_item('new', data.node.parent, 0, data.node.text);
                 // console.log("create_node ",data.node);
             });
@@ -221,10 +227,12 @@
         );
     };
     function deleteLabel(labelId){
+        console.log("获取返回值");
         $.post(
             "http://localhost:8080/pic/label/ajaxDeleteLabel",
             "labelId="+labelId,
             function(data) {
+                console.log("获取返回值",data);
                 if(!data.isDelete){
                     console.log("失败 -- 删除标签到数据库");
                     return;
