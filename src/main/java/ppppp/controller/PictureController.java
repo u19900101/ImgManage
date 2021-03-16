@@ -2,11 +2,13 @@ package ppppp.controller;
 
 import com.drew.imaging.ImageProcessingException;
 import com.google.gson.Gson;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import ppppp.bean.Label;
 import ppppp.bean.Picture;
@@ -17,14 +19,12 @@ import ppppp.service.PictureService;
 import ppppp.util.MyUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.*;
-
+import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 
 /**
  * @author lppppp
@@ -450,6 +450,10 @@ public class PictureController {
             if(map.get("msg") != null){
                 return new Gson().toJson(map);
             }
+        }else {
+            Label undefined = labelMapper.selectByPrimaryKey(-1);
+            undefined.setTags(undefined.getTags()-1);
+            labelMapper.updateByPrimaryKey(undefined);
         }
 
         String existImgPath = picture.getPath();

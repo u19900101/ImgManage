@@ -1,10 +1,11 @@
 package ppppp.dao;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import ppppp.bean.Picture;
 import ppppp.bean.PictureExample;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public interface PictureMapper {
     long countByExample(PictureExample example);
@@ -38,4 +39,8 @@ public interface PictureMapper {
     ArrayList<Picture> selectByLabelNameLike(List labelNameList);
 
     ArrayList<Picture> selectByLabelIdLike(List labelIdList);
+
+    ArrayList<Picture> selectByLabelName(String labelName);
+
+    ArrayList<Picture> selectLabelIsNull();
 }

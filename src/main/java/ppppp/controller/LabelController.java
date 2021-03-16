@@ -1,21 +1,20 @@
 package ppppp.controller;
 
 import com.google.gson.Gson;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import ppppp.bean.*;
 import ppppp.dao.LabelMapper;
 import ppppp.dao.PictureMapper;
 
-
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+
+import static ppppp.service.PictureService.groupPictureByMonth;
 
 /**
  * @author lppppp
@@ -67,20 +66,25 @@ public class LabelController {
 
     @RequestMapping("/selectByLabel")
     // 根据 标签名称 获取所有的包含该标签的照片 按照月份(不包含二级标签) 装进map中
-    public String selectByLabel(Integer labelid, String labelName,HttpServletRequest req) {
+    public String selectByLabel( String labelName,HttpServletRequest req) {
         TreeMap<String,ArrayList<Picture>> listHashMap = new TreeMap<>();
-
-        // 获取 标签子标签的所有 id 通过 ',{labelName},' 字段来 查询所有
+        ArrayList<Picture> pictureArrayList = new ArrayList<>();
         ArrayList labelidList = new ArrayList();
-        getAllSonLabelId(labelName,labelidList);//也包含自己
+        if(labelName.equalsIgnoreCase("undefined")){
+            pictureArrayList = pictureMapper.selectLabelIsNull();
+            pictureArrayList.addAll(pictureMapper.selectByLabelName(""));
+        }else {
+            // 获取 标签子标签的所有 id 通过 ',{labelName},' 字段来 查询所有
+            getAllSonLabelId(labelName,labelidList);//也包含自己
+            pictureArrayList = pictureMapper.selectByLabelIdLike(labelidList);
+        }
 
-        ArrayList<Picture> pictureArrayList = pictureMapper.selectByLabelIdLike(labelidList);
         if(pictureArrayList.size()>0){
             listHashMap.put(labelName, pictureArrayList);
         }
-
+        TreeMap<String,ArrayList<Picture>> map = groupPictureByMonth(pictureArrayList);
         //将map 写进 MonthPic
-        req.getSession().setAttribute("monthsTreeMapListPic", listHashMap);
+        req.getSession().setAttribute("monthsTreeMapListPic", map);
         return "picture";
     }
 
@@ -205,7 +209,12 @@ public class LabelController {
         }else {
             addOrDeleteTagsById = updateTagsById(newLabelId,null,1,changeLabels);
         }
-
+        // 判断是否从未分类的照片 添加了标签
+        if(picture.getPlabel() == null || picture.getPlabel().length()<=1){
+            Label undefined = labelMapper.selectByPrimaryKey(-1);
+            undefined.setTags(undefined.getTags()-1);
+            labelMapper.updateByPrimaryKey(undefined);
+        }
         // 2.更新 t_label 更新标签的徽记  本标签 以及 父标签
         picture.setPlabel(picture.getPlabel() == null || picture.getPlabel().length()<=1?","+newLabelId+",":picture.getPlabel()+newLabelId+",");
 

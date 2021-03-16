@@ -290,6 +290,7 @@ public class faceController {
     }
 
 
+
     public LabelMapper getLabelMapper(){
         ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
         return context.getBean(LabelMapper.class);

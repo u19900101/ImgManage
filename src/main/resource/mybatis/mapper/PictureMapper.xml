@@ -121,6 +121,26 @@
   </select>
 
 
+  <select id="selectByLabelName" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_pic
+    where
+    plabel = #{labelName,jdbcType=VARCHAR}
+  </select>
+
+
+  <select id="selectLabelIsNull" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_pic
+    where
+    plabel is null
+  </select>
 
 
   <select id="selectByLabelNameLike" resultMap="ResultMapWithBLOBs">

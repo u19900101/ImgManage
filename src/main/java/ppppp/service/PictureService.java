@@ -2,7 +2,6 @@ package ppppp.service;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ppppp.bean.Picture;
@@ -18,7 +17,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static ppppp.controller.PictureController.*;
-import static ppppp.controller.PictureController.uploadimgDir;
 
 /**
  * @author lppppp
@@ -309,7 +307,7 @@ public class PictureService {
         return insert;
     }
 
-    public TreeMap<String, ArrayList<Picture>> groupPictureByMonth(List<Picture> pictures) {
+    public static TreeMap<String, ArrayList<Picture>> groupPictureByMonth(List<Picture> pictures) {
         //将带时间的照片按月进行分组
         TreeMap<String,ArrayList<Picture>> map = new TreeMap<>(new Comparator<String>() {
             // 月份按照降序排列
