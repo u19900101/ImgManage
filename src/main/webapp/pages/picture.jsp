@@ -190,7 +190,7 @@
                                              title="<h5>${picture.pname}</h5>${picture.pcreatime}"
                                              style="height: 100%;width: auto">
 
-                                        <button v-show = "buttonShow" @click = "deletePicture()" type="button" class="btn btn-default  btn-sm"
+                                        <button v-show = "buttonShow" @click = "deletePicture(event)" type="button" class="btn btn-default  btn-sm"
                                                 style="position:absolute; left: 48%; top: 90%;"
                                                 data-placement="top"
                                                 data-toggle="tooltip"
@@ -252,7 +252,7 @@
                                          @mouseenter="enter()" @mouseleave="left()"
                                          class="labelDown" path = "${picture.path}" style="position:relative;border: 1px solid yellow">
                                         <input type="hidden" name="path" value="${picture.path}">
-
+                                        <a href="#" class="thumbnail">
                                         <img
                                             id='img_${picture.pid}'
                                              src="${picture.path}"
@@ -261,7 +261,8 @@
                                              data-toggle="tooltip"
                                              title="<h5>${picture.pname}</h5>${picture.pcreatime}"
                                              style="height: 100%;width: auto">
-                                        <button v-show = "buttonShow" @click = "deletePicture()" type="button" class="btn btn-default  btn-sm"
+                                        </a>
+                                        <button v-show = "buttonShow" @click = "deletePicture(event)" type="button" class="btn btn-default  btn-sm"
                                                 style="position:absolute; left: 48%; top: 90%;"
                                                 data-placement="top"
                                                 data-toggle="tooltip"
@@ -307,15 +308,17 @@
                         buttonShow : false,
                     },
                     methods: {
-                        deletePicture: function () {
+                        deletePicture: function (event) {
+                            event.stopPropagation(); //阻止事件的向上传播
                             var pId = '${picture.pid}';
+                            console.log("点击进入删除，阻止事件的向上传播","pid is",pId);
                             $.post(
                                 "http://localhost:8080/pic/picture/ajaxDeletePic",
                                 "pId=" + pId,
                                 function (data) {
                                     if (data.status == 'success') {
-                                        $("#" + pId).remove();
-                                        success_prompt(data.msg, 1500);
+                                        $("#v_" + pId).remove();
+                                        // success_prompt(data.msg, 1500);
                                     } else if (data.status == 'fail') {
                                         fail_prompt(data.msg, 2500);
                                     } else {
