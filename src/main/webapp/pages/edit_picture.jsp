@@ -372,8 +372,8 @@
                     "http://localhost:8080/pic/face/getFace",
                     "pId="+pId+"&imgPath="+imgPath,
                     function (data) {
-                        var faceNum = data.faceNum;
-                        if(faceNum>0){
+                        var facePicture = data.facePicture;
+                        if(facePicture){
                             var labelHref = "pages/faceDetect.jsp";
                             $("#rightPage").load(labelHref);
                         }

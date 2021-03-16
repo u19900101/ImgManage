@@ -53,7 +53,7 @@ public class faceController {
         // 查看当前照片是否已经经过检测（判断图片路径）
         // String imgAbsPath= "D:\\MyJava\\mylifeImg\\pythonModule\\face\\d\\9.jpg";
         String imgAbsPath =  baseDir+imgPath;
-        FacePictureWithBLOBs facePicture = getFacePictureMapper().selectByPrimaryKey(imgAbsPath);
+        FacePictureWithBLOBs facePicture = getFacePictureMapper().selectByPrimaryKey(imgPath);
         if(facePicture != null){
             System.out.println("该照片已进行过人脸检测");
 
@@ -63,16 +63,18 @@ public class faceController {
             map.put("face_landmarks", facePicture.getLandmarks());
             request.getSession().setAttribute("map", map);*/
             // 将faceIds
-            request.getSession().setAttribute("facePicture", facePicture);
+
 
             String[] faceIds = facePicture.getFaceIds().replace("[", "").replace("]","").replace(" ", "").split(",");
-            ArrayList faceNames = new ArrayList<>();
+            ArrayList<String> faceNames = new ArrayList<>();
             for (String faceId : faceIds) {
                 Label label = labelMapper.selectByPrimaryKey(Integer.valueOf(faceId));
-                faceNames.add(label.getLabelName());
+                faceNames.add("\""+label.getLabelName()+"\"");
             }
+            facePicture.setPicId(facePicture.getPicId().replace("\\", "/"));
             map.put("facePicture", facePicture);
-            map.put("faceNames", faceNames);
+            map.put("faceNamesList", faceNames);
+            request.getSession().setAttribute("map", map);
             return  new Gson().toJson(map);
         }
 
@@ -100,7 +102,7 @@ public class faceController {
             String  face_locations = null;
             String[]   face_name_ids = null;
             List<Integer> face_name_ids_List = new ArrayList();
-
+            List faceNamesList = new ArrayList<>();
             String faceNum = null;
 
             if ((line = in.readLine()) != null) {
@@ -111,21 +113,23 @@ public class faceController {
             }
 
             if ((line = in.readLine()) != null) {
-
                 face_name_ids = line.replace(" ","").replace("[", "").replace("]", "").replace(",", " ").trim().split(" ");
                 // 初始化 人脸标签库 得到人脸 id
                 for (String name_id : face_name_ids) {
                     Integer labelId =Integer.valueOf(name_id);
                     Label label1 = labelMapper.selectByPrimaryKey(labelId);
+                    String faceName = null;
                     if(label1 == null){
                         // 新的人脸 创建 label
-                        Label label = new Label("faceName_" + name_id);
+                        faceName = "faceName_" + name_id;
+                        Label label = new Label(faceName);
                         int insert = labelMapper.insert(label);
                         if(insert != 1){
                             System.out.println("失败--插入人脸到t_label");
                             return "失败--插入人脸到t_label";
                         }
                         labelId = label.getLabelid();
+
                     }else {
                         // 已存在的人脸 数量+1
                         label1.setTags(label1.getTags()+1);
@@ -135,13 +139,14 @@ public class faceController {
                         // 1.更新 t_pic 表
                         // 不存在标签 向数据库中插入该标签
                         int updatePic = pictureMapper.updateByPrimaryKeySelective(picture);
-
                         if(insert != 1 || updatePic != 1){
                             System.out.println("失败--插入人脸到t_label");
                             return "失败--插入人脸到t_label";
                         }
+                        faceName = label1.getLabelName();
                     }
                     face_name_ids_List.add(labelId);
+                    faceNamesList.add(faceName);
                 }
             }
             if ((line = in.readLine()) != null) {
@@ -168,12 +173,16 @@ public class faceController {
             }else {
                 System.out.println("成功....插入到 t_face_pic");
             }
+            facePicture2.setPicId(facePicture2.getPicId().replace("\\", "/"));
+            map.put("facePicture", facePicture2);
+            map.put("faceNamesList", faceNamesList);
 
 
         } catch (IOException e) {
             e.printStackTrace();
         }
         request.getSession().setAttribute("map", map);
+
         return  new Gson().toJson(map);
     }
 

@@ -19,7 +19,7 @@
 
 
 <script>
-    function canvasPart(canvasId,srcImgPath,rects,points,text) {
+    function canvasPart(canvasId,srcImgPath,rects,points,faceNum,faceNamesList) {
         var c = document.getElementById(canvasId);
 
         var ctx = c.getContext("2d");
@@ -43,14 +43,17 @@
             // 添加文字 后面两个数字是坐标
             ctx.font  = "30px sans-serif";
             ctx.fillStyle = '#fc0000';
-            ctx.fillText("face Num :"+text, 10, 50);
+            ctx.fillText("face Num :"+faceNum, 10, 50);
 
             for (var i = 0; i < rects.length; i++) {
                 // 画矩形 前两个数字是坐标, 后面是矩形的宽高 fillRect是填充的
                 ctx.lineWidth = 3;
                 ctx.strokeStyle = '#64e204';
                 ctx.strokeRect(rects[i][0]*scale, rects[i][1]*scale, rects[i][2]*scale, rects[i][3]*scale);
-
+                // 显示人名
+                ctx.font  = "20px sans-serif";
+                ctx.fillStyle = '#000000';
+                ctx.fillText(faceNamesList[i], rects[i][0]*scale, rects[i][1]*scale-10);
                 //  画圈
                 var r = 1;
                 for (var j = 0; j < points[0].length; j++) {
@@ -61,7 +64,7 @@
                     // ctx.stroke();// 空心圆
                     ctx.fillStyle="#69fcd5";
                     ctx.fill();//画实心圆
-                    // ctx.closePath();
+
                 }
             }
         }
@@ -69,15 +72,16 @@
 
 
     var canvasId = "myCanvas";
-    var faceNum = "${facePicture.faceNum}";
-    var rects = ${facePicture.locations};
-    var points = ${facePicture.landmarks};
-    var faceNames = ${facePicture.faceIds};
+    var faceNum = "${map.facePicture.faceNum}";
+    var rects = ${map.facePicture.locations};
+    var points = ${map.facePicture.landmarks};
+    var faceNamesList = ${map.faceNamesList};
     // var srcImgPath = 'face/6.jpg';
-    var srcImgPath = "${facePicture.picId}";
+    var srcImgPath = "${map.facePicture.picId}";
 
-    console.log( srcImgPath);
-    canvasPart(canvasId,srcImgPath,rects,points,faceNum);
+    console.log("srcImgPath",srcImgPath);
+    console.log("faceNamesList",faceNamesList);
+    canvasPart(canvasId,srcImgPath,rects,points,faceNum,faceNamesList);
 
 </script>
 </body>
