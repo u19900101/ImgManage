@@ -8,7 +8,9 @@ public class FacePictureWithBLOBs extends FacePicture {
     public FacePictureWithBLOBs(String picId, Integer faceNum, String faceIds) {
         super(picId, faceNum, faceIds);
     }
+    public FacePictureWithBLOBs() {
 
+    }
     public FacePictureWithBLOBs(String picId) {
         super(picId);
     }

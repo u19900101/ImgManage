@@ -43,4 +43,6 @@ public interface PictureMapper {
     ArrayList<Picture> selectByLabelName(String labelName);
 
     ArrayList<Picture> selectLabelIsNull();
+
+    ArrayList<Picture> selectAllPic();
 }

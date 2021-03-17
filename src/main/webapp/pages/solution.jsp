@@ -32,6 +32,12 @@
             <span class="glyphicon glyphicon-tags" style="font-size:15px;" ></span>
             查看所有
         </button>
+
+        <button id="faceDetect">
+            <span class="glyphicon glyphicon-tags" style="font-size:15px;" ></span>
+            人脸检测
+        </button>
+
         <div id="jstree">
 
         </div>
@@ -51,15 +57,24 @@
 
         onload();
         function onload() {
+            $("#jstree").load("label/getLabelTree");
             // 在picture页面加载tree，解决刚进来时点击出现bug
             $("#rightPage").load("picture/page");
-            // var labelHref = "label/getLabelTree";
-            // $("#leftPage").load(labelHref);
-            // $("#leftPage").load("pages/tree.jsp");
         };
 
         $("#showAllPic").on("click",function () {
             onload();
+        });
+
+        $("#faceDetect").on("click",function () {
+            $.post(
+                "http://localhost:8080/pic/face/detectAllPicFace",
+
+                function(data) {
+                   console.log("操作完成...")
+                },
+                "json"
+            );
         })
     });
 

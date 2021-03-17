@@ -32,13 +32,13 @@
             var img_w = img.width;
             var img_h = img.height;
 
-            var ch = 800;
+            var ch = 400;
             var scale = ch/img_h;
             $("#"+canvasId).attr("height",ch);
-            $("#"+canvasId).attr("width",img_w/img_h*800);
+            $("#"+canvasId).attr("width",img_w/img_h*ch);
             // console.log("cw,ch: ",img_w/img_h*800,ch,"img_w,img_h: ",img_w,img_h);
 
-            ctx.drawImage(img, 0, 0,img_w/img_h*800,ch);
+            ctx.drawImage(img, 0, 0,img_w/img_h*ch,ch);
 
             // 添加文字 后面两个数字是坐标
             ctx.font  = "30px sans-serif";
@@ -71,7 +71,7 @@
     }
 
 
-    var canvasId = "myCanvas";
+   /* var canvasId = "myCanvas";
     var faceNum = "${map.facePicture.faceNum}";
     var rects = ${map.facePicture.locations};
     var points = ${map.facePicture.landmarks};
@@ -81,7 +81,11 @@
 
     console.log("srcImgPath",srcImgPath);
     console.log("faceNamesList",faceNamesList);
-    canvasPart(canvasId,srcImgPath,rects,points,faceNum,faceNamesList);
+    canvasPart(canvasId,srcImgPath,rects,points,faceNum,faceNamesList);*/
+
+    var s = "[[110, 418, 554, 555],[110, 418, 554, 555]]";
+    var m = JSON.parse(s);
+    console.log(m);
 
 </script>
 </body>

@@ -372,13 +372,8 @@
             $(targetId).collapse('toggle');
         })
     });
-    function reLoadLeftPage(){
-        var labelHref = "label/getLabelTree";
 
-        $("#jstree").load(labelHref);
-    }
     $(document).ready(function(){
-
         reLoadLeftPage();
     });
 </script>

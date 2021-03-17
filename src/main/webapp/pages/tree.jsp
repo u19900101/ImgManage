@@ -17,7 +17,11 @@
 </div>
 
 <script>
-
+    function reLoadLeftPage(){
+        $('#jstree').data('jstree', false).empty();
+        var labelHref = "label/getLabelTree";
+        $("#jstree").load(labelHref);
+    }
     $(document).ready(function() {
             // 右侧页面点击图片时 跳转页面
             console.log("加载了tree.jsp页面...");
@@ -64,7 +68,6 @@
                             // 二次加载树之前 对树进行清空  不然 一直死循环 执行前一次的点击
                             $('#jstree').data('jstree', false).empty();
                             $("#rightPage").load(labelHref);
-
                         }
                     }
                    })
@@ -274,6 +277,7 @@
             "json"
         );
     };
+
 </script>
 </body>
 </html>
