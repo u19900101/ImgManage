@@ -58,14 +58,37 @@ public class faceController {
     @ResponseBody
     @RequestMapping(value = "/getFace",method = RequestMethod.POST)
     public String getFace(String imgPath,String pId,HttpServletRequest request){
-
-        HashMap map = getFaceMethod(imgPath,pId);
+        // 直接从数据库查询结果返回
+        HashMap map = getFaceMethod2(imgPath,pId);
         // request.getSession().setAttribute("map", map);
-
         return  new Gson().toJson(map);
     }
 
+    public HashMap getFaceMethod2(String imgPath,String pId){
+        HashMap map = new HashMap();
 
+        ArrayList<String> faceNamesList = new ArrayList<>();
+        FacePictureWithBLOBs facePicture =  facePictureMapper.selectByPrimaryKey(pId);
+        //该照片已进行过人脸检测 直接查询结果进行封装
+        if(facePicture != null){
+            System.out.println("该照片已进行过人脸检测");
+            if(facePicture.getFaceIds() == null){
+                map.put("faceNum", 0);
+                return map;
+            }
+            String[] faceIds = facePicture.getFaceIds().replace("[", "").replace("]","").replace(" ", "").split(",");
+            for (String faceId : faceIds) {
+                Label label = labelMapper.selectByPrimaryKey(Integer.valueOf(faceId));
+                faceNamesList.add(label.getLabelName());
+            }
+        }
+        map.put("faceNamesList", faceNamesList);
+        map.put("faceNum", facePicture.getFaceNum());
+        map.put("face_locations", facePicture.getLocations());
+        map.put("face_landmarks", facePicture.getLandmarks());
+        map.put("srcImgPath", imgPath.replace("\\", "/"));
+        return map;
+    }
 
     public HashMap getFaceMethod(String imgPath, String pId){
         HashMap map = new HashMap();
