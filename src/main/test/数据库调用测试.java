@@ -28,15 +28,10 @@ public class 数据库调用测试 {
 
     @Test
     public void T_(){
-
-        // List<Picture> pictures = pictureMapper().selectAllPic().subList(30, 40);
-        //
-        // for (Picture picture : pictures) {
-        //     getFaceMethod(picture.getPath(),picture.getPid());
-        // }
-        long l = System.currentTimeMillis();
-        ArrayList<Picture> pictureArrayList = pictureMapper().selectAllPic();
-        System.out.println(System.currentTimeMillis()-l);
+        List list = new ArrayList<>();
+        list.add(5);
+        List<Picture> pictures = pictureMapper().selectByLabelIdLike(list);
+        System.out.println(pictures.size());
 
     }
     public HashMap getFaceMethod(String imgPath, String pId){

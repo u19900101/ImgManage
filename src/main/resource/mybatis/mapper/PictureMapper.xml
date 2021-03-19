@@ -172,9 +172,12 @@
     from t_pic
     where
     <foreach collection="list" item="item" index="index"  separator="OR">
-      `plabel` LIKE CONCAT('%',#{item},'%')
+      `plabel` LIKE CONCAT('%,',#{item},',%')
     </foreach>
   </select>
+
+
+
   <update id="MyUpdateByPrimaryKey" parameterType="map">
     update t_pic
     set path = #{newPath,jdbcType=VARCHAR},
