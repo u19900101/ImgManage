@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ppppp.bean.*;
+import ppppp.dao.FaceMapper;
+import ppppp.dao.FacePictureMapper;
 import ppppp.dao.LabelMapper;
 import ppppp.dao.PictureMapper;
 
@@ -27,6 +29,10 @@ public class LabelController {
     LabelMapper labelMapper;
     @Autowired
     PictureMapper pictureMapper;
+    @Autowired
+    FacePictureMapper facePictureMapper;
+    @Autowired
+    FaceMapper faceMapper;
     // 展示所有的标签
     @RequestMapping("/showAllLabel")
     public String showRecentLabel(Model model) {
@@ -299,6 +305,9 @@ public class LabelController {
 
 
     //删除照片的标签  同时修改徽记数量
+    //若删除为人脸 则要对
+    // 1.t_face_pic 中的 face_id 进行修改，去掉 该id字段,修改 face_num 减一
+    // 2.t_face 中的人脸进行删除
     @ResponseBody
     @RequestMapping(value = "/ajaxDeletePicLabel",method = RequestMethod.POST)
     public String ajaxDeletePicLabel(String pId,Integer deleteLabelId) {
@@ -327,8 +336,6 @@ public class LabelController {
 
         // 更新 t_pic
         int update = pictureMapper.updateByPrimaryKeySelective(picture);
-
-
         if(update!=1 || updateTags!= 1){
             System.out.println("失败 -- 删除照片标签");
             map.put("isDelete", false);
@@ -336,9 +343,23 @@ public class LabelController {
             System.out.println("成功 -- 删除照片标签");
             map.put("isDelete", true);
         }
+
+        // 更新 t_face_pic
+        deleFrom_t_face_pic(pId,deleteLabelId);
+        // 更新 t_face
+        deleFrom_t_face(pId,deleteLabelId);
         return new Gson().toJson(map);
     }
 
+    private void deleFrom_t_face(String pId, Integer deleteLabelId) {
+    }
+
+    private void deleFrom_t_face_pic(String pId, Integer deleteLabelId) {
+        FacePictureExample facePictureExample = new FacePictureExample();
+        FacePictureExample.Criteria criteria = facePictureExample.createCriteria();
+        criteria.andFaceIdsIsNotNull();
+        List<FacePicture> facePictures = facePictureMapper.selectByExample(facePictureExample);
+    }
 
 
     // 删除标签类

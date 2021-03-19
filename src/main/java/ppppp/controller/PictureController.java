@@ -397,8 +397,19 @@ public class PictureController {
         picture.setPname(split[0]);
         if(picture.getPlabel()!=null && picture.getPlabel().length()>1){
             String[] labels = picture.getPlabel().replace(","," ").trim().split(" ");
-            model.addAttribute("labelIds",picture.getPlabel().replace(","," ").trim());
+            // 对要显示的id 进行去重
+            model.addAttribute("labelIds",picture.getPlabel().replace(","," ").trim().split(" "));
+            String labelWithNoDep = "";
+            for (String label : labels) {
+                if(labelWithNoDep.contains(label)){
+                    continue;
+                }else {
+                    labelWithNoDep += label+" ";
+                }
+            }
+
             String labelsListStr = "";
+            labels = labelWithNoDep.split(" ");
             for (String label : labels) {
                 labelsListStr +=" " +labelMapper.selectByPrimaryKey(Integer.valueOf(label)).getLabelName().replace(" ", "");
             }
@@ -408,7 +419,6 @@ public class PictureController {
         model.addAttribute("type","."+split[1]);
         return "forward:/pages/edit_picture.jsp";
     }
-
 
     // 实时监测文件是否重名
 

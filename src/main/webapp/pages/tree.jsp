@@ -45,7 +45,7 @@
                  var href = "picture/before_edit_picture";
                  var picId =$(this).attr("id");
                  // vue的 id不能纯数字开头
-                 picId = picId.split("_")[1];
+                 picId = picId.substring(picId.indexOf("_")+1,picId.length);
                  $("#rightPage").load(href+"?pId="+picId);
 
             });

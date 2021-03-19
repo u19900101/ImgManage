@@ -18,8 +18,8 @@ def getFaceInfo(imgpath,known_face_encodings,known_face_ids):
     img=cv2.imdecode(np.fromfile(imgpath,dtype=np.int8),-1)
     # img = cv2.imread(imgpath) # 0.22s
     if(img.shape[0]<2000):
-        img = cv2.resize(img,(3000,int(img.shape[0]/(img.shape[1])*3000)))
         scale = 3000.0/img.shape[1]
+        img = cv2.resize(img,(3000,int(img.shape[0]/(img.shape[1])*3000)))
     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     face_locations = face_recognition.face_locations(img_rgb,1)
@@ -113,15 +113,26 @@ def insert_new_label():
     max_label_id = sqlSelect(sql,())[0][0]+1
     insertSql = "INSERT INTO t_label (labelId,label_name,tags,href) VALUES (%s, %s, %s, %s)"
     insertVal = (max_label_id,"faceName_"+str(max_label_id),1,"label/selectByLabel?labelName=faceName_"+str(max_label_id))
-    return sqlBase(insertSql,insertVal),max_label_id
+    sqlBase(insertSql,insertVal)
+    mydb.commit()
+    return cursor.rowcount,max_label_id
+
+# 1.更新t_pic 表
+# 2.更新未分类标签的数量
 def update_t_pic(pic_id,label_id):
     sql = "SELECT plabel FROM t_pic where pid = %s"
     plabel = sqlSelect(sql,(pic_id,))[0][0]
-    sql = "UPDATE t_pic SET plabel = %s WHERE pid = %s"
+
     if plabel is None or plabel == "":
+        sql = "SELECT tags FROM t_label where labelId = %s"
+        tags = sqlSelect(sql,(-1,))[0][0]
+        update_t_label_sql = "UPDATE t_label SET tags = %s WHERE labelId = %s"
+        update_t_label_sql_val = (tags-1,-1)
+        rowcount = sqlBase(update_t_label_sql,update_t_label_sql_val)
         val = (","+str(label_id)+",",pic_id)
     else:
         val = (plabel+str(label_id)+",",pic_id)
+    sql = "UPDATE t_pic SET plabel = %s WHERE pid = %s"
     sqlBase(sql,val)
 def insert_t_face(pic_id,face_name_id,face_encoding):
     insertSql = "INSERT INTO t_face (face_name_id,face_encoding,pic_id) VALUES (%s, %s, %s)"
@@ -139,6 +150,7 @@ def insert_t_face_pic(pic_id,faceDic,label_ids):
         val = (pic_id,faceDic['faceNum'],faceDic['face_locations'],str(label_ids),faceDic['face_landmarks'])
         print("插入t_face_pic 人脸数量：",faceDic['faceNum'])
     return sqlBase(sql,val)
+
 def writeToMySql(pic_id):
     know_encodings,know_ids = getFaceData()
     sql = "select * from t_face_pic where pic_id = %s"
@@ -152,8 +164,6 @@ def writeToMySql(pic_id):
         baseDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT\\"
         imgpath = baseDir + sqlSelect(sql,val)[0][1]
         faceDic = getFaceInfo(imgpath,know_encodings,np.asarray(know_ids))
-
-
     # imgpath = "img\\2020\\12\\2020_12_21T19_35_22.jpg"
     label_ids = []
     try:
@@ -165,35 +175,41 @@ def writeToMySql(pic_id):
                 labels = sqlSelect(sql,(face_name_id,))
                 if len(labels) == 0:
                     insert_row,face_name_id = insert_new_label()
+
                     print("新建人脸 face_name_id ",face_name_id)
                 else:
                     print("增加 ",labels[0][1],"tags ")
                     sql = "UPDATE t_label SET tags = %s WHERE labelId = %s"
                     val = (labels[0][4]+1,face_name_id)
                     sqlBase(sql,val)
+
                 label_ids.append(face_name_id)
                 update_t_pic(pic_id,face_name_id)
                 insert_t_face(pic_id,face_name_id,str(face_encoding))
             # i = 10/0 # 模拟回滚
         insert_t_face_pic(pic_id,faceDic,label_ids)
+
         mydb.commit()
         print(cursor.rowcount, "--成功--增删改影响数量")
     except:
         mydb.rollback()
         print("出现错误进行回滚....")
-
+def f():
+    sql = "select pid from t_pic"
+    pids = sqlSelect(sql,())
+    count = 0
+    for pic_id in pids:
+        print(count,"开始检测...")
+        writeToMySql(pic_id)
+        count +=1
 # pic_id = "1111111110000011100100111101011111000000001010010000010001010000"
 #
-sql = "select pid from t_pic"
-pids = sqlSelect(sql,())
-count = 100
-# pids[119]
-# pids[110]
-#
-# writeToMySql(pids[125])
-for pic_id in pids[200:]:
-    print(count,"开始检测...")
-    writeToMySql(pic_id)
-    count +=1
+# sql = "select pid from t_pic"
+# pids = sqlSelect(sql,())
+# writeToMySql(pids[5])
+
+f()
+# insert_new_label()
+
 
 

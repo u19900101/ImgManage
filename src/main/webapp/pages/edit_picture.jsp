@@ -427,6 +427,7 @@
 
 <script>
     function canvasPart(canvasId,srcImgPath,rects,points,faceNum,faceNamesList) {
+
         var c = document.getElementById(canvasId);
 
         var ctx = c.getContext("2d");
@@ -438,11 +439,11 @@
             // 让绘图自适应 canvas 尺寸
             var img_w = img.width;
             var img_h = img.height;
-
             var ch = 500;
             var scale = ch/img_h;
+            console.log(rects,"图片高度",img_h,"画布高度",ch,"缩放比例：",scale);
             $("#"+canvasId).attr("height",ch);
-            $("#"+canvasId).attr("width",img_w/img_h*ch);
+            $("#"+canvasId).attr("width",img_w*scale);
             // console.log("cw,ch: ",img_w/img_h*800,ch,"img_w,img_h: ",img_w,img_h);
 
             ctx.drawImage(img, 0, 0,img_w/img_h*ch,ch);
@@ -457,6 +458,7 @@
                 ctx.lineWidth = 3;
                 ctx.strokeStyle = '#64e204';
                 ctx.strokeRect(rects[i][0]*scale, rects[i][1]*scale, rects[i][2]*scale, rects[i][3]*scale);
+                console.log("绘制矩形框：",rects[i][0]*scale, rects[i][1]*scale, rects[i][2]*scale, rects[i][3]*scale)
                 // 显示人名
                 ctx.font  = "20px sans-serif";
                 ctx.fillStyle = '#000000';
