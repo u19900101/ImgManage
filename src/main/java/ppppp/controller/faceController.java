@@ -66,6 +66,7 @@ public class faceController {
         HashMap map = new HashMap();
 
         ArrayList<String> faceNamesList = new ArrayList<>();
+        ArrayList<String> face_pathsList = new ArrayList<>();
         FacePictureWithBLOBs facePicture =  getFacePictureMapper().selectByPrimaryKey(pId);
         //该照片已进行过人脸检测 直接查询结果进行封装
         if(facePicture != null){
@@ -75,16 +76,20 @@ public class faceController {
                 return map;
             }
             String[] faceIds = facePicture.getFaceIds().replace("[", "").replace("]","").replace(" ", "").split(",");
-            for (String faceId : faceIds) {
-                Label label = getLabelMapper().selectByPrimaryKey(Integer.valueOf(faceId));
+            String[] face_paths = facePicture.getFacePaths().replace("[", "").replace("]","").replace(",", " ").trim().split(" ");
+            for (int i = 0; i < faceIds.length; i++) {
+                Label label = getLabelMapper().selectByPrimaryKey(Integer.valueOf(faceIds[i]));
                 faceNamesList.add(label.getLabelName());
+                face_pathsList.add(face_paths[i]);
             }
+
         }
         map.put("faceNamesList", faceNamesList);
         map.put("faceNum", facePicture.getFaceNum());
         map.put("face_locations", facePicture.getLocations());
         map.put("face_landmarks", facePicture.getLandmarks());
-        map.put("face_paths", facePicture.getFacePaths());
+
+        map.put("face_paths", face_pathsList);
         map.put("srcImgPath", imgPath.replace("\\", "/"));
         return map;
     }

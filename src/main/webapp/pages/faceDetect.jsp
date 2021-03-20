@@ -9,14 +9,6 @@
 <%@ include file="/pages/head.jsp"%>
 <html>
 <head>
-  <%--  <style type="text/css">
-        p img
-        {
-            position:absolute;
-            /*rect (top, right, bottom, left) */
-            clip:rect(100px 500px 200px 0px)
-        }
-    </style>--%>
 
 </head>
 <body>
@@ -30,36 +22,8 @@
     截取照片 可进行轮播
 </div>
 
-<p>clip 属性剪切了一幅图像：</p>
-原图：<img style="float: left" src="img\2021\01\2021_01_28T21_06_27.jpeg"  height="500">
-裁剪:
-        <%--/*rect (top, right, bottom, left) */--%>
 
-        <div style="float: left"><img src="img\2021\01\2021_01_28T21_06_27.jpeg"
-                height="500"
-                style="position: absolute;clip: rect(400px 500px 600px 0px)">
-        </div>
-
-        <div style="float: left"><img src="img\2021\01\2021_01_28T21_06_27.jpeg"
-                height="500"
-                style="position: absolute;clip: rect(200px 500px 300px 0px)">
-        </div>
-
-     <%--   <p><img src="img\2021\01\2021_01_28T21_06_27.jpeg"
-                height="500"
-                style="position: absolute;
-                            clip: rect(400px 500px 200px 0px)">
-        </p>
-        <p><img src="img\2021\01\2021_01_28T21_06_27.jpeg"
-                height="500"
-                style="position: absolute;
-                            clip: rect(700px 500px 800px 0px)">
-        </p>--%>
-
-
-<%--<script>
-
-
+<script>
         var imgPath = "img\\2021\\01\\2021_01_28T21_06_27.jpeg";
         var pId = "_0110010001000001000001000101111100101000111011001010100100000000";
         // vue的 id不能纯数字开头
@@ -78,7 +42,9 @@
                     var points = JSON.parse(data.face_landmarks);
                     var faceNamesList = data.faceNamesList;
                     var srcImgPath = data.srcImgPath;
+                    var face_paths = data.face_paths;
                     canvasPart(canvasId,srcImgPath,rects,points,faceNum,faceNamesList);
+                    showFace(face_paths)
                 }else {
                     console.log("未检测到人脸");
                     alert("未检测到人脸");
@@ -86,11 +52,17 @@
             },
             "json"
         );
-
+    function showFace(face_paths) {
+        console.log(face_paths);
+        for (var i = 0; i < face_paths.length; i++) {
+            console.log(face_paths[i]);
+            var html = '<img src = "'+face_paths[i]+'" width="80">';
+            $("#right").append(html);
+        }
+    }
     function canvasPart(canvasId,srcImgPath,rects,points,faceNum,faceNamesList) {
 
         var c = document.getElementById(canvasId);
-
         var ctx = c.getContext("2d");
         var img = new Image();
         // 这里可以放 图片路径 "./test.jpg"  || base64图片 || 图片链接
@@ -141,6 +113,6 @@
         }
     }
 
-</script>--%>
+</script>
 </body>
 </html>
