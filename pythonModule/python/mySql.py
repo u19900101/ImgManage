@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import dlib
+
 import face_recognition
 import numpy as  np
 import cv2
@@ -7,31 +9,47 @@ import re
 import time
 import MySQLdb
 import numpy as np
+import  os
 mydb = MySQLdb.connect("localhost","root","kk","t_imgs",charset="utf8")
+baseDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT\\"
 cursor = mydb.cursor()
 def getFaceInfo(imgpath,known_face_encodings,known_face_ids):
+    print("当前检测图片为：",imgpath)
     rectangle = []
     keypoint = []
     scale = 1
-    #  解决中文路径的问题
-    ## imdecode读取的是rgb，如果后续需要opencv处理的话，需要转换成bgr，转换后图片颜色会变化
-    img=cv2.imdecode(np.fromfile(imgpath,dtype=np.int8),-1)
-    # img = cv2.imread(imgpath) # 0.22s
-    if(img.shape[0]<2000):
-        scale = 3000.0/img.shape[1]
-        img = cv2.resize(img,(3000,int(img.shape[0]/(img.shape[1])*3000)))
-    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-    face_locations = face_recognition.face_locations(img_rgb,1)
-    faceNum = len(face_locations)
+    predicter_path ='shape_predictor_68_face_landmarks.dat'
+    detector = dlib.get_frontal_face_detector()
+    sp = dlib.shape_predictor(predicter_path)   # 导入检测人脸特征点的模型
+    # 读入图片  解决中文路径问题
+    bgr_img=cv2.imdecode(np.fromfile(imgpath,dtype=np.int8),-1)
+    if bgr_img is None:
+        print("Sorry, we could not load '{}' as an image".format(imgpath))
+        return
+    # opencv的颜色空间是BGR，需要转为RGB才能用在dlib中
+    rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
+    # bgr_img = cv2.imread(face_file_path)
+    if(rgb_img.shape[0]<2000):
+        scale = 3000.0/rgb_img.shape[1]
+        rgb_img = cv2.resize(rgb_img,(3000,int(rgb_img.shape[0]/(rgb_img.shape[1])*3000)))
+
+    dets = detector(rgb_img, 1)
+    # 检测到的人脸数量
+    faceNum = len(dets)
+    print(faceNum)
+    if faceNum == 0:
+        print("Sorry, there were no faces found in '{}'".format(imgpath))
+        return
+    # 坐标转化
+    face_locations = []
+    for det in dets:
+        face_locations.append((det.top(),det.right(),det.bottom(),det.left()))
+
     faceDic = {}
     faceDic['faceNum'] = faceNum
-    if(faceNum == 0):
-        print("无人脸",imgpath)
-        return
-    face_landmarks = face_recognition.face_landmarks(img,face_locations) #72个点
-    face_encodings = face_recognition.face_encodings(img,face_locations)
-
+    face_landmarks = face_recognition.face_landmarks(rgb_img,face_locations) #72个点
+    face_encodings = face_recognition.face_encodings(rgb_img,face_locations)
     for (top, right, bottom, left),face_landmark  in zip(face_locations,face_landmarks):
         rectangle.append([left,top,right-left,bottom-top])
         pointTemp = []
@@ -40,14 +58,20 @@ def getFaceInfo(imgpath,known_face_encodings,known_face_ids):
                 pointTemp.append([point[0], point[1]])
         keypoint.append(pointTemp)
 
-
     faceDic['face_locations'] = str((np.array(rectangle)/scale).astype(int).tolist())
     faceDic['face_landmarks'] = str((np.array(keypoint)/scale).astype(int).tolist())
     faceDic['face_encodings'] = str(np.asarray(face_encodings).tolist())
 
     # 与数据库比对  得到人脸 id  新人脸就在原有人脸最大id上+1，得到新id
     faceDic['face_name_ids'] = str(getFaceIndex(known_face_encodings,known_face_ids,face_encodings))
-    return faceDic
+
+
+    # 人脸对齐
+    faces = dlib.full_object_detections()
+    for det in dets:
+        faces.append(sp(rgb_img, det))
+    images = dlib.get_face_chips(rgb_img, faces, size=320)
+    return faceDic,images
 
 def getFaceIndex(known_face_encodings,known_face_ids,face_encodings):
     new_faceId = -10 # -1 是未分类的id
@@ -92,7 +116,9 @@ def sqlSelect(sql,val):
         print ("Error: unable to fetch data")
 
 def getFaceData():
-    sql = "SELECT face_name_id,face_encoding FROM t_face"
+    sql = "SELECT face_name_ids,face_encodings FROM t_face_pic where face_num >0"
+    know_face_encodings =[]
+    know_face_name_ids =[]
     try:
         cursor.execute(sql)
         results =  np.array(cursor.fetchall(),dtype=str)
@@ -100,14 +126,16 @@ def getFaceData():
             return [],[]
         know_0 = results[:,0]
         know_1 = results[:,1]
-        know_encodings = []
-        know_ids = []
-        for know_id,know_encoding in zip(know_0,know_1):
-            know_encodings.append(np.asarray(eval(know_encoding)))
-            know_ids.append(eval(know_id))
+        know_face_encodings = []
+        know_face_name_ids = []
+        for ids,encodings in zip(know_0,know_1):
+            ids,encodings = eval(ids),eval(encodings)
+            for know_id,know_encoding in zip(ids,encodings):
+                know_face_encodings.append(np.asarray(know_encoding))
+                know_face_name_ids.append(know_id)
     except:
         print ("Error: unable to fetch data")
-    return know_encodings,know_ids
+    return know_face_encodings,know_face_name_ids
 def insert_new_label():
     sql = "SELECT MAX(labelId) FROM t_label"
     max_label_id = sqlSelect(sql,())[0][0]+1
@@ -115,8 +143,8 @@ def insert_new_label():
     insertVal = (max_label_id,"faceName_"+str(max_label_id),1,"label/selectByLabel?labelName=faceName_"+str(max_label_id))
     sqlBase(insertSql,insertVal)
     mydb.commit()
-    return cursor.rowcount,max_label_id
-
+    face_name = "faceName_"+str(max_label_id)
+    return cursor.rowcount,max_label_id,face_name
 # 1.更新t_pic 表
 # 2.更新未分类标签的数量
 def update_t_pic(pic_id,label_id):
@@ -138,19 +166,44 @@ def insert_t_face(pic_id,face_name_id,face_encoding):
     insertSql = "INSERT INTO t_face (face_name_id,face_encoding,pic_id) VALUES (%s, %s, %s)"
     insertVal = (face_name_id,face_encoding,pic_id)
     return sqlBase(insertSql,insertVal)
-def insert_t_face_pic(pic_id,faceDic,label_ids):
+def insert_t_face_pic(pic_id,faceDic,label_ids,face_paths):
     if faceDic is None:
         sql = "INSERT INTO t_face_pic (pic_id,face_num) VALUES (%s, %s)"
     #  特殊字符插入有bug
         val = (pic_id,0)
         print("插入t_face_pic 人脸数量：",0)
     else:
-        sql = "INSERT INTO t_face_pic (pic_id,face_num,locations,face_ids,landmarks) VALUES (%s, %s, %s, %s, %s)"
+        sql = "INSERT INTO t_face_pic (pic_id,face_num,locations," \
+              "face_name_ids,landmarks,face_encodings,face_paths) VALUES (%s, %s, %s, %s, %s, %s, %s)"
         #  特殊字符插入有bug
-        val = (pic_id,faceDic['faceNum'],faceDic['face_locations'],str(label_ids),faceDic['face_landmarks'])
-        print("插入t_face_pic 人脸数量：",faceDic['faceNum'])
+        res = "["
+        for face_path in face_paths:
+            res +=face_path + ","
+        res +="]"
+        val = (pic_id,faceDic['faceNum'],faceDic['face_locations'],str(label_ids),
+               faceDic['face_landmarks'],faceDic['face_encodings'],res)
+        # print("插入t_face_pic 人脸数量：",faceDic['faceNum'],faceDic['face_encodings'],str(face_paths))
     return sqlBase(sql,val)
+def writeFaceToLocal(face_names,images):
+    face_paths = []
+    for face_name,image in zip(face_names,images):
+        dirs = baseDir+"img\\face\\"+face_name
+        if not os.path.exists(dirs):
+            os.makedirs(dirs)
+        faceids = os.listdir(dirs)
+        # 得到最大的一个数字 +1 作为新的名称
+        if len(faceids)>0:
+            newid = int(faceids[-1].split('.')[0])+1
+        else:
+            newid = 0
 
+        cv_rgb_image = np.array(image).astype(np.uint8)# 先转换为numpy数组
+        cv_bgr_image = cv2.cvtColor(cv_rgb_image, cv2.COLOR_RGB2BGR)# opencv下颜色空间为bgr，所以从rgb转换为bgr
+        path = dirs+'\\'+str(newid).zfill(5)+'.jpg'
+        print("正在保存图片 ：" ,path)
+        cv2.imwrite(path,cv_bgr_image)
+        face_paths.append(path[path.index("img"):])
+    return face_paths
 def writeToMySql(pic_id):
     know_encodings,know_ids = getFaceData()
     sql = "select * from t_face_pic where pic_id = %s"
@@ -161,36 +214,39 @@ def writeToMySql(pic_id):
     else:
         sql = "select * from t_pic where pid = %s"
         val = (pic_id,)
-        baseDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT\\"
+
         imgpath = baseDir + sqlSelect(sql,val)[0][1]
-        faceDic = getFaceInfo(imgpath,know_encodings,np.asarray(know_ids))
-    # imgpath = "img\\2020\\12\\2020_12_21T19_35_22.jpg"
+        faceDic,images = getFaceInfo(imgpath,know_encodings,np.asarray(know_ids))
+
     label_ids = []
     try:
         if faceDic is not None:
             face_encodings = faceDic['face_encodings']
-
+            face_names = []
             for face_name_id,face_encoding in zip(eval(faceDic['face_name_ids']),eval(face_encodings)):
                 sql = "SELECT *  FROM t_label where labelId = %s"
                 labels = sqlSelect(sql,(face_name_id,))
                 if len(labels) == 0:
-                    insert_row,face_name_id = insert_new_label()
-
+                    insert_row,face_name_id,face_name = insert_new_label()
                     print("新建人脸 face_name_id ",face_name_id)
                 else:
                     print("增加 ",labels[0][1],"tags ")
                     sql = "UPDATE t_label SET tags = %s WHERE labelId = %s"
                     val = (labels[0][4]+1,face_name_id)
                     sqlBase(sql,val)
-
+                    face_name = labels[0][1]
                 label_ids.append(face_name_id)
-                update_t_pic(pic_id,face_name_id)
-                insert_t_face(pic_id,face_name_id,str(face_encoding))
-            # i = 10/0 # 模拟回滚
-        insert_t_face_pic(pic_id,faceDic,label_ids)
 
+                update_t_pic(pic_id,face_name_id)
+                # insert_t_face(pic_id,face_name_id,str(face_encoding))
+                # 截取人脸存到本地
+                face_names.append(face_name)
+            # i = 10/0 # 模拟回滚
+        face_paths = writeFaceToLocal(face_names,images)
+        insert_t_face_pic(pic_id,faceDic,label_ids,face_paths)
         mydb.commit()
         print(cursor.rowcount, "--成功--增删改影响数量")
+        # mydb.close()
     except:
         mydb.rollback()
         print("出现错误进行回滚....")
@@ -209,7 +265,8 @@ def f():
 # writeToMySql(pids[5])
 
 f()
-# insert_new_label()
+
+# getFaceData()
 
 
 

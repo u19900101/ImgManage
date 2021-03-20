@@ -9,23 +9,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import ppppp.bean.Face;
 import ppppp.bean.FacePictureWithBLOBs;
 import ppppp.bean.Label;
 import ppppp.bean.Picture;
-import ppppp.dao.FaceMapper;
 import ppppp.dao.FacePictureMapper;
 import ppppp.dao.LabelMapper;
 import ppppp.dao.PictureMapper;
-import ppppp.util.MyUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * @author lppppp
@@ -39,8 +32,7 @@ public class faceController {
     LabelMapper labelMapper;
     @Autowired
     PictureMapper pictureMapper;
-    @Autowired
-    FaceMapper faceMapper;
+
     @Autowired
     FacePictureMapper facePictureMapper;
 
@@ -48,7 +40,7 @@ public class faceController {
     public void detectAllPicFace(){
         ArrayList<Picture> pictureArrayList = pictureMapper.selectAllPic();
         for (Picture picture : pictureArrayList) {
-            getFaceMethod(picture.getPath(),picture.getPid());
+            // getFaceMethod(picture.getPath(),picture.getPid());
         }
     }
 
@@ -64,11 +56,17 @@ public class faceController {
         return  new Gson().toJson(map);
     }
 
+    @Test
+    public void T__(){
+        String pid = "0110010001000001000001000101111100101000111011001010100100000000";
+        String imgPath = "";
+        HashMap map = getFaceMethod2(imgPath,pid);
+    }
     public HashMap getFaceMethod2(String imgPath,String pId){
         HashMap map = new HashMap();
 
         ArrayList<String> faceNamesList = new ArrayList<>();
-        FacePictureWithBLOBs facePicture =  facePictureMapper.selectByPrimaryKey(pId);
+        FacePictureWithBLOBs facePicture =  getFacePictureMapper().selectByPrimaryKey(pId);
         //该照片已进行过人脸检测 直接查询结果进行封装
         if(facePicture != null){
             System.out.println("该照片已进行过人脸检测");
@@ -78,7 +76,7 @@ public class faceController {
             }
             String[] faceIds = facePicture.getFaceIds().replace("[", "").replace("]","").replace(" ", "").split(",");
             for (String faceId : faceIds) {
-                Label label = labelMapper.selectByPrimaryKey(Integer.valueOf(faceId));
+                Label label = getLabelMapper().selectByPrimaryKey(Integer.valueOf(faceId));
                 faceNamesList.add(label.getLabelName());
             }
         }
@@ -86,11 +84,12 @@ public class faceController {
         map.put("faceNum", facePicture.getFaceNum());
         map.put("face_locations", facePicture.getLocations());
         map.put("face_landmarks", facePicture.getLandmarks());
+        map.put("face_paths", facePicture.getFacePaths());
         map.put("srcImgPath", imgPath.replace("\\", "/"));
         return map;
     }
 
-    public HashMap getFaceMethod(String imgPath, String pId){
+   /* public HashMap getFaceMethod(String imgPath, String pId){
         HashMap map = new HashMap();
         // 查看当前照片是否已经经过检测（判断图片路径）
         // String imgAbsPath= "D:\\MyJava\\mylifeImg\\pythonModule\\face\\d\\9.jpg";
@@ -232,7 +231,7 @@ public class faceController {
         map.put("srcImgPath", facePicture.getPicId().replace("\\", "/"));
 
         return map;
-    }
+    }*/
 
 
     @Test
@@ -240,7 +239,7 @@ public class faceController {
        // init();
 
     }
-    @RequestMapping("/init")
+    /*@RequestMapping("/init")
     public void init(){
         String imgAbsPath= "D:\\MyJava\\mylifeImg\\pythonModule\\face\\d\\9.jpg";
         FacePictureWithBLOBs facePicture = getFacePictureMapper().selectByPrimaryKey(imgAbsPath);
@@ -251,9 +250,9 @@ public class faceController {
         }
         String pyAbsFilePath = "D:\\MyJava\\mylifeImg\\pythonModule\\python\\init.py";
         init(pyAbsFilePath, imgAbsPath);
-    }
+    }*/
 //    用一张照片初始化数据库
-    public void init(String pyAbsFilePath,String imgAbsPath){
+   /* public void init(String pyAbsFilePath,String imgAbsPath){
         try {
             String[] args = new String[] { "python",pyAbsFilePath ,imgAbsPath};
             Process proc = Runtime.getRuntime().exec(args);// 执行py文件
@@ -317,7 +316,7 @@ public class faceController {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
 
 
@@ -325,10 +324,7 @@ public class faceController {
         ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
         return context.getBean(LabelMapper.class);
     }
-    public FaceMapper getFaceMapper(){
-        ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
-        return context.getBean(FaceMapper.class);
-    }
+
     public FacePictureMapper getFacePictureMapper(){
         ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
         return context.getBean(FacePictureMapper.class);

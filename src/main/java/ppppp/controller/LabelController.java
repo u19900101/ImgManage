@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ppppp.bean.*;
-import ppppp.dao.FaceMapper;
+
 import ppppp.dao.FacePictureMapper;
 import ppppp.dao.LabelMapper;
 import ppppp.dao.PictureMapper;
@@ -31,8 +31,7 @@ public class LabelController {
     PictureMapper pictureMapper;
     @Autowired
     FacePictureMapper facePictureMapper;
-    @Autowired
-    FaceMapper faceMapper;
+
     // 展示所有的标签
     @RequestMapping("/showAllLabel")
     public String showRecentLabel(Model model) {
@@ -357,7 +356,7 @@ public class LabelController {
     private void deleFrom_t_face_pic(String pId, Integer deleteLabelId) {
         FacePictureExample facePictureExample = new FacePictureExample();
         FacePictureExample.Criteria criteria = facePictureExample.createCriteria();
-        criteria.andFaceIdsIsNotNull();
+        criteria.andPicIdIsNotNull();
         List<FacePicture> facePictures = facePictureMapper.selectByExample(facePictureExample);
     }
 

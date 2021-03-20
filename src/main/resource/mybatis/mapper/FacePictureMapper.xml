@@ -4,11 +4,13 @@
   <resultMap id="BaseResultMap" type="ppppp.bean.FacePicture">
     <id column="pic_id" jdbcType="VARCHAR" property="picId" />
     <result column="face_num" jdbcType="INTEGER" property="faceNum" />
-    <result column="face_ids" jdbcType="VARCHAR" property="faceIds" />
+    <result column="face_name_ids" jdbcType="VARCHAR" property="faceNameIds" />
   </resultMap>
   <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="ppppp.bean.FacePictureWithBLOBs">
     <result column="locations" jdbcType="LONGVARCHAR" property="locations" />
     <result column="landmarks" jdbcType="LONGVARCHAR" property="landmarks" />
+    <result column="face_encodings" jdbcType="LONGVARCHAR" property="faceEncodings" />
+    <result column="face_paths" jdbcType="LONGVARCHAR" property="facePaths" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <where>
@@ -69,10 +71,10 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    pic_id, face_num, face_ids
+    pic_id, face_num, face_name_ids
   </sql>
   <sql id="Blob_Column_List">
-    locations, landmarks
+    locations, landmarks, face_encodings, face_paths
   </sql>
   <select id="selectByExampleWithBLOBs" parameterType="ppppp.bean.FacePictureExample" resultMap="ResultMapWithBLOBs">
     select
@@ -123,10 +125,12 @@
     </if>
   </delete>
   <insert id="insert" parameterType="ppppp.bean.FacePictureWithBLOBs">
-    insert into t_face_pic (pic_id, face_num, face_ids, 
-      locations, landmarks)
-    values (#{picId,jdbcType=VARCHAR}, #{faceNum,jdbcType=INTEGER}, #{faceIds,jdbcType=VARCHAR}, 
-      #{locations,jdbcType=LONGVARCHAR}, #{landmarks,jdbcType=LONGVARCHAR})
+    insert into t_face_pic (pic_id, face_num, face_name_ids, 
+      locations, landmarks, face_encodings, 
+      face_paths)
+    values (#{picId,jdbcType=VARCHAR}, #{faceNum,jdbcType=INTEGER}, #{faceNameIds,jdbcType=VARCHAR}, 
+      #{locations,jdbcType=LONGVARCHAR}, #{landmarks,jdbcType=LONGVARCHAR}, #{faceEncodings,jdbcType=LONGVARCHAR}, 
+      #{facePaths,jdbcType=LONGVARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="ppppp.bean.FacePictureWithBLOBs">
     insert into t_face_pic
@@ -137,14 +141,20 @@
       <if test="faceNum != null">
         face_num,
       </if>
-      <if test="faceIds != null">
-        face_ids,
+      <if test="faceNameIds != null">
+        face_name_ids,
       </if>
       <if test="locations != null">
         locations,
       </if>
       <if test="landmarks != null">
         landmarks,
+      </if>
+      <if test="faceEncodings != null">
+        face_encodings,
+      </if>
+      <if test="facePaths != null">
+        face_paths,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -154,14 +164,20 @@
       <if test="faceNum != null">
         #{faceNum,jdbcType=INTEGER},
       </if>
-      <if test="faceIds != null">
-        #{faceIds,jdbcType=VARCHAR},
+      <if test="faceNameIds != null">
+        #{faceNameIds,jdbcType=VARCHAR},
       </if>
       <if test="locations != null">
         #{locations,jdbcType=LONGVARCHAR},
       </if>
       <if test="landmarks != null">
         #{landmarks,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="faceEncodings != null">
+        #{faceEncodings,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="facePaths != null">
+        #{facePaths,jdbcType=LONGVARCHAR},
       </if>
     </trim>
   </insert>
@@ -180,14 +196,20 @@
       <if test="record.faceNum != null">
         face_num = #{record.faceNum,jdbcType=INTEGER},
       </if>
-      <if test="record.faceIds != null">
-        face_ids = #{record.faceIds,jdbcType=VARCHAR},
+      <if test="record.faceNameIds != null">
+        face_name_ids = #{record.faceNameIds,jdbcType=VARCHAR},
       </if>
       <if test="record.locations != null">
         locations = #{record.locations,jdbcType=LONGVARCHAR},
       </if>
       <if test="record.landmarks != null">
         landmarks = #{record.landmarks,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="record.faceEncodings != null">
+        face_encodings = #{record.faceEncodings,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="record.facePaths != null">
+        face_paths = #{record.facePaths,jdbcType=LONGVARCHAR},
       </if>
     </set>
     <if test="_parameter != null">
@@ -198,9 +220,11 @@
     update t_face_pic
     set pic_id = #{record.picId,jdbcType=VARCHAR},
       face_num = #{record.faceNum,jdbcType=INTEGER},
-      face_ids = #{record.faceIds,jdbcType=VARCHAR},
+      face_name_ids = #{record.faceNameIds,jdbcType=VARCHAR},
       locations = #{record.locations,jdbcType=LONGVARCHAR},
-      landmarks = #{record.landmarks,jdbcType=LONGVARCHAR}
+      landmarks = #{record.landmarks,jdbcType=LONGVARCHAR},
+      face_encodings = #{record.faceEncodings,jdbcType=LONGVARCHAR},
+      face_paths = #{record.facePaths,jdbcType=LONGVARCHAR}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -209,7 +233,7 @@
     update t_face_pic
     set pic_id = #{record.picId,jdbcType=VARCHAR},
       face_num = #{record.faceNum,jdbcType=INTEGER},
-      face_ids = #{record.faceIds,jdbcType=VARCHAR}
+      face_name_ids = #{record.faceNameIds,jdbcType=VARCHAR}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -220,8 +244,8 @@
       <if test="faceNum != null">
         face_num = #{faceNum,jdbcType=INTEGER},
       </if>
-      <if test="faceIds != null">
-        face_ids = #{faceIds,jdbcType=VARCHAR},
+      <if test="faceNameIds != null">
+        face_name_ids = #{faceNameIds,jdbcType=VARCHAR},
       </if>
       <if test="locations != null">
         locations = #{locations,jdbcType=LONGVARCHAR},
@@ -229,21 +253,29 @@
       <if test="landmarks != null">
         landmarks = #{landmarks,jdbcType=LONGVARCHAR},
       </if>
+      <if test="faceEncodings != null">
+        face_encodings = #{faceEncodings,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="facePaths != null">
+        face_paths = #{facePaths,jdbcType=LONGVARCHAR},
+      </if>
     </set>
     where pic_id = #{picId,jdbcType=VARCHAR}
   </update>
   <update id="updateByPrimaryKeyWithBLOBs" parameterType="ppppp.bean.FacePictureWithBLOBs">
     update t_face_pic
     set face_num = #{faceNum,jdbcType=INTEGER},
-      face_ids = #{faceIds,jdbcType=VARCHAR},
+      face_name_ids = #{faceNameIds,jdbcType=VARCHAR},
       locations = #{locations,jdbcType=LONGVARCHAR},
-      landmarks = #{landmarks,jdbcType=LONGVARCHAR}
+      landmarks = #{landmarks,jdbcType=LONGVARCHAR},
+      face_encodings = #{faceEncodings,jdbcType=LONGVARCHAR},
+      face_paths = #{facePaths,jdbcType=LONGVARCHAR}
     where pic_id = #{picId,jdbcType=VARCHAR}
   </update>
   <update id="updateByPrimaryKey" parameterType="ppppp.bean.FacePicture">
     update t_face_pic
     set face_num = #{faceNum,jdbcType=INTEGER},
-      face_ids = #{faceIds,jdbcType=VARCHAR}
+      face_name_ids = #{faceNameIds,jdbcType=VARCHAR}
     where pic_id = #{picId,jdbcType=VARCHAR}
   </update>
 </mapper>
