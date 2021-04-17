@@ -17,6 +17,7 @@ public class 数据库调用测试 {
 
     String baseDir = "D:\\MyJava\\mylifeImg\\target\\mylifeImg-1.0-SNAPSHOT\\";
 
+
     @Test
     public void T_(){
         List list = new ArrayList<>();
