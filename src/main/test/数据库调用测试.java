@@ -25,6 +25,7 @@ public class 数据库调用测试 {
         List<Picture> pictures = pictureMapper().selectByLabelIdLike(list);
         System.out.println(pictures.size());
 
+
     }
 
 
