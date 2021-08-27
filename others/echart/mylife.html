@@ -16,7 +16,8 @@
         var heatMapData = [];
         var allData = [];
         //获取csv对象
-        d3.csv("./data/我的抗战1.0_info.csv", function (error, csvdata) {
+        d3.csv("./data/我的抗战2.0_2017_info.csv", function (error, csvdata) {
+        // d3.csv("./data/我的抗战2.0_2018_info.csv", function (error, csvdata) {
             // d3.csv("../info.csv", function (error, csvdata) {
             console.log("进入文件读取");
             if (error) {
@@ -73,7 +74,8 @@
                         top: 100,
                         left: 100,
                         // range: contributeDate,
-                        range: ['2017-01-01', '2017-12-31'],
+                        // range: ['2021-01-01', '2021-12-31'],
+                        range: ['2017','2018','2019','2020','2021'],
                         splitLine: {
                             show: true,
                             lineStyle: {
