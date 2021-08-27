@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <script src="echarts.min.js"></script>
+</head>
+<body>
+    <div id="main" style="width:100%;height:400px;"></div>
+    <script type="text/javascript">
+        var myChart = echarts.init(document.getElementById('main'));
+
+        // 模拟数据
+        function getVirtulData(year) {
+            year = year || '2017';
+            var date = +echarts.number.parseDate(year + '-01-01');
+            var end = +echarts.number.parseDate(year + '-12-31');
+            var dayTime = 3600 * 24 * 1000;
+            var data = [];
+            for (var time = date; time <= end; time += dayTime) {
+                data.push([
+                    echarts.format.formatTime('yyyy-MM-dd', time),
+                    Math.floor(Math.random() * 10000)
+                ]);
+            }
+            return data;
+        }
+        var option = {
+            visualMap: {
+                show: true,
+                min: 0,
+                max: 10000
+            },
+            legend: {
+                top: '300',
+                left: '100',
+                data:['文章数', 'Top 12'],
+                textStyle: {
+                  // 设置字体颜色
+                  color: '#000'
+                }
+              },
+            calendar: [{
+                top: 100,
+                left: 'center',
+                range: "2021",
+                splitLine: {
+                  show: true,
+                  lineStyle: {
+                    // 设置月份分割线的颜色
+                    color: '#D3D3D3',
+                    width: 2,
+                    type: 'solid'
+                  }
+                },
+                yearLabel: {show: false},
+                dayLabel: {
+                  nameMap: ["周日","周一","周二","周三","周四","周五","周六"], // 设置中文显示
+                  textStyle: {
+                    // 设置周显示颜色
+                    color: '#000'
+                  },
+                  firstDay: 7 // 从周一开始
+                },
+                monthLabel: {
+                  nameMap: 'cn', // 设置中文显示
+                  textStyle: {
+                    // 设置月显示颜色
+                    color: '#000'
+                  }
+                },
+                itemStyle: {
+                  normal: {
+                    // 设置背景颜色
+                    color: '#ffffff',
+                    borderWidth: 1,
+                    // 设置方块分割线段颜色
+                    borderColor: '#D3D3D3'
+                  }
+                }
+              }],
+            series: {
+                type: 'heatmap',
+                coordinateSystem: 'calendar',
+                data: getVirtulData(2021)
+            }
+        };
+       
+        //  let option = {
+
+        //       //设置背景
+        //       // backgroundColor: '#d0d0d0',
+
+        //       title: {
+        //         top: 30,
+        //         text: '文章贡献度',
+        //         subtext: '一年内博客提交的数量',
+        //         left: 'center',
+        //         textStyle: {
+        //           color: '#000'
+        //         }
+        //       },
+        //       tooltip : {
+        //         trigger: 'item',
+        //         formatter:function(params){
+        //           return (params.data[0] +  '<br>文章数：' + params.data[1])
+        //         }
+        //       },
+        //       legend: {
+        //         top: '30',
+        //         left: '100',
+        //         data:['文章数', 'Top 12'],
+        //         textStyle: {
+        //           // 设置字体颜色
+        //           color: '#000'
+        //         }
+        //       },
+        //       calendar: [{
+        //         top: 100,
+        //         left: 'center',
+        //         range: contributeDate,
+        //         splitLine: {
+        //           show: true,
+        //           lineStyle: {
+        //             // 设置月份分割线的颜色
+        //             color: '#D3D3D3',
+        //             width: 4,
+        //             type: 'solid'
+        //           }
+        //         },
+        //         yearLabel: {show: false},
+        //         dayLabel: {
+        //           nameMap: ["周日","周一","周二","周三","周四","周五","周六"], // 设置中文显示
+        //           textStyle: {
+        //             // 设置周显示颜色
+        //             color: '#000'
+        //           },
+        //           firstDay: 7 // 从周一开始
+        //         },
+        //         monthLabel: {
+        //           nameMap: 'cn', // 设置中文显示
+        //           textStyle: {
+        //             // 设置月显示颜色
+        //             color: '#000'
+        //           }
+        //         },
+        //         itemStyle: {
+        //           normal: {
+        //             // 设置背景颜色
+        //             color: '#ffffff',
+        //             borderWidth: 1,
+        //             // 设置方块分割线段颜色
+        //             borderColor: '#D3D3D3'
+        //           }
+        //         }
+        //       }],
+        //       series : [
+        //         {
+        //           name: '文章数',
+        //           type: 'scatter',
+        //           coordinateSystem: 'calendar',
+        //           data: blogContributeCount,
+        //           // 根据值设置原点大小
+        //           symbolSize: function (val) {
+        //             if(val[1] == 0) {
+        //               return val[1]
+        //             } else {
+        //               let size = 8 + val[1]*2
+        //               if(size > 18) {
+        //                 size = 18
+        //               }
+        //               return size
+        //             }
+        //           },
+        //           itemStyle: {
+        //             normal: {
+        //               // 设置圆点颜色
+        //               color: '#2ec7c9'
+        //             }
+        //           }
+        //         }
+        //       ]
+        //     }
+        
+            myChart.setOption(option);
+    </script>
+</body>
+</html>
