@@ -112,27 +112,157 @@ def edit_info(res_path):
             dt = datetime.datetime.strptime(temp.at[temp.index.values[0],'day'],'%Y/%m/%d %H:%M')
             out_date = (dt + datetime.timedelta(days=-1)).strftime('%Y/%m/%d %H:%M')
             temp.day[x] = out_date
+            # 更新 day_date 重新写一次
+            temp.day_date[x] = out_date.split(" ")[0]
     # 5.更新csv文件
     df = df.drop(del_index)
     df.to_csv(res_path,index=False, sep=',')
-def gen_Year_csv(dir,day_start,day_end,res_path):
+    # 6.填充空的gps信息
+    update_gps_path(res_path)
+    # 7.进行分表操作
+    classifyByYear(res_path,res_path)
+
+def classifyByYear(csvPath,desPath):
+    # 1.读取文件
+    df=pd.read_csv(csvPath,header=0,sep=',') 
+    # 2.按照day_date(2018/01/01)  列的前四位  2018进行分表
+    # day_date_list = list(df['day_date'])
+    day_date_list = [x.split('/')[0] for x in list(df['day_date'])]
+    year_list = list(set(day_date_list))
+    year_list = [eval(x) for x in list(set(day_date_list))]
+    # 3.将年份由小到大进行排序
+    year_list.sort()
+    # 4.分割年份  年份第一次出现的位置进行
+    all_years = [df[day_date_list.index(str(year_list[x])):day_date_list.index(str(year_list[x]+1))] for x in range(len(year_list)-1)]
+    # 最后一年
+    all_years.append(df[day_date_list.index(str(year_list[-1])):])
+    # 3.输出表
+    [df_year.to_csv(os.path.dirname(desPath)+'/'+str(year)+"_info.csv",index=False, sep=',')  for (year,df_year) in zip(year_list,all_years)]
+def cut_gps(gps_df):
+    res = []
+    # 2.线性分割 坐标
+    for g in [list(gps_df.longitude),list(gps_df.latitude)]:
+
+        # 提取度分秒的数字  # 9°32'45  -->  9*3600+32*60+45
+        pattern = re.compile(r'\d+')
+        # res_start = [int(i) for i in pattern.findall(g[0])]
+        # res_start = res_start[0]*3600+res_start[1]*60+res_start[2]
+        # res_end = [int(i) for i in pattern.findall(g[-1])]
+        # res_end = res_end[0]*3600+res_end[1]*60+res_end[2]
+        # 上面的表达式简化版
+        res_start_end = [[int(i) for i in pattern.findall(x)] for x in [g[0],g[-1]]]
+        res_start_end = [x[0]*3600+x[1]*60+x[2] for x in res_start_end]
+        res_gps =[str(int(m/3600))+"°"+str(int(m%3600/60))+"'"+str(int(m%3600%60)) for m in np.linspace(res_start_end[0],res_start_end[1],len(g))]
+        res.append(res_gps)
+    return res
+def update_gps_dir(dir):
+    for path in os.listdir(dir):
+        print(path)
+        if path.endswith(".csv"):
+            update_gps_path(dir+path)
+def update_gps_path(info_path):
+    # 1.读取文件
+    df=pd.read_csv(info_path,header=0,sep=',') 
+    # 2.找到第一个 gps行
+    recnet_gps_index = -1
+    for i in range(len(df)):
+        day = df.loc[i]
+        if len(str(day.longitude))>4 :
+            print("first gps is ",i,day.day_date)
+            recnet_gps_index = i
+            # 处理 recnet_gps_index 之前没有gps 的行
+            if(i>0):
+                print("在第一个gps之前有 ",i," 行数据需要处理")
+            break
+    if(recnet_gps_index == -1):
+        print("数据库中没有gps信息")
+        exit
+
+    end = len(df)
+    i += 1
+    while(i<end):
+        day = df.loc[i]
+        # 判断日期是否大于前 时间
+        if time.strptime(df['day'][i], '%Y/%m/%d %H:%M')>time.localtime():
+            print("大于当前时间  截至")
+            break
+        # 判断行中是否含有坐标信息  
+        #  1.不存在gps信息 将 nan 18°41'29 都转化为str 进行处理
+        if len(str(day.longitude))<4 :
+            # print("index_no_gps: ",i,day.day_date,"No Gps..","\n")
+            # 当存在gps信息时
+            # 1.记录没有gps的位置 index_no_gps  
+            # index_no_gps = i
+            # 2.上一次出现gps的坐标 recnet_gps_index
+            # 3.下一次出现gps的坐标 after_gps_index
+            after_gps_index = -1
+            for y in  range(i+1,end):
+                day = df.loc[y]
+                if len(str(day.longitude))>4:
+                    after_gps_index =y
+                    i = y
+                    break
+            # 4.判断 若两次的坐标误差小于 1°  将 2的gps 赋值给 在 2和3之间的所有行
+            # 存在上下都有gps的行
+            if(after_gps_index!= -1 and recnet_gps_index != -1):
+                # print(df.loc[recnet_gps_index].day_date,df.loc[after_gps_index].day_date,
+                # "之间存在需要被替换掉的gps行数",after_gps_index-recnet_gps_index-1,"\n")
+
+                # 上个 gps的经度 r_E  和 纬度 r_N
+                r_E = int(df['longitude'][recnet_gps_index].split("°")[0])
+                r_N = int(df['latitude'][recnet_gps_index].split("°")[0])
+                af_E = int(df['longitude'][after_gps_index].split("°")[0])
+                af_N = int(df['latitude'][after_gps_index].split("°")[0])
+                # 当经纬度 差距都不超过 3°时 进行赋值
+                if(abs(r_E-af_E)<3 and abs(af_N-r_N)<3):
+                    for z in range(recnet_gps_index+1,after_gps_index):
+                        df['longitude'][z] =  df['longitude'][recnet_gps_index]
+                        df['latitude'][z] =  df['latitude'][recnet_gps_index]
+                    print("done",after_gps_index-recnet_gps_index-1," gps：changed",df.loc[z].day_date,"\n")
+                else:
+                    print("gps 变化超过 3 ° 进行均值赋值",df.loc[recnet_gps_index+1].day_date,"gps")
+                    [long_list,lat_list] = cut_gps(df.loc[recnet_gps_index:after_gps_index])
+                    t_index = 1
+                    for z in range(recnet_gps_index+1,after_gps_index):
+                        df['longitude'][z] =  long_list[t_index]
+                        df['latitude'][z] =  lat_list[t_index]
+                        t_index +=1
+                    print("done",after_gps_index-recnet_gps_index-1," gps：changed",df.loc[z].day_date,"\n")
+                # 更新 recnet_gps_index
+                recnet_gps_index = after_gps_index
+            else:
+                
+                # 加坐标  用这种才能修改 dfb['a'][0:1]='kkkk'  这种不行 df.loc[i].latitude  = df.loc[recnet_gps_index].latitude
+                df['longitude'][i] =  df['longitude'][recnet_gps_index]
+                df['latitude'][i] =  df['latitude'][recnet_gps_index]
+                print("just before gps：changed",df.loc[i].day_date,"\n")
+            
+        # 2.更新 最近一次的gps信息
+        else:
+            recnet_gps_index = i  #longitude,latitude
+            # 对 before之前没有gps的进行替换
+        i +=1
+    # 4.重新写入文件
+    df.to_csv(info_path,index=False, sep=',')
+def gen_Year_csv(dirList,day_start,day_end,res_path):
     # dir = 'D:/MyJava/19_mogu_blog_v2-Nacos/others/我的抗战1.0/'
     result = []
     # 遍历输出每一个文件的名字和类型
-    for item in os.listdir(dir):
-        # 输出指定后缀类型的文件
-        if(item.endswith('.html')):
-            res = getInfo(item, dir+item)
-            if(len(getInfo(item, dir+item))>0):
-                result.append(res)
+    for dir in dirList:
+        for item in os.listdir(dir):
+            # 输出指定后缀类型的文件
+            if(item.endswith('.html')):
+                res = getInfo(item, dir+item)
+                if(len(getInfo(item, dir+item))>0):
+                    result.append(res)
             
     # print(result)
     result = np.array(result)
 
     day = result[:,0].tolist()
     title = result[:,1].tolist()
-    longitude = result[:,2].tolist()
-    latitude = result[:,3].tolist()
+    latitude = result[:,2].tolist()
+    longitude = result[:,3].tolist()
     num = result[:,4].tolist()
 
     # 添加缺少的日期
@@ -156,11 +286,10 @@ def gen_Year_csv(dir,day_start,day_end,res_path):
     edit_info(res_path)
 
    
-dir = 'D:/MyJava/19_mogu_blog_v2-Nacos/others/我的抗战2.0/'  
-day_start='2018/1/1'
+dirList = ['D:/MyJava/19_mogu_blog_v2-Nacos/others/我的抗战1.0/',
+            'D:/MyJava/19_mogu_blog_v2-Nacos/others/我的抗战2.0/']
+day_start='2017/1/1'
 day_end='2021/12/31'
 res_path = "./info.csv"
-# df=pd.read_csv(res_path,header=0,sep=',') 
-# df = edit_info(df)
-# df.to_csv(res_path,index=False, sep=',')
-gen_Year_csv(dir,day_start,day_end,res_path)
+
+gen_Year_csv(dirList,day_start,day_end,res_path)
