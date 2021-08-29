@@ -212,11 +212,11 @@
     </div>
     <script type="text/javascript">
         $(function () {  
-            showMap(114.343967,30.67658); //初始坐标
+            showMap(30.5857328,114.3047429); //初始坐标
         })
 
         //传入坐标，然后跳转到该位置
-        function showMap(x, y) {
+        function showMap(y,x) {
             var map = new BMap.Map("mymap");
             map.centerAndZoom(new BMap.Point(x, y), 15); //坐标，放大倍数
             //显示左上角的辅助栏
