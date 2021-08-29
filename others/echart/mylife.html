@@ -3,174 +3,198 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>copy</title>
+    <title>Mylife_track</title>
     <script src="./data/echarts.min.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
+
 </head>
 
 <body>
-    <div id="main" style="height: 600px;width:100%;"></div>
+    <button onclick="getYear(this)">2017</button>
+    <button onclick="getYear(this)">2018</button>
+    <button onclick="getYear(this)">2019</button>
+    <button onclick="getYear(this)">2020</button>
+    <button onclick="getYear(this)">2021</button>
+    <input type="hidden" id="year" value="2021">
+    <script> 
+        
+        function getYear(id) {
+            console.log(id.innerHTML)
+            document.getElementById("year").value = id.innerHTML;
+            show();
+        }
+    </script>
+
+    <div id="main" style="height: 600px;width:100%;">
+    </div>
+
+    
     <script>
+        show();
+        function show() {
+            var gpsData_title = [];
+            var heatMapData = [];
+            var allData = [];
+            // var year = document.getElementById("year").innerText;
+            var year = document.getElementById("year").value;
+            var nextYear = (parseInt(year) + 1).toString()
+            //获取csv对象
+            d3.csv("./data/" + year + "_info.csv", function (error, csvdata) {
+                // d3.csv("./data/我的抗战2.0_2018_info.csv", function (error, csvdata) {
+                // d3.csv("../info.csv", function (error, csvdata) {
+                console.log("进入文件读取");
+                if (error) {
+                    console.log(error);
+                } else {
+                    for (var i = 0; i < csvdata.length; i++) {
+                        allData.push(
+                            [csvdata[i].day,
+                            eval(csvdata[i].num),
+                            csvdata[i].title,
+                            csvdata[i].longitude,
+                            csvdata[i].latitude,
+                            eval(csvdata[i].num),
+                            ]
+                        );
+                    }
 
-        var gpsData_title = [];
-        var heatMapData = [];
-        var allData = [];
-        //获取csv对象
-        d3.csv("./data/我的抗战2.0_2017_info.csv", function (error, csvdata) {
-        // d3.csv("./data/我的抗战2.0_2018_info.csv", function (error, csvdata) {
-            // d3.csv("../info.csv", function (error, csvdata) {
-            console.log("进入文件读取");
-            if (error) {
-                console.log(error);
-            } else {
+                    var myChart = echarts.init(document.getElementById("main"));
 
-                for (var i = 0; i < csvdata.length; i++) {
-                    allData.push(
-                        [csvdata[i].day,
-                        eval(csvdata[i].num),
-                        csvdata[i].title,
-                        csvdata[i].longitude,
-                        csvdata[i].latitude,
-                        eval(csvdata[i].num),
-                        ]
-                    );
-                }
 
-                // console.log(allData)
-                var myChart = echarts.init(document.getElementById("main"));
-
-                var option = {
-                    //设置背景
-                    //   backgroundColor: '#d0d0d0',
-                    visualMap: {
-                        // show: true,
-                        min: 0,
-                        max: 100,
-                        inRange: {
-                            color: ['#00c602'],
-                            opacity: [0, 1]
-                        },
-                        controller: {
+                    var option = {
+                        //设置背景
+                        //   backgroundColor: '#d0d0d0',
+                        visualMap: {
+                            // show: true,
+                            min: 0,
+                            max: 100,
                             inRange: {
+                                color: ['#00c602'],
                                 opacity: [0, 1]
                             },
-                            outOfRange: {
-                                color: '#ccc'
-                            }
-                        },
-                        seriesIndex: [0],
-                    },
-                    title: {
-                        top: 30,
-                        text: '文章贡献度',
-                        subtext: '一年内博客提交的数量',
-                        left: 'center',
-                        textStyle: {
-                            color: '#000'
-                        }
-                    },
-
-                    calendar: [{
-                        top: 100,
-                        left: 100,
-                        // range: contributeDate,
-                        // range: ['2021-01-01', '2021-12-31'],
-                        range: ['2017','2018','2019','2020','2021'],
-                        splitLine: {
-                            show: true,
-                            lineStyle: {
-                                // 设置月份分割线的颜色
-                                color: '#ea0808',
-                                width: 1,
-                                type: 'solid'
-                            }
-                        },
-                        yearLabel: { show: true },
-                        dayLabel: {
-                            nameMap: ["日", "一", "二", "三", "四", "五", "六"], // 设置中文显示
-                            textStyle: {
-                                // 设置周显示颜色
-                                color: '#000'
+                            controller: {
+                                inRange: {
+                                    opacity: [0, 1]
+                                },
+                                outOfRange: {
+                                    color: '#ccc'
+                                }
                             },
-                            firstDay: 7 // 从周一开始
+                            seriesIndex: [0],
                         },
-                        monthLabel: {
-                            nameMap: 'cn', // 设置中文显示
+                        title: {
+                            top: 30,
+                            text: '文章贡献度',
+                            subtext: '一年内博客提交的数量',
+                            left: 'center',
                             textStyle: {
-                                // 设置月显示颜色
                                 color: '#000'
                             }
                         },
-                        // orient: 'vertical',
-                        itemStyle: {
-                            normal: {
-                                // 设置背景颜色
-                                color: '#ffffff',
-                                borderWidth: 5,
-                                // 设置方块分割线段颜色
-                                // borderColor: 'rgba(211,211,211,0)'
-                                borderColor: 'rgba(3,3,3,0.02)'
+
+                        calendar: [{
+                            top: 100,
+                            left: 100,
+                            // range: contributeDate,
+                            range: [year, nextYear],
+                            splitLine: {
+                                show: true,
+                                lineStyle: {
+                                    // 设置月份分割线的颜色
+                                    color: '#ea0808',
+                                    width: 1,
+                                    type: 'solid'
+                                }
+                            },
+                            yearLabel: { show: true },
+                            dayLabel: {
+                                nameMap: ["日", "一", "二", "三", "四", "五", "六"], // 设置中文显示
+                                textStyle: {
+                                    // 设置周显示颜色
+                                    color: '#000'
+                                },
+                                firstDay: 7 // 从周一开始
+                            },
+                            monthLabel: {
+                                nameMap: 'cn', // 设置中文显示
+                                textStyle: {
+                                    // 设置月显示颜色
+                                    color: '#000'
+                                }
+                            },
+                            // orient: 'vertical',
+                            itemStyle: {
+                                normal: {
+                                    // 设置背景颜色
+                                    color: '#ffffff',
+                                    borderWidth: 5,
+                                    // 设置方块分割线段颜色
+                                    // borderColor: 'rgba(211,211,211,0)'
+                                    borderColor: 'rgba(3,3,3,0.02)'
+                                }
                             }
-                        }
-                    }],
-                    tooltip: [{
-                        trigger: 'item',
-                        formatter: function (params) {
-                            // console.log(params)
-                            if(params.value[2].length>80){
-                                // console.log(params.value[2])
-                                return ('时间：' + params.value[0] + "<br>权重：" + params.value[1] +
-                                "<br>标题：" + params.value[2].slice(0,40) +
-                                "<br>" +params.value[2].slice(40,80) +
-                                "<br>" + params.value[2].slice(80,-1) +
-                                "<br>经度：" + params.value[3] + "<br>纬度：" + params.value[4])
-                            }else if(params.value[2].length>40){
-                                // console.log(params.value[2])
-                                return ('时间：' + params.value[0] + "<br>权重：" + params.value[1] +
-                                "<br>标题：" + params.value[2].slice(0,40) +
-    
-                                "<br>   " + params.value[2].slice(40,-1) +
-                                "<br>经度：" + params.value[3] + "<br>纬度：" + params.value[4])
-                            }else{
-                                return ('时间：' + params.value[0] + "<br>权重：" + params.value[1] +
-                                "<br>标题：" + params.value[2] +
-                                "<br>经度：" + params.value[3] + "<br>纬度：" + params.value[4])
+                        }],
+                        tooltip: [{
+                            trigger: 'item',
+                            formatter: function (params) {
+                                // console.log(params)
+                                if (params.value[2].length > 80) {
+                                    // console.log(params.value[2])
+                                    return ('时间：' + params.value[0] + "<br>权重：" + params.value[1] +
+                                        "<br>标题：" + params.value[2].slice(0, 40) +
+                                        "<br>" + params.value[2].slice(40, 80) +
+                                        "<br>" + params.value[2].slice(80, -1) +
+                                        "<br>经度：" + params.value[3] + "<br>纬度：" + params.value[4])
+                                } else if (params.value[2].length > 40) {
+                                    // console.log(params.value[2])
+                                    return ('时间：' + params.value[0] + "<br>权重：" + params.value[1] +
+                                        "<br>标题：" + params.value[2].slice(0, 40) +
+
+                                        "<br>   " + params.value[2].slice(40, -1) +
+                                        "<br>经度：" + params.value[3] + "<br>纬度：" + params.value[4])
+                                } else {
+                                    return ('时间：' + params.value[0] + "<br>权重：" + params.value[1] +
+                                        "<br>标题：" + params.value[2] +
+                                        "<br>经度：" + params.value[3] + "<br>纬度：" + params.value[4])
+                                }
+
+                            },
+                            // position: 'right'
+                            // 设置框的大小
+                            textStyle: {
+                                width: 10,
+                                overflow: "break"
                             }
-                           
+                        }],
+
+                        series: [{
+                            type: 'heatmap',
+                            name: '数量',
+                            coordinateSystem: 'calendar',
+                            data: allData,
                         },
-                        // position: 'right'
-                        // 设置框的大小
-                        textStyle: {
-                            width: 10,
-                            overflow: "break"
-                        }
-                    }],
 
-                    series: [{
-                        type: 'heatmap',
-                        name: '数量',
-                        coordinateSystem: 'calendar',
-                        data: allData,
-                    },
+                        ]
+                    };
+                    myChart.setOption(option);
+                    myChart.on('click', function (params) {
 
-                    ]
-                };
-                myChart.setOption(option);
-                myChart.on('click', function (params) {
+                        // console.log(params);
+                        console.log(
+                            "时间:", params.value[0],
+                            "大小：", params.value[1],
+                            "标题：", params.value[2],
+                            "经度：", params.value[3],
+                            "纬度: ", params.value[4]);
 
-                    // console.log(params);
-                    console.log(
-                        "时间:", params.value[0],
-                        "大小：", params.value[1],
-                        "标题：", params.value[2],
-                        "经度：", params.value[3],
-                        "纬度: ", params.value[4]);
+                        // window.open('https://www.baidu.com/s?wd=' + encodeURIComponent(params.name));
+                    });
+                }
+            });
 
-                    // window.open('https://www.baidu.com/s?wd=' + encodeURIComponent(params.name));
-                });
-            }
-        });
+        }
     </script>
+   
 </body>
 
 </html>
