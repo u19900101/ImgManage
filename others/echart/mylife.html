@@ -4,9 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Mylife_track</title>
+    <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
+    <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=ce3b1a3a7e67fc75810ce1ba1f83c01a&plugin=AMap.MapType"></script> 
+    <!-- <style>
+        *{margin:0;padding:0;list-style: none;}
+        #container {width:100%; height: 100%;top:0;left:0;position: absolute; }  
+    </style> -->
     <script src="./data/echarts.min.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
-    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=67jMQ5DmYTe1TLMBKFUTcZAR"></script>
     <script src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
 </head>
 
@@ -193,8 +198,8 @@
                         longitude = eval(long_list[0]) + eval(long_list[1] / 60) + eval(long_list[2] / 3600)
                         latitude = eval(lat_list[0]) + eval(lat_list[1] / 60) + eval(lat_list[2] / 3600)
                         console.log("gps is ", longitude, latitude)
-                        showMap(longitude, latitude); //初始坐标
 
+                        showMap(latitude, longitude);
                         // var gps = latitude + ',' + longitude
                         // //   https://www.google.com/maps/@31.0058333,114.3189224,17z?hl=zh-cn
                         // console.log('https://www.google.com/maps/@'+gps+',4z?hl=zh-cn')
@@ -206,37 +211,45 @@
         }
     </script>
     <!-- <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3415.810521221901!2d114.1664603151151!3d31.114997981505454!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x342c75a1f1eb64cd%3A0x51f172503f0ec0b7!2z5Liw5bGx5Lit5a2m!5e0!3m2!1szh-CN!2s!4v1630211402348!5m2!1szh-CN!2s" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe> -->
+    <!-- 高德 -->
+    <div id="container-AMap" style="width:100%; height:400px; position: relative"></div>
+   
+    <!-- <script src="https://webapi.amap.com/maps?v=1.4.15&key=a7d488a61bbee951008e48840ee13dfb"></script> -->
 
-    <div id="map">
-        <div style="width: 100%; height: 400px;" id="mymap"></div>
-    </div>
     <script type="text/javascript">
-        $(function () {  
-            showMap(30.5857328,114.3047429); //初始坐标
+        $(function () {
+            showMap(30.5857328, 114.3047429); //初始坐标
         })
 
         //传入坐标，然后跳转到该位置
-        function showMap(y,x) {
-            var map = new BMap.Map("mymap");
-            map.centerAndZoom(new BMap.Point(x, y), 15); //坐标，放大倍数
-            //显示左上角的辅助栏
-            map.addControl(new BMap.NavigationControl());
-            // map.addControl(new BMap.MapTypeControl());          //添加地图类型控件
+        function showMap(lat, lng) {
+            // lng = 114.33388888888888
+            // lat = 30.669722222222223
 
-            //普通地图 ,mBaiduMap是地图控制器对象
-            // map.setMapType(BaiduMap.MAP_TYPE_NORMAL);
-            // map.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
-            //创建小红点
-            var marker = new BMap.Marker(new BMap.Point(x, y));
-            map.addOverlay(marker);
-            //穿件创建小红点上的提示框
-            var infoWindow = new BMap.InfoWindow("<p>名字:风玡</p><p>phone:12345678911</p>");
-            marker.addEventListener("click", function () {
-                this.openInfoWindow(infoWindow);
-            })
+            var map = new AMap.Map('container-AMap', {
+                center: [lng, lat],
+                zoom: 20,
+            });
 
+
+            var marker = new AMap.Marker({
+                position: new AMap.LngLat(lng, lat),   // 经纬度对象，也可以是经纬度构成的一维数组[119.920486,30.245285]
+                // title: '方恒国际酒店'
+            });
+            //==================异步加载1个插件==================
+            AMap.plugin('AMap.ToolBar', function () {//异步加载插件
+                var toolbar = new AMap.ToolBar();
+                map.addControl(toolbar);
+            });
+
+            // 将创建的点标记添加到已有的地图实例：
+            map.add(marker);
+
+            map.addControl(new AMap.MapType({
+                defaultType: 0 //0代表默认，1代表卫星
+            }));
         }
-    </script>
+    </script> 
 </body>
 
 </html>
