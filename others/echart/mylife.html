@@ -6,7 +6,8 @@
     <title>Mylife_track</title>
     <script src="./data/echarts.min.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
-
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=67jMQ5DmYTe1TLMBKFUTcZAR"></script>
+    <script src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
 </head>
 
 <body>
@@ -16,8 +17,7 @@
     <button onclick="getYear(this)">2020</button>
     <button onclick="getYear(this)">2021</button>
     <input type="hidden" id="year" value="2021">
-    <script> 
-        
+    <script>
         function getYear(id) {
             console.log(id.innerHTML)
             document.getElementById("year").value = id.innerHTML;
@@ -25,10 +25,7 @@
         }
     </script>
 
-    <div id="main" style="height: 600px;width:100%;">
-    </div>
-
-    
+    <div id="main" style="height: 200px;width:100%;"></div>
     <script>
         show();
         function show() {
@@ -83,9 +80,9 @@
                             seriesIndex: [0],
                         },
                         title: {
-                            top: 30,
-                            text: '文章贡献度',
-                            subtext: '一年内博客提交的数量',
+                            top: 0,
+                            text: '贡献度',
+                            // subtext: '一年内提交的数量',
                             left: 'center',
                             textStyle: {
                                 color: '#000'
@@ -93,7 +90,7 @@
                         },
 
                         calendar: [{
-                            top: 100,
+                            top: 50,
                             left: 100,
                             // range: contributeDate,
                             range: [year, nextYear],
@@ -186,15 +183,60 @@
                             "标题：", params.value[2],
                             "经度：", params.value[3],
                             "纬度: ", params.value[4]);
-
                         // window.open('https://www.baidu.com/s?wd=' + encodeURIComponent(params.name));
+
+
+                        var long_list = params.value[3].match(/\d+/g)
+                        var lat_list = params.value[4].match(/\d+/g)
+
+                        console.log(long_list, lat_list)
+                        longitude = eval(long_list[0]) + eval(long_list[1] / 60) + eval(long_list[2] / 3600)
+                        latitude = eval(lat_list[0]) + eval(lat_list[1] / 60) + eval(lat_list[2] / 3600)
+                        console.log("gps is ", longitude, latitude)
+                        showMap(longitude, latitude); //初始坐标
+
+                        // var gps = latitude + ',' + longitude
+                        // //   https://www.google.com/maps/@31.0058333,114.3189224,17z?hl=zh-cn
+                        // console.log('https://www.google.com/maps/@'+gps+',4z?hl=zh-cn')
+                        // window.open('https://www.google.com/maps/@'+gps+',4z?hl=zh-cn');
                     });
                 }
             });
 
         }
     </script>
-   
+    <!-- <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3415.810521221901!2d114.1664603151151!3d31.114997981505454!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x342c75a1f1eb64cd%3A0x51f172503f0ec0b7!2z5Liw5bGx5Lit5a2m!5e0!3m2!1szh-CN!2s!4v1630211402348!5m2!1szh-CN!2s" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe> -->
+
+    <div id="map">
+        <div style="width: 100%; height: 400px;" id="mymap"></div>
+    </div>
+    <script type="text/javascript">
+        $(function () {  
+            showMap(114.343967,30.67658); //初始坐标
+        })
+
+        //传入坐标，然后跳转到该位置
+        function showMap(x, y) {
+            var map = new BMap.Map("mymap");
+            map.centerAndZoom(new BMap.Point(x, y), 15); //坐标，放大倍数
+            //显示左上角的辅助栏
+            map.addControl(new BMap.NavigationControl());
+            // map.addControl(new BMap.MapTypeControl());          //添加地图类型控件
+
+            //普通地图 ,mBaiduMap是地图控制器对象
+            // map.setMapType(BaiduMap.MAP_TYPE_NORMAL);
+            // map.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
+            //创建小红点
+            var marker = new BMap.Marker(new BMap.Point(x, y));
+            map.addOverlay(marker);
+            //穿件创建小红点上的提示框
+            var infoWindow = new BMap.InfoWindow("<p>名字:风玡</p><p>phone:12345678911</p>");
+            marker.addEventListener("click", function () {
+                this.openInfoWindow(infoWindow);
+            })
+
+        }
+    </script>
 </body>
 
 </html>
