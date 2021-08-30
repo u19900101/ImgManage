@@ -41,7 +41,15 @@ def getInfo(fileName, path):
 
         if(len(getNE(tagBList_i[2].text)) == 2):
             longitude = getNE(tagBList_i[2].text)[0]
+            pattern = re.compile(r'\d+')
+            lngs =[float(x) for x in (pattern.findall(longitude))]
+            longitude = lngs[0] + lngs[1]/60 + lngs[2]/3600
+
             latitude = getNE(tagBList_i[2].text)[1]
+            lats =[float(x) for x in (pattern.findall(latitude))]
+            latitude = lats[0] + lats[1]/60 + lats[2]/3600
+
+            
     try:
         day = tagBList_i[0].text
         title = Soup.findAll({"title"})[0].text  # 查找标题对应的内容
@@ -142,17 +150,9 @@ def cut_gps(gps_df):
     res = []
     # 2.线性分割 坐标
     for g in [list(gps_df.longitude),list(gps_df.latitude)]:
-
-        # 提取度分秒的数字  # 9°32'45  -->  9*3600+32*60+45
-        pattern = re.compile(r'\d+')
-        # res_start = [int(i) for i in pattern.findall(g[0])]
-        # res_start = res_start[0]*3600+res_start[1]*60+res_start[2]
-        # res_end = [int(i) for i in pattern.findall(g[-1])]
-        # res_end = res_end[0]*3600+res_end[1]*60+res_end[2]
-        # 上面的表达式简化版
-        res_start_end = [[int(i) for i in pattern.findall(x)] for x in [g[0],g[-1]]]
-        res_start_end = [x[0]*3600+x[1]*60+x[2] for x in res_start_end]
-        res_gps =[str(int(m/3600))+"°"+str(int(m%3600/60))+"'"+str(int(m%3600%60)) for m in np.linspace(res_start_end[0],res_start_end[1],len(g))]
+        # 起止 经纬度
+        res_start_end = [g[0],g[-1]]
+        res_gps =[m for m in np.linspace(res_start_end[0],res_start_end[1],len(g))]
         res.append(res_gps)
     return res
 def update_gps_dir(dir):
@@ -209,10 +209,10 @@ def update_gps_path(info_path):
                 # "之间存在需要被替换掉的gps行数",after_gps_index-recnet_gps_index-1,"\n")
 
                 # 上个 gps的经度 r_E  和 纬度 r_N
-                r_E = int(df['longitude'][recnet_gps_index].split("°")[0])
-                r_N = int(df['latitude'][recnet_gps_index].split("°")[0])
-                af_E = int(df['longitude'][after_gps_index].split("°")[0])
-                af_N = int(df['latitude'][after_gps_index].split("°")[0])
+                r_E = int(df['longitude'][recnet_gps_index])
+                r_N = int(df['latitude'][recnet_gps_index])
+                af_E = int(df['longitude'][after_gps_index])
+                af_N = int(df['latitude'][after_gps_index])
                 # 当经纬度 差距都不超过 3°时 进行赋值
                 if(abs(r_E-af_E)<3 and abs(af_N-r_N)<3):
                     for z in range(recnet_gps_index+1,after_gps_index):

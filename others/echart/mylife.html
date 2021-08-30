@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <title>Mylife_track</title>
     <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
-    <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=ce3b1a3a7e67fc75810ce1ba1f83c01a&plugin=AMap.MapType"></script> 
+    <script type="text/javascript"
+        src="https://webapi.amap.com/maps?v=1.4.15&key=ce3b1a3a7e67fc75810ce1ba1f83c01a&plugin=AMap.MapType"></script>
     <!-- <style>
         *{margin:0;padding:0;list-style: none;}
         #container {width:100%; height: 100%;top:0;left:0;position: absolute; }  
@@ -190,13 +191,8 @@
                             "纬度: ", params.value[4]);
                         // window.open('https://www.baidu.com/s?wd=' + encodeURIComponent(params.name));
 
-
-                        var long_list = params.value[3].match(/\d+/g)
-                        var lat_list = params.value[4].match(/\d+/g)
-
-                        console.log(long_list, lat_list)
-                        longitude = eval(long_list[0]) + eval(long_list[1] / 60) + eval(long_list[2] / 3600)
-                        latitude = eval(lat_list[0]) + eval(lat_list[1] / 60) + eval(lat_list[2] / 3600)
+                        longitude = params.value[3]
+                        latitude = params.value[4]
                         console.log("gps is ", longitude, latitude)
 
                         showMap(latitude, longitude);
@@ -213,7 +209,7 @@
     <!-- <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3415.810521221901!2d114.1664603151151!3d31.114997981505454!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x342c75a1f1eb64cd%3A0x51f172503f0ec0b7!2z5Liw5bGx5Lit5a2m!5e0!3m2!1szh-CN!2s!4v1630211402348!5m2!1szh-CN!2s" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe> -->
     <!-- 高德 -->
     <div id="container-AMap" style="width:100%; height:400px; position: relative"></div>
-   
+
     <!-- <script src="https://webapi.amap.com/maps?v=1.4.15&key=a7d488a61bbee951008e48840ee13dfb"></script> -->
 
     <script type="text/javascript">
@@ -229,6 +225,7 @@
             var map = new AMap.Map('container-AMap', {
                 center: [lng, lat],
                 zoom: 20,
+               
             });
 
 
@@ -249,7 +246,7 @@
                 defaultType: 0 //0代表默认，1代表卫星
             }));
         }
-    </script> 
+    </script>
 </body>
 
 </html>
