@@ -49,26 +49,45 @@
 <body>
   <div id="info">
     <h1 id="day"></h1>
-    <h2 id = "title"></h2>
+    <h2 id="title"></h2>
     <ul id="displayed-list"></ul>
   </div>
   <div id="map"></div>
 
   <script>
     var osmUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+    // var osmUrl = "http://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}";
     var osmAttrib =
       '&copy; <a href="https://openstreetmap.org/copyright">' +
       "OpenStreetMap</a> contributors";
-    var osm = L.tileLayer(osmUrl, {
-      maxZoom: 18,
-      attribution: osmAttrib,
-      noWrap: true,
-    });
+    // var osm = L.tileLayer(osmUrl, {
+    //   maxZoom: 18,
+    //   attribution: osmAttrib,
+    //   noWrap: true,
+    // });
 
+    // 改用高德地图的图层
+    var osm = L.tileLayer(
+      // 'http://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
+      // 高德卫星地图
+      'http://webst0{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}' ,
+      {
+      subdomains: ['1', '2', '3', '4'],
+      minZoom: 1,
+      maxZoom: 19
+    });
+    // var osm = L.tileLayer(
+    //   // 'http://www.google.cn/maps/vt?lyrs=m@189&gl=cn&x={x}&y={y}&z={z}',
+    //   // 谷歌卫星地图
+    //   'http://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}',
+    //   {
+    //    minZoom: 1,
+    //     maxZoom: 21
+    //   });
     var map = L.map("map", {
       layers: [osm],
-      center: new L.LatLng(9.5425, 112.88111111111112),
-      zoom: 10,
+      center: new L.LatLng(18.692222222222227, 109.18),
+      zoom: 3,
       maxBounds: [
         [90, -180],
         [-90, 180],
@@ -95,9 +114,11 @@
         // list.appendChild(li);
         day.innerHTML = quake.feature.properties.day;
         title.innerHTML = quake.feature.properties.title;
+        // 实时更新地图
+        map.panTo(new L.LatLng(quake.feature.geometry.coordinates[1], quake.feature.geometry.coordinates[0]));
         // map.center = new L.LatLng(quake.feature.geometry.coordinates[1], quake.feature.geometry.coordinates[0])
       });
-   
+
     }
 
     // eqfeed_callback is called once the earthquake geojsonp file below loads
@@ -135,8 +156,8 @@
             fillColor: "hsl(" + hue + ", 100%, 50%)",
           }).bindPopup(
             // '<a href="' + data.properties.url + '">click for more info</a>'
-            '<h3>' + data.properties.day + '</h3>'+
-             '<h1>' + data.properties.title + '</h1>'
+            '<h3>' + data.properties.day + '</h3>' +
+            '<h1>' + data.properties.title + '</h1>'
           );
         },
       });
@@ -145,7 +166,7 @@
       timeline.addTo(map);
       timeline.on("change", function (e) {
         updateList(e.target);
-      
+
       });
       updateList(timeline);
     }

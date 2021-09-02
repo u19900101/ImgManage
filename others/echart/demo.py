@@ -284,7 +284,42 @@ def gen_Year_csv(dirList,day_start,day_end,res_path):
                                 'day_timestramp':day_timestramp})
     dataframe.sort_values(by='day_timestramp').to_csv(res_path,index=False, sep=',')
     edit_info(res_path)
-
+def gen_traceData(res_path,desPath):
+    df=pd.read_csv(res_path,header=0,sep=',') 
+    # df = df[:100][['day','title','longitude','latitude']]
+    df = df[['day','title','longitude','latitude']]
+    # 查找包含空值的行
+    # df[df.isnull().T.any()]
+    # 删除包含空值的行
+    df.dropna(axis=0, how='any', inplace=True)
+    # 3.将需要在地图上显示信息 day title longitude latitude输出到json文件
+    dicList = [] 
+    time_list = [int(time.mktime(time.strptime(x, '%Y/%m/%d %H:%M'))*1000) for x in list(df.day)]
+    for gtime,title,lng,lat,day in zip(time_list,list(df['title']),list(df['longitude']),list(df['latitude']),list(df['day'])):
+        # print(time,title,lng,lat)
+        dicList.append({
+            "type":"Feature",
+            "properties":{  
+                            "mag":1,
+                            "day":day,
+                            "time":gtime,
+                            "title":title,
+                            },
+            "geometry":{"type":"Point",
+                            "coordinates":[lng,lat]},}
+        )
+    # 写进json文件
+    eqfeed_callback =  {
+            "type":"FeatureCollection",
+            "metadata":{
+            "generated":int(time.time()*1000),
+            "title":"USGS All Earthquakes, Past Day","status":200,"api":"1.10.3","count":len(df)},
+            "features":dicList}
+    
+    with open(desPath, 'w', encoding='utf-8') as file:
+        traceData = "eqfeed_callback("+str(eqfeed_callback)+");"
+        file.write(traceData)
+        file.close()
    
 dirList = ['D:/MyJava/19_mogu_blog_v2-Nacos/others/我的抗战1.0/',
             'D:/MyJava/19_mogu_blog_v2-Nacos/others/我的抗战2.0/']
