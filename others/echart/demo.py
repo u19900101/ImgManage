@@ -293,3 +293,21 @@ day_end='2021/12/31'
 res_path = "./info.csv"
 
 gen_Year_csv(dirList,day_start,day_end,res_path)
+
+
+# 1.制作生成形如上述的mapData.js文件，引入到html中即可
+# 2.读取 csv文件的经纬度信息
+def gen_diarymapData(filepath,desPath):
+    df=pd.read_csv(filepath,header=0,sep=',') 
+    # 3.将需要在地图上显示信息 day title longitude latitude输出到js文件
+    d = pd.DataFrame(columns = ['lng','lat','day','title'])
+    d[['lng','lat','day','title']] = df[['longitude','latitude','day','title']]
+    # print(heatmapData)
+    # 打开一个文件
+    with open(desPath, 'w', encoding='utf-8') as file:
+        diarymapData = "var diarymapData = " + d.to_json(orient = 'records',force_ascii=False)
+        file.write(diarymapData)
+        # 关闭打开的文件
+        file.close()
+# res_path = '../info.csv'
+# desPath = './data/diarymapData.js'
