@@ -22,6 +22,8 @@
     <button onclick="getYear(this)">2019</button>
     <button onclick="getYear(this)">2020</button>
     <button onclick="getYear(this)">2021</button>
+    <a href="/echart/timeline_trace/my_trace_timeline.html">Timeline</a>
+    <a href="/echart/BubbleMap.html">BubbleMap</a>
     <input type="hidden" id="year" value="2021">
     <script>
         function getYear(id) {
@@ -221,7 +223,7 @@
 
             var map = new AMap.Map('container-AMap', {
                 center: [lng, lat],
-                zoom: 20,
+                zoom: 15,
                
             });
 
@@ -240,7 +242,7 @@
             map.add(marker);
 
             map.addControl(new AMap.MapType({
-                defaultType: 0 //0代表默认，1代表卫星
+                defaultType: 1 //0代表默认，1代表卫星
             }));
         }
     </script>
