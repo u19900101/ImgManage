@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import datetime
 import time
+import requests
 # 目标 值
 # 输出到文件中,格式如下
 # [日期,标题,经度，纬度,贡献度]
@@ -87,7 +88,7 @@ def add_absent_days(day_timestramp,day_start,day_end):
 # 2019/08/20 15:02,3.196  转文全部被拒  心情失落  又开始考虑复原,0,0,28,1566284520.0
 # 2019/08/20 15:04,3.197  第一天便无法做到自律 
 # 存在bug 不能直接进行操作 非要先存再读
-def edit_info(res_path):
+def edit_date(res_path):
     # 手动修改 日期  
     # 截取day的date————2017/02/02 12:26  -->  2017/02/02  是否唯一进行检查
    
@@ -125,10 +126,7 @@ def edit_info(res_path):
     # 5.更新csv文件
     df = df.drop(del_index)
     df.to_csv(res_path,index=False, sep=',')
-    # 6.填充空的gps信息
-    update_gps_path(res_path)
-    # 7.进行分表操作
-    classifyByYear(res_path,res_path)
+    
 
 def classifyByYear(csvPath,desPath):
     # 1.读取文件
@@ -244,8 +242,8 @@ def update_gps_path(info_path):
         i +=1
     # 4.重新写入文件
     df.to_csv(info_path,index=False, sep=',')
-def gen_Year_csv(dirList,day_start,day_end,res_path):
-    # dir = 'D:/MyJava/19_mogu_blog_v2-Nacos/others/我的抗战1.0/'
+def init(dirList,day_start,day_end,res_path):
+# dir = 'D:/MyJava/19_mogu_blog_v2-Nacos/others/我的抗战1.0/'
     result = []
     # 遍历输出每一个文件的名字和类型
     for dir in dirList:
@@ -283,7 +281,43 @@ def gen_Year_csv(dirList,day_start,day_end,res_path):
                                 'num': num,
                                 'day_timestramp':day_timestramp})
     dataframe.sort_values(by='day_timestramp').to_csv(res_path,index=False, sep=',')
-    edit_info(res_path)
+
+# 添加一列  location_name
+def get_locationName(lng,lat):
+    key = 'GjG3XAdmywz7CyETWqHwIuEC6ZExY6QT'
+    r = requests.get(url='http://api.map.baidu.com/geocoder/v2/', params={'location':str(lat)+','+str(lng),'ak':key,'output':'json'})
+    result = r.json()
+    # print(result)
+    province = result['result']['addressComponent']['province']
+    city = result['result']['addressComponent']['city']
+    district = result['result']['addressComponent']['district']
+    street = result['result']['addressComponent']['street']
+    street_number = result['result']['addressComponent']['street_number']
+    return city+" "+district+" "+street+" "+street_number
+    
+def add_location_name(res_path):
+    m=pd.read_csv(res_path,header=0,sep=',') 
+    location_list = []
+    for index, row in m.iterrows():
+        if(np.isnan(row.longitude) or np.isnan(row.latitude)):
+            location_list.append('无位置信息')
+            continue
+        location_name = get_locationName(row.longitude,row.latitude)
+        location_list.append(location_name)
+    m["location_name"] = location_list
+    m.to_csv(res_path,index=False, sep=',')
+
+def gen_Year_csv(dirList,day_start,day_end,res_path):
+    # 1.对数据进行预处理
+    init(dirList,day_start,day_end,res_path)
+    # 2.对日期进行优化操作   如：删掉  8/19整行   将第一个8/20改为 8/19
+    edit_date(res_path)
+    # 3.填充空的gps信息
+    update_gps_path(res_path)
+    # 4.添加一行 location_name
+    add_location_name(res_path)
+    # 5.进行分表操作
+    classifyByYear(res_path,res_path)
 def gen_traceData(res_path,desPath):
     df=pd.read_csv(res_path,header=0,sep=',') 
     # df = df[:100][['day','title','longitude','latitude']]
@@ -327,7 +361,7 @@ day_start='2017/1/1'
 day_end='2021/12/31'
 res_path = "./info.csv"
 
-gen_Year_csv(dirList,day_start,day_end,res_path)
+# gen_Year_csv(dirList,day_start,day_end,res_path)
 
 
 # 1.制作生成形如上述的mapData.js文件，引入到html中即可

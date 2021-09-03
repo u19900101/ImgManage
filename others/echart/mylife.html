@@ -33,7 +33,7 @@
         }
     </script>
 
-    <div id="main" style="height: 200px;width:100%;"></div>
+    <div id="main" style="height: 2000px;width:100%;"></div>
     <script>
         show();
         function show() {
@@ -58,13 +58,13 @@
                             csvdata[i].title,
                             csvdata[i].longitude,
                             csvdata[i].latitude,
+                            csvdata[i].location_name,
                             eval(csvdata[i].num),
                             ]
                         );
                     }
 
                     var myChart = echarts.init(document.getElementById("main"));
-
 
                     var option = {
                         //设置背景
@@ -99,7 +99,7 @@
 
                         calendar: [{
                             top: 50,
-                            left: 100,
+                            left: 40,
                             // range: contributeDate,
                             range: [year, nextYear],
                             splitLine: {
@@ -127,7 +127,7 @@
                                     color: '#000'
                                 }
                             },
-                            // orient: 'vertical',
+                            orient: 'vertical',
                             itemStyle: {
                                 normal: {
                                     // 设置背景颜色
@@ -149,18 +149,23 @@
                                         "<br>标题：" + params.value[2].slice(0, 40) +
                                         "<br>" + params.value[2].slice(40, 80) +
                                         "<br>" + params.value[2].slice(80, -1) +
-                                        "<br>经度：" + params.value[3] + "<br>纬度：" + params.value[4])
+                                        "<br>位置：" + params.value[5]
+                                        // "<br>经度：" + params.value[3] + "<br>纬度：" + params.value[4]
+                                        )
                                 } else if (params.value[2].length > 40) {
                                     // console.log(params.value[2])
                                     return ('时间：' + params.value[0] + "<br>权重：" + params.value[1] +
                                         "<br>标题：" + params.value[2].slice(0, 40) +
-
                                         "<br>   " + params.value[2].slice(40, -1) +
-                                        "<br>经度：" + params.value[3] + "<br>纬度：" + params.value[4])
+                                        "<br>位置：" + params.value[5]
+                                        // "<br>经度：" + params.value[3] + "<br>纬度：" + params.value[4]
+                                        )
                                 } else {
                                     return ('时间：' + params.value[0] + "<br>权重：" + params.value[1] +
                                         "<br>标题：" + params.value[2] +
-                                        "<br>经度：" + params.value[3] + "<br>纬度：" + params.value[4])
+                                        "<br>位置：" + params.value[5]
+                                        // "<br>经度：" + params.value[3] + "<br>纬度：" + params.value[4]
+                                        )
                                 }
 
                             },
@@ -189,13 +194,15 @@
                             "时间:", params.value[0],
                             "大小：", params.value[1],
                             "标题：", params.value[2],
+                            "位置：", params.value[5],
                             "经度：", params.value[3],
-                            "纬度: ", params.value[4]);
+                            "纬度: ", params.value[4],
+                            );
                         // window.open('https://www.baidu.com/s?wd=' + encodeURIComponent(params.name));
 
                         longitude = params.value[3]
                         latitude = params.value[4]
-                        console.log("gps is ", longitude, latitude)
+                        // console.log("gps is ", longitude, latitude)
 
                         showMap(latitude, longitude);
                         // var gps = latitude + ',' + longitude
@@ -208,10 +215,14 @@
 
         }
     </script>
-    <!-- <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3415.810521221901!2d114.1664603151151!3d31.114997981505454!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x342c75a1f1eb64cd%3A0x51f172503f0ec0b7!2z5Liw5bGx5Lit5a2m!5e0!3m2!1szh-CN!2s!4v1630211402348!5m2!1szh-CN!2s" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe> -->
+   
+   
+   
+   
+   <!-- <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3415.810521221901!2d114.1664603151151!3d31.114997981505454!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x342c75a1f1eb64cd%3A0x51f172503f0ec0b7!2z5Liw5bGx5Lit5a2m!5e0!3m2!1szh-CN!2s!4v1630211402348!5m2!1szh-CN!2s" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe> -->
     <!-- 高德 -->
-    <div id="container-AMap" style="width:100%; height:400px; position: relative"></div>
-    <script type="text/javascript">
+    <!-- <div id="container-AMap" style="width:100%; height:400px; position: relative"></div> -->
+    <!-- <script type="text/javascript">
         $(function () {
             showMap(30.5857328, 114.3047429); //初始坐标
         })
@@ -245,7 +256,7 @@
                 defaultType: 1 //0代表默认，1代表卫星
             }));
         }
-    </script>
+    </script> -->
 </body>
 
 </html>
