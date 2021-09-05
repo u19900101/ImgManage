@@ -54,6 +54,10 @@ def getInfo(fileName, path):
     try:
         day = tagBList_i[0].text
         title = Soup.findAll({"title"})[0].text  # 查找标题对应的内容
+        # 将一个或多个空格替换为 _
+        title = re.sub(" +", "_", title)
+        # 偶尔会有bug  再次将空格替换为空  编码问题 尬
+        title = title.replace('\xa0','')
     except IndexError:
         print(fileName)
     # print(day,title,longitude,latitude,len(title))
@@ -361,7 +365,8 @@ day_start='2017/1/1'
 day_end='2021/12/31'
 res_path = "./info.csv"
 
-# gen_Year_csv(dirList,day_start,day_end,res_path)
+gen_Year_csv(dirList,day_start,day_end,res_path)
+
 
 
 # 1.制作生成形如上述的mapData.js文件，引入到html中即可

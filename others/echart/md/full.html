@@ -95,36 +95,12 @@
  <script type="text/javascript" src="./static/js/FileSaver.js" charset="utf-8"></script>
 <body>
     <div id="layout">
-        <header>
-            <h1>完整示例</h1>
-            <p>Full example</p>
-            <ul style="margin: 10px 0 0 18px;">
-                <li>Enable HTML tags decode</li>
-                <li>Enable TeX, Flowchart, Sequence Diagram, Emoji, FontAwesome, Task lists</li>
-                <li>Enable Image upload</li>
-                <li>Enable [TOCM], Search Replace, Code fold</li>
-            </ul>
-        </header>
+        
         <div class="btns">
             <button id="save">save</button>
-            <button id="goto-line-btn">Goto line 90</button>
-            <button id="show-btn">Show editor</button>
-            <button id="hide-btn">Hide editor</button>
-            <button id="get-md-btn">Get Markdown</button>
-            <button id="get-html-btn">Get HTML</button>
-            <button id="watch-btn">Watch</button>
-            <button id="unwatch-btn">Unwatch</button>
-            <button id="preview-btn">Preview HTML (Press Shift + ESC cancel)</button>
-            <button id="fullscreen-btn">Fullscreen (Press ESC cancel)</button>
-            <button id="show-toolbar-btn">Show toolbar</button>
-            <button id="close-toolbar-btn">Hide toolbar</button>
-            <button id="toc-menu-btn">ToC Dropdown menu</button>
-            <button id="toc-default-btn">ToC default</button>
         </div>
-       
 
-        <!-- //HTML中添加一个导出元素 -->
-        <input type="button" id="export" value="导出"/>
+
         <div id="test-editormd"></div>
     </div>
     <script src="static/js/jquery.min.js"></script>
@@ -182,8 +158,8 @@
                     width: "90%",
                     height: 740,
                     path: './static/lib/',
-                    theme: "dark",
-                    previewTheme: "dark",
+                    // theme: "dark",
+                    // previewTheme: "dark",
                     editorTheme: "pastel-on-dark",
                     markdown: md,
                     codeFold: true,
