@@ -7,13 +7,10 @@
     <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
     <script type="text/javascript"
         src="https://webapi.amap.com/maps?v=1.4.15&key=ce3b1a3a7e67fc75810ce1ba1f83c01a&plugin=AMap.MapType"></script>
-    <!-- <style>
-        *{margin:0;padding:0;list-style: none;}
-        #container {width:100%; height: 100%;top:0;left:0;position: absolute; }  
-    </style> -->
     <script src="./data/echarts.min.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+
 </head>
 
 <body>
@@ -32,8 +29,12 @@
             show();
         }
     </script>
+    <div style="float: right;">
+        <iframe id="childFrame" src="./md/full.html" width="800px" height="2000px"  scrolling="yes/no/auto">
+        </iframe>
+    </div>
+    <div id="main" style="height: 2000px;width:20%;"></div>
 
-    <div id="main" style="height: 2000px;width:100%;"></div>
     <script>
         show();
         function show() {
@@ -151,7 +152,7 @@
                                         "<br>" + params.value[2].slice(80, -1) +
                                         "<br>位置：" + params.value[5]
                                         // "<br>经度：" + params.value[3] + "<br>纬度：" + params.value[4]
-                                        )
+                                    )
                                 } else if (params.value[2].length > 40) {
                                     // console.log(params.value[2])
                                     return ('时间：' + params.value[0] + "<br>权重：" + params.value[1] +
@@ -159,17 +160,17 @@
                                         "<br>   " + params.value[2].slice(40, -1) +
                                         "<br>位置：" + params.value[5]
                                         // "<br>经度：" + params.value[3] + "<br>纬度：" + params.value[4]
-                                        )
+                                    )
                                 } else {
                                     return ('时间：' + params.value[0] + "<br>权重：" + params.value[1] +
                                         "<br>标题：" + params.value[2] +
                                         "<br>位置：" + params.value[5]
                                         // "<br>经度：" + params.value[3] + "<br>纬度：" + params.value[4]
-                                        )
+                                    )
                                 }
 
                             },
-                            // position: 'right'
+                            position: 'right',
                             // 设置框的大小
                             textStyle: {
                                 width: 10,
@@ -189,21 +190,28 @@
                     myChart.setOption(option);
                     myChart.on('click', function (params) {
 
-                        // console.log(params);
-                        console.log(
-                            "时间:", params.value[0],
-                            "大小：", params.value[1],
-                            "标题：", params.value[2],
-                            "位置：", params.value[5],
-                            "经度：", params.value[3],
-                            "纬度: ", params.value[4],
-                            );
+
+                    // 通过标题 获取md文件 并显示
+                    var mdfile = params.value[2] + ".md"
+                    console.log("mdfile is ", mdfile);
+
+                    //调用子页面方法
+
+                    document.getElementById("childFrame").contentWindow.displayDiary(mdfile);
+    
+
+                        // console.log(
+                        //     "时间:", params.value[0],
+                        //     "大小：", params.value[1],
+                        //     "标题：", params.value[2],
+                        //     "位置：", params.value[5],
+                        //     "经度：", params.value[3],
+                        //     "纬度: ", params.value[4],
+                        //     );
                         // window.open('https://www.baidu.com/s?wd=' + encodeURIComponent(params.name));
-
-                        longitude = params.value[3]
-                        latitude = params.value[4]
+                        // longitude = params.value[3]
+                        // latitude = params.value[4]
                         // console.log("gps is ", longitude, latitude)
-
                         // showMap(latitude, longitude);
                         // var gps = latitude + ',' + longitude
                         // //   https://www.google.com/maps/@31.0058333,114.3189224,17z?hl=zh-cn
@@ -215,11 +223,12 @@
 
         }
     </script>
-   
-   
-   
-   
-   <!-- <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3415.810521221901!2d114.1664603151151!3d31.114997981505454!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x342c75a1f1eb64cd%3A0x51f172503f0ec0b7!2z5Liw5bGx5Lit5a2m!5e0!3m2!1szh-CN!2s!4v1630211402348!5m2!1szh-CN!2s" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe> -->
+
+
+
+
+
+    <!-- <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3415.810521221901!2d114.1664603151151!3d31.114997981505454!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x342c75a1f1eb64cd%3A0x51f172503f0ec0b7!2z5Liw5bGx5Lit5a2m!5e0!3m2!1szh-CN!2s!4v1630211402348!5m2!1szh-CN!2s" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe> -->
     <!-- 高德 -->
     <!-- <div id="container-AMap" style="width:100%; height:400px; position: relative"></div> -->
     <!-- <script type="text/javascript">

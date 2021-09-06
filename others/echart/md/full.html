@@ -138,22 +138,8 @@
    
     <script type="text/javascript">
         var testEditor;
-
-        $(function () {
-
-            // 自动保存
-            function saveDoc() {
-                // 获取Markdown源码
-                var mdstr = testEditor.getMarkdown();
-                console.log(mdstr);
-                //保存到服务器
-                $.post("./", { filename: "saved.md", content: mdstr }, function (data) {
-                    alert(data);
-                });
-            }
-
-            // $.get('./2021_1_30_demo.md', function (md) {
-            $.get('./k.md', function (md) {
+        function displayDiary(mdfile){
+            $.get(mdfile, function (md) {
                 testEditor = editormd("test-editormd", {
                     width: "90%",
                     height: 740,
@@ -199,6 +185,22 @@
                 });
             });
 
+        }
+        $(function () {
+
+            // 自动保存
+            function saveDoc() {
+                // 获取Markdown源码
+                var mdstr = testEditor.getMarkdown();
+                console.log(mdstr);
+                //保存到服务器
+                $.post("./", { filename: "saved.md", content: mdstr }, function (data) {
+                    alert(data);
+                });
+            }
+
+            // $.get('./2021_1_30_demo.md', function (md) {
+           
             $("#save").bind("click", function () {
                 saveDoc();
                 

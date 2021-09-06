@@ -97,7 +97,7 @@ info0:{[file;onlycols]
 	info:update t:"H",rule:80 from info where t="I",mw<7,.csv.cancast["H"]peach sdv;
 	info:update t:"F",rule:90 from info where t="n",mdot<2,mw>1,.csv.cancast["F"]peach sdv;
 	info:update t:"E",rule:100,maybe:1b from info where t="F",mw<9;
-	info:update t:"M",rule:110,maybe:1b from info where t in"nIHEF",mdot<2,mw within 4 7,.csv.cancast["M"]peach sdv; 
+	info:update t:"考研机试",rule:110,maybe:1b from info where t in"nIHEF",mdot<2,mw within 4 7,.csv.cancast["考研机试"]peach sdv;
 	info:update t:"D",rule:120,maybe:1b from info where t in"nI",mdot in 0 2,mw within 6 11,.csv.cancast["D"]peach sdv; 
 	info:update t:"V",rule:130,maybe:1b from info where t="I",mw in 5 6,7<count each dchar,{all x like"*[0-9][0-5][0-9][0-5][0-9]"}peach sdv,.csv.cancast["V"]peach sdv; / 235959 12345        
 	info:update t:"U",rule:140,maybe:1b from info where t="H",mw in 3 4,7<count each dchar,{all x like"*[0-9][0-5][0-9]"}peach sdv,.csv.cancast["U"]peach sdv; /2359
